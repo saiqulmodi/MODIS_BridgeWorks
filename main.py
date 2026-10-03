@@ -3,7 +3,12 @@
 Phase 1: window, background grid, and the first level's terrain
 (two cliffs with a river between them).
 """
+import math
+
 import pygame
+
+from engine.materials import STEEL
+from engine.truss import FAILED, GREEN, RED, YELLOW, Member, Node, TrussSolver
 
 # --- Window -------------------------------------------------------------
 WIDTH, HEIGHT = 1280, 720
@@ -24,6 +29,8 @@ GRASS = (90, 170, 80)
 WATER = (40, 110, 190)
 WATER_SHINE = (120, 180, 240)
 TEXT = (20, 30, 40)
+STATUS_COLOURS = {GREEN: (60, 200, 90), YELLOW: (240, 200, 40),
+                  RED: (230, 60, 50), FAILED: (230, 0, 0)}
 
 # --- Level 1 terrain (in metres, origin at top-left of the world) -------
 LEFT_CLIFF_END_M = 12     # left bank ends 12 m from the left edge
@@ -78,15 +85,90 @@ def draw_terrain(screen, tick):
     pygame.draw.rect(screen, GRASS, (right_start, top, WIDTH - right_start, 8))
 
 
-def draw_hud(screen, font):
+def world_to_screen(x, y):
+    """Physics coordinates (metres, y UP from the cliff top) -> screen pixels."""
+    return m2px(x), m2px(CLIFF_TOP_M - y)
+
+
+def build_demo_bridge(load_kn):
+    """A steel Warren truss across the gap, with the deck load on the bottom joints."""
+    span = RIGHT_CLIFF_START_M - LEFT_CLIFF_END_M
+    panels, height = 4, 3.0
+    w = span / panels
+    x0 = LEFT_CLIFF_END_M
+    nodes = []
+    for k in range(panels + 1):                      # bottom joints 0..4
+        if k == 0:
+            nodes.append(Node.pinned(x0, 0))
+        elif k == panels:
+            nodes.append(Node.roller(x0 + span, 0))
+        else:
+            nodes.append(Node(x0 + k * w, 0, fy=-load_kn * 1e3))
+    for k in range(panels):                          # top joints 5..8
+        nodes.append(Node(x0 + (k + 0.5) * w, height))
+    A, I = 0.002, 2e-6
+    members = []
+    for k in range(panels):
+        top = panels + 1 + k
+        members += [Member(k, k + 1, STEEL, A, I),
+                    Member(k, top, STEEL, A, I),
+                    Member(top, k + 1, STEEL, A, I)]
+        if k < panels - 1:
+            members.append(Member(top, top + 1, STEEL, A, I))
+    return nodes, members
+
+
+def point_segment_distance(p, a, b):
+    ax, ay = a
+    bx, by = b
+    px, py = p
+    dx, dy = bx - ax, by - ay
+    seg2 = dx * dx + dy * dy
+    t = 0 if seg2 == 0 else max(0, min(1, ((px - ax) * dx + (py - ay) * dy) / seg2))
+    return math.hypot(px - (ax + t * dx), py - (ay + t * dy))
+
+
+def draw_truss(screen, nodes, members, result, tick):
+    hovered = None
+    mouse = pygame.mouse.get_pos()
+    for k, (m, r) in enumerate(zip(members, result.members)):
+        a = world_to_screen(nodes[m.i].x, nodes[m.i].y)
+        b = world_to_screen(nodes[m.j].x, nodes[m.j].y)
+        colour = STATUS_COLOURS[r.status]
+        if r.status == FAILED and (tick // 8) % 2:   # flashing red
+            colour = (255, 255, 255)
+        width = 7 if point_segment_distance(mouse, a, b) < 7 else 5
+        if width == 7:
+            hovered = k
+        pygame.draw.line(screen, colour, a, b, width)
+    for nd in nodes:
+        pos = world_to_screen(nd.x, nd.y)
+        pygame.draw.circle(screen, (40, 40, 50), pos, 6)
+        if nd.fix_y:
+            pygame.draw.polygon(screen, (60, 60, 70),
+                                [pos, (pos[0] - 9, pos[1] + 14), (pos[0] + 9, pos[1] + 14)])
+    return hovered
+
+
+def draw_hud(screen, font, load_kn, result, hovered):
     gap_m = RIGHT_CLIFF_START_M - LEFT_CLIFF_END_M
+    worst = max(result.members, key=lambda r: r.ratio)
     lines = [
-        "Level 1 - Small River Crossing",
-        f"Gap to span: {gap_m} m   |   Grid: 1 square = 1 m",
+        "Level 1 - Small River Crossing   (engine demo: steel Warren truss)",
+        f"Gap: {gap_m} m   |   Load on each deck joint: {load_kn:.0f} kN   (UP / DOWN to change)",
+        f"Most stressed member: {worst.ratio * 100:.0f}% of its limit",
+        "Hover a beam to see its maths.   Green <50%  Yellow 50-80%  Red 80-100%  Flashing = failed",
         "ESC to quit",
     ]
     for i, line in enumerate(lines):
         screen.blit(font.render(line, True, TEXT), (16, 12 + i * 24))
+    if hovered is not None:
+        r = result.members[hovered]
+        kind = "TENSION (pulled)" if r.N > 0 else "COMPRESSION (pushed)" if r.N < 0 else "no load"
+        info = [f"Beam {hovered}:  N = {r.N / 1e3:+.1f} kN  {kind}   load {r.ratio * 100:.0f}%",
+                r.explanation]
+        for i, line in enumerate(info):
+            screen.blit(font.render(line, True, (255, 255, 255)), (16, HEIGHT - 60 + i * 24))
 
 
 def main():
@@ -98,19 +180,29 @@ def main():
 
     sky = make_sky()
     grid = make_grid()
+    load_kn = 20.0
+    nodes, members = build_demo_bridge(load_kn)
+    result = TrussSolver(nodes, members).solve()
     tick = 0
     running = True
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                running = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    running = False
+                elif event.key in (pygame.K_UP, pygame.K_DOWN):
+                    step = 10 if event.key == pygame.K_UP else -10
+                    load_kn = max(0.0, load_kn + step)
+                    nodes, members = build_demo_bridge(load_kn)
+                    result = TrussSolver(nodes, members).solve()
 
         screen.blit(sky, (0, 0))
         screen.blit(grid, (0, 0))
         draw_terrain(screen, tick)
-        draw_hud(screen, font)
+        hovered = draw_truss(screen, nodes, members, result, tick)
+        draw_hud(screen, font, load_kn, result, hovered)
         pygame.display.flip()
         clock.tick(FPS)
         tick += 1
