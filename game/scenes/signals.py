@@ -29,6 +29,8 @@ class SignalScene(LevelScene):
                 "tracks to add or remove signals. Edit the interlocking rows below: click an input "
                 "to cycle it, NOT to invert it, AND/OR to switch. RUN plays 12 minutes of traffic.")
 
+    DEMO_STATE = ("eb_slots", "wb_slots", "four", "logic")
+
     def __init__(self, app, level):
         super().__init__(app, level)
         self.cfg = level.cfg
@@ -76,6 +78,25 @@ class SignalScene(LevelScene):
                                                   ["AND", "OR"].index(row.ops[k]),
                                                   lambda v, r=r, k=k: self._op(r, k, v), size=13))
                     x += 56
+
+    # --- demonstration --------------------------------------------------------------------
+    def demo_prepare(self):
+        if self.mode != "edit":
+            self.reset_after_failure()
+
+    def load_demo(self):
+        from engine.railnet import reference_logic
+        self.logic = reference_logic()
+        self.eb_slots, self.wb_slots, self.four = {400.0}, {400.0}, False
+        self.after_demo()
+
+    def run_demo(self):
+        self.toggle_run()
+
+    def after_demo(self):
+        self._build_logic()
+        self.aspect_btn.label = "4-aspect signals" if self.four else "3-aspect signals"
+        self.show_info()
 
     def _neg(self, r, k):
         if self.mode == "edit":

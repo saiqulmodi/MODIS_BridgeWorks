@@ -10,7 +10,7 @@ from engine.vehicles import G, braking_distance, max_climbable_grade, tractive_e
 
 from .. import sound
 from ..common import Card, LevelScene
-from ..rail_sim import (LOCOS, RailSim, cost, default_design, fixed_station, grades,
+from ..rail_sim import (LOCOS, RailDesign, RailSim, cost, default_design, fixed_station, grades,
                         ground_height, train_spec)
 from ..help_texts import HELP, LOCO
 from ..ui import (ACCENT, BAD, BG_DARK, BOTTOM_BAR, CYAN, DRAWER_W, GOOD, HEIGHT, LINE, MUTED,
@@ -44,6 +44,8 @@ class RailScene(LevelScene):
     CONTROLS = ("Drag the round handles up/down to shape the track (cuttings and embankments "
                 "cost money). Pick a locomotive and the number of wagons. Click a track segment "
                 "to see the slope maths. SPACE runs the train.")
+
+    DEMO_STATE = ("design",)
 
     def __init__(self, app, level):
         super().__init__(app, level)
@@ -94,6 +96,28 @@ class RailScene(LevelScene):
         self.run_btn = self.widgets.add(Button((x, y, WIDTH - x - 10, 40), "RUN", self.toggle_run,
                                                hotkey=pygame.K_SPACE, colour=(40, 110, 70),
                                                help=HELP["run_rail"]))
+
+    # --- demonstration ----------------------------------------------------------------------
+    def demo_prepare(self):
+        if self.mode != "edit":
+            self.reset_after_failure()
+
+    def load_demo(self):
+        hs = [ground_height(self.cfg, x) for x in self.cfg["stations"]]
+        if self.level.num == 2:
+            self.design = RailDesign(hs, "Diesel shunter", 2)
+        else:
+            self.design = RailDesign(hs, "Mainline diesel", 5, False, 340)
+        self.after_demo()
+
+    def run_demo(self):
+        self.toggle_run()
+
+    def after_demo(self):
+        self.loco_cycler.set(self.design.loco)
+        if getattr(self, "banker_btn", None):
+            self.banker_btn.active = self.design.banker
+        self.select_train()
 
     # --- design changes ---------------------------------------------------------------------
     def _loco(self, name):

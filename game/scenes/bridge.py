@@ -53,6 +53,8 @@ class BridgeScene(LevelScene):
                 "the vehicle drives on. Right-click deletes. Ctrl+Z undo. Select tool + click a "
                 "beam/joint/vehicle shows its maths. SPACE runs the test.")
 
+    DEMO_STATE = ("design",)
+
     def __init__(self, app, level):
         super().__init__(app, level)
         self.cfg = level.cfg
@@ -82,6 +84,28 @@ class BridgeScene(LevelScene):
         self._build_lab()
         self.drawer.show("Calculator", [], hint="Build with the tools below. Turn on TEST to "
                                                   "see live stress colours while you draw.")
+
+    # --- demonstration ----------------------------------------------------------------
+    def demo_prepare(self):
+        if self.mode != "edit":
+            self.stop_run()
+        self.pending = None
+
+    def load_demo(self):
+        from ..reference import demo_bridge_design
+        self.design = demo_bridge_design(self.level.num)
+        self.selected = None
+        self.dirty = True
+        self._build_lab()
+
+    def run_demo(self):
+        self.start_run()
+
+    def after_demo(self):
+        self.selected = None
+        self.dirty = True
+        self._build_lab()
+        self.select(None)
 
     # --- toolbar -----------------------------------------------------------------------
     def _materials_for(self, tool):
@@ -148,7 +172,7 @@ class BridgeScene(LevelScene):
         if self.cfg.get("grid_power"):
             hazard = "Grid & wind lab"
         if hazard:
-            self.top_buttons.add(Button((WIDTH - 462, 6, 162, 32), hazard, self.toggle_lab, size=14,
+            self.top_buttons.add(Button((WIDTH - 546, 6, 162, 32), hazard, self.toggle_lab, size=14,
                                         hotkey=pygame.K_l))
 
     def _build_lab(self):

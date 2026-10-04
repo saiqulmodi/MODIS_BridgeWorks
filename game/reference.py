@@ -89,6 +89,24 @@ def cables_material(_):
     return "Carbon-fibre cable"
 
 
+def demo_bridge_design(num):
+    """The design each bridge level's demonstration shows."""
+    cfg = get(num).cfg
+    if num == 1:
+        return warren(cfg, 2, 3.0, mat="Timber", A=0.008, shape="Hollow box")
+    if num == 7:
+        d = warren(cfg, 8, 6, mat="Steel", A=0.008, shape="Hollow box")
+        d.fairing = True
+        return d
+    if num == 8:
+        d = viaduct(cfg, A_col=0.004, A_diag=0.002, A_deck=0.002)
+        d.isolation = d.flex_joints = True
+        return d
+    if num == 10:
+        return megastructure(cfg)
+    raise ValueError(num)
+
+
 def level1_good():
     cfg = get(1).cfg
     return warren(cfg, 4, 3.0, mat="Steel", A=0.001, shape="I-beam")

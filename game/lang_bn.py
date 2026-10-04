@@ -566,6 +566,8 @@ EXACT.update({
 
 from .lang_bn_help import HELP_BN  # noqa: E402  (bottom-bar IDEA help)
 EXACT.update(HELP_BN)
+from .lang_bn_demo import DEMO_BN, DEMO_PATTERNS  # noqa: E402  (paid demonstrations)
+EXACT.update(DEMO_BN)
 
 # Slider and value labels ("Label: 12")
 LABELS = {
@@ -613,8 +615,9 @@ def _list(s):
 
 PATTERNS = [
     # --- top bar, menus, money
-    (r"Cost (Rs [^/]+) / (Rs [^(]+?)( \(\+salvage (.+)\))?",
-     lambda m: f"খরচ {m.group(1)} / {m.group(2)}" + (f" (+উদ্ধার {m.group(4)})" if m.group(3) else "")),
+    (r"Cost (Rs [^/]+) / (Rs [^(]+?)( \(\+salvage ([^)]+)\))?( \(demo -([^)]+)\))?",
+     lambda m: f"খরচ {m.group(1)} / {m.group(2)}" + (f" (+উদ্ধার {m.group(4)})" if m.group(3) else "")
+     + (f" (ডেমো -{m.group(6)})" if m.group(5) else "")),
     (r"Budget: (.+?)    Par \(bonus star\): (.+)", r"বাজেট: \1    প্যার (বোনাস তারা): \2"),
     (r"Materials: (.+)", lambda m: "উপকরণ: " + _list(m.group(1))),
     (r"L(\d+)  (.+)", lambda m: f"L{m.group(1)}  {EXACT.get(m.group(2), m.group(2))}"),
@@ -839,6 +842,7 @@ PATTERNS = [
     (r"(.+ / .+)", lambda m: " / ".join(EXACT.get(p, p) for p in m.group(1).split(" / "))),
 ]
 
+PATTERNS = DEMO_PATTERNS + PATTERNS
 COMPILED = [(re.compile(p), r) for p, r in PATTERNS]
 
 # Technical words that may stay in Latin letters in Bengali mode (formula symbols, units,

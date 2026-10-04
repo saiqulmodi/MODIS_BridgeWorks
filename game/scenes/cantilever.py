@@ -28,8 +28,13 @@ class CantileverScene(LevelScene):
                 "calculator before the first cast. When all arms are complete, STITCH, then "
                 "run the TRUCK TEST.")
 
+    DEMO_STATE = ("bridge", "history", "last_check", "tilt", "balance_hist", "girder", "bundle",
+                  "truck", "truck_worst")
+
     def __init__(self, app, level):
         super().__init__(app, level)
+        self.demo_queue = []
+        self.demo_timer = 0.0
         self.cam = Camera(level.cfg["view"])
         self.bridge = CantileverBridge()
         self.history = []              # (pier, side) cast order for undo
@@ -72,6 +77,53 @@ class CantileverScene(LevelScene):
 
     def cost(self):
         return construction_cost(self.bridge)
+
+    # --- demonstration: cast the whole bridge step by step ---------------------------------
+    def demo_prepare(self):
+        self.truck = None
+        self.demo_queue = []
+
+    def load_demo(self):
+        self.bridge = CantileverBridge(d_pier=3.5, d_tip=2.5)
+        self.history = []
+        self.last_check = [None, None]
+        self.tilt = [0.0, 0.0]
+        self.balance_hist = {"pier A MN*m": [(0, 0.0)], "pier B MN*m": [(0, 0.0)]}
+        self.girder = self.bundle = None
+        self.show_girder_panel()
+
+    def run_demo(self):
+        b = self.bridge
+        q = [("tie", 0), ("tie", 1)]
+        for k in range(6):
+            for p in (0, 1):
+                for s in (-1, 1):
+                    if k < b.arm_segments_needed(p, s):
+                        q.append(("cast", p, s))
+        q += [("pt", 1), ("stitch",), ("truck",)]
+        self.demo_queue = q
+        self.demo_timer = 0.0
+
+    def after_demo(self):
+        self.show_girder_panel()
+
+    def _demo_step(self, dt):
+        self.demo_timer += dt
+        if self.demo_timer < 0.3:
+            return
+        self.demo_timer = 0.0
+        act = self.demo_queue.pop(0)
+        if act[0] == "tie":
+            self.tie(act[1])
+        elif act[0] == "cast":
+            self.cast(act[1], act[2])
+        elif act[0] == "pt":
+            self._set_pt(act[1])
+            self.show_girder_panel()
+        elif act[0] == "stitch":
+            self.stitch()
+        elif act[0] == "truck":
+            self.start_truck()
 
     # --- calculator panel ------------------------------------------------------------------
     def show_girder_panel(self):
@@ -200,6 +252,8 @@ class CantileverScene(LevelScene):
 
     def update_world(self, dt):
         self.tick += 1
+        if self.demo_active and self.demo_queue:
+            self._demo_step(dt)
         b = self.bridge
         for (p, s), btn in self.cast_btns.items():
             btn.enabled = not b.arm_complete(p, s) and not b.stitched

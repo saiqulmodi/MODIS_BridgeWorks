@@ -255,6 +255,26 @@ def run_all_flows():
         _draw(app)
         _until_overlay(app, 5000)
         _diagnose_and_close(app)
+    # --- paid demonstrations: warning, pay, demo banner, end screen --------------------------
+    for num in range(1, 11):
+        app.start_level(num)
+        app.scene.overlay = None
+        sc = app.scene
+        sc.demo_clicked()
+        _draw(app)
+        sc.pay_and_start_demo()
+        for _ in range(20):
+            sc.update(1 / 30)
+        _draw(app)
+        _until_overlay(app, 30000)
+        sc.end_demo(restore=True)
+        _draw(app)
+        sc.demo_clicked()
+        _draw(app)
+        sc.end_demo(restore=True)
+    from game.demo import DEMO_TEXT
+    for t in DEMO_TEXT.values():
+        tr(t)
     app.to_menu()
     _draw(app)
     return app

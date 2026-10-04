@@ -36,6 +36,8 @@ class TrafficScene(LevelScene):
                 "are sliders in the calculator. RUN plays 12 minutes of rush hour; the road is "
                 "coloured by speed so you can watch jams travel backwards.")
 
+    DEMO_STATE = ("mode_name", "cycle", "split", "speed_kmh")
+
     def __init__(self, app, level):
         super().__init__(app, level)
         self.cfg = level.cfg
@@ -58,6 +60,23 @@ class TrafficScene(LevelScene):
         self.run_btn = self.widgets.add(Button((382, y, WIDTH - 392, 40), "RUN RUSH HOUR",
                                                self.toggle_run, hotkey=pygame.K_SPACE, colour=(40, 110, 70),
                                                help=HELP["run_traffic"]))
+        self.show_panel()
+
+    # --- demonstration --------------------------------------------------------------------
+    def demo_prepare(self):
+        if self.state != "edit":
+            self.reset_after_failure()
+
+    def load_demo(self):
+        self.mode_name = "roundabout"
+        self.after_demo()
+
+    def run_demo(self):
+        self.toggle_run()
+
+    def after_demo(self):
+        self.mode_cycler.index = MODES.index(self.mode_name)
+        self.mode_cycler.label = self.mode_cycler._label()
         self.show_panel()
 
     def _label(self, m):

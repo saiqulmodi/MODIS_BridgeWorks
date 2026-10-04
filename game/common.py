@@ -1,5 +1,6 @@
 """Pieces every level shares: the scientific-calculator drawer, the Black Box investigation,
 the results screen, the mission briefing, and the LevelScene base class."""
+import copy
 import math
 
 import pygame
@@ -8,6 +9,7 @@ from engine import economy
 from engine.failure import EXP_ALTERNATE, EXP_AUTOPSY, FailureReport
 
 from . import sound
+from .demo import DEMO_TEXT, ConfirmDemo, DemoDone, demo_cost
 from .fx import Confetti
 from .ui import (HINT, ACCENT, BAD, BG_DARK, BOTTOM_BAR, CYAN, DRAWER_W, GOOD, HEIGHT, LINE, MUTED,
                  PANEL, PANEL_EDGE, TEXT, TOP_BAR, WARN, WIDTH, Button, Slider, WidgetGroup,
@@ -178,7 +180,7 @@ class Briefing(Overlay):
         y = text_block(surface, lv.mission, (r.x + 24, r.y + 86), col_w, 17, TEXT)
         y = text_block(surface, lv.context, (r.x + 24, y + 8), col_w, 15, MUTED)
         y += 10
-        text(surface, f"Budget: {economy.format_rs(lv.budget)}    Par (bonus star): "
+        text(surface, f"Budget: {economy.format_rs(self.scene.budget)}    Par (bonus star): "
                       f"{economy.format_rs(lv.par_cost)}", (r.x + 24, y), 16, ACCENT, bold=True)
         y += 26
         if lv.materials:
@@ -378,6 +380,15 @@ class LevelScene:
                                     size=14, hotkey=pygame.K_F1))
         self.top_buttons.add(Button((WIDTH - 108, 6, 96, 32), "Menu", self.to_menu, size=14,
                                     hotkey=pygame.K_ESCAPE))
+        self.demo_btn = self.top_buttons.add(Button((WIDTH - 378, 6, 80, 32), "Demo", self.demo_clicked,
+                                                    size=14, tooltip="Watch a working solution "
+                                                    "(costs part of this level's budget)."))
+        self.demo_back_btn = self.top_buttons.add(Button((WIDTH - DRAWER_W - 236, TOP_BAR + 14, 200, 34),
+                                                         "Back to my design",
+                                                         lambda: self.end_demo(restore=True), size=14))
+        self.demo_back_btn.visible = False
+        self.demo_active = False
+        self.demo_snapshot = None
 
     # --- money ------------------------------------------------------------------------
     @property
@@ -390,8 +401,67 @@ class LevelScene:
         self.app.save.write()
 
     @property
+    def demo_penalty(self):
+        return self.app.save.level(self.level.num).get("demo_penalty", 0.0)
+
+    @property
     def budget(self):
-        return self.level.budget + self.salvage
+        return self.level.budget + self.salvage - self.demo_penalty
+
+    # --- demonstrations -----------------------------------------------------------------
+    DEMO_STATE = ()           # attributes saved before a demo and restored afterwards
+
+    def demo_clicked(self):
+        if self.overlay is not None:
+            return
+        if self.app.save.level(self.level.num).get("demo_paid"):
+            self.say("Demonstration already paid for - replaying free")
+            self.start_demo()
+        else:
+            self.overlay = ConfirmDemo(self)       # warning first, nothing charged yet
+
+    def pay_and_start_demo(self):
+        lv = self.app.save.level(self.level.num)
+        if not lv.get("demo_paid"):
+            lv["demo_paid"] = True
+            lv["demo_penalty"] = demo_cost(self.level)
+            self.app.save.write()
+            sound.play("kaching")
+        self.overlay = None
+        self.start_demo()
+
+    def start_demo(self):
+        if self.demo_active:
+            self.end_demo(restore=False)
+        self.demo_prepare()
+        self.demo_snapshot = copy.deepcopy({a: getattr(self, a) for a in self.DEMO_STATE})
+        self.load_demo()
+        self.demo_active = True
+        self.demo_back_btn.visible = True
+        self.run_demo()
+
+    def end_demo(self, restore=True):
+        self.overlay = None
+        self.demo_prepare()
+        if restore and self.demo_snapshot is not None:
+            for k, val in self.demo_snapshot.items():
+                setattr(self, k, val)
+        self.demo_active = False
+        self.demo_snapshot = None
+        self.demo_back_btn.visible = False
+        self.after_demo()
+
+    def demo_prepare(self):
+        """Stop any run so the demo (or the restore) starts from the editor."""
+
+    def load_demo(self):
+        """Put the demonstration design in place."""
+
+    def run_demo(self):
+        """Start playing the demonstration."""
+
+    def after_demo(self):
+        """Refresh the screen after the design was swapped back."""
 
     def cost(self):
         return 0.0
@@ -407,6 +477,9 @@ class LevelScene:
         self.toast, self.toast_t = msg, t
 
     def fail(self, report: FailureReport):
+        if self.demo_active:
+            self.overlay = DemoDone(self, worked=False)
+            return
         report.build_cost = report.build_cost or self.cost()
         self.app.save.record(self.level.num, 0, report.build_cost, 0, report.time, False)
         sound.play("snap")
@@ -428,6 +501,10 @@ class LevelScene:
 
     def succeed(self, cost, safety, time_s, fs=None, extra_goal=True, lines=None, verdict="",
                 revenue=None):
+        if self.demo_active:
+            sound.play("kaching")
+            self.overlay = DemoDone(self, worked=True)
+            return
         stars = economy.star_rating(True, cost, self.level.par_cost, self.budget, fs, extra_goal)
         if cost > self.budget:
             report = FailureReport("budget", "OVER BUDGET", f"Cost {economy.format_rs(cost)} > budget "
@@ -503,10 +580,24 @@ class LevelScene:
             r = panel(surface, (WIDTH // 2 - w // 2 - 150, TOP_BAR + 10, w, 34), BG_DARK, ACCENT, 8)
             text(surface, self.toast, r.center, 17, ACCENT, anchor="center")
         if self.overlay is None:
+            self._banner_h = self.draw_demo_banner(surface) if self.demo_active else 0
             self.draw_hint(surface)
         if self.overlay is not None:
             self.overlay.draw(surface)
         self.top_buttons.draw(surface)
+
+    def draw_demo_banner(self, surface):
+        width = WIDTH - DRAWER_W - 40
+        lines = wrap(DEMO_TEXT.get(self.level.num, ""), width - 260, 14)
+        h = max(62, 34 + 19 * len(lines))
+        r = panel(surface, (16, HEIGHT - BOTTOM_BAR - h - 8, width, h), BG_DARK, CYAN, 10, alpha=235)
+        text(surface, "DEMONSTRATION", (r.x + 12, r.y + 6), 15, CYAN, bold=True)
+        y = r.y + 28
+        for line in lines:
+            text(surface, line, (r.x + 12, y), 14, TEXT, raw=True)
+            y += 19
+        self.demo_back_btn.rect.topleft = (r.right - 214, r.y + 12)
+        return h + 8
 
     def draw_hint(self, surface):
         """'IDEA' box: for the bottom-bar button under the mouse, else the one last clicked."""
@@ -522,7 +613,8 @@ class LevelScene:
         width = WIDTH - DRAWER_W - 40
         lines = wrap(body, width - 30, 15)
         h = 36 + 21 * len(lines)
-        r = panel(surface, (16, HEIGHT - BOTTOM_BAR - h - 8, width, h), BG_DARK, ACCENT, 10, alpha=240)
+        r = panel(surface, (16, HEIGHT - BOTTOM_BAR - h - 8 - getattr(self, "_banner_h", 0), width, h),
+                  BG_DARK, ACCENT, 10, alpha=240)
         x = text(surface, "IDEA", (r.x + 12, r.y + 7), 15, ACCENT, bold=True).right
         text(surface, title, (x + 10, r.y + 7), 15, TEXT, bold=True)
         y = r.y + 30
@@ -545,8 +637,14 @@ class LevelScene:
         money = f"Cost {economy.format_rs(c)} / {economy.format_rs(self.budget)}"
         if self.salvage:
             money += f" (+salvage {economy.format_rs(self.salvage)})"
-        text(surface, money, (390, 12), 17, col, bold=True)
-        text(surface, f"EXP {self.app.save.exp}", (720, 12), 17, ACCENT, bold=True)
+        if self.demo_penalty:
+            money += f" (demo -{economy.format_rs(self.demo_penalty)})"
+        x0 = max(390, measure(f"L{self.level.num}  {self.level.title}", 20, True)[0] + 34)
+        room = min(b.rect.x for b in self.top_buttons.items if b.visible and b.rect.y < TOP_BAR) - x0 - 12
+        size = 17
+        while size > 11 and measure(money, size, True)[0] > room:
+            size -= 1
+        text(surface, money, (x0, 12 + (17 - size) // 2), size, col, bold=True)
         from .i18n import lang
         self.lang_btn.label = "English" if lang() == "bn" else "বাংলা"
 

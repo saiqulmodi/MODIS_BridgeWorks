@@ -13,6 +13,7 @@ venv\Scripts\python.exe main.py
 Esc returns to the level menu. C toggles the calculator. F1 re-opens the briefing.
 **F2 switches between English and Bengali (বাংলা)** - also the button on the menu and in every level's top bar. The choice is remembered.
 **IDEA hints:** hover over or click any button on the bottom bar and an IDEA box explains what it does, with a tip.
+**Demo:** the Demo button at the top of each level plays a working solution. It costs 1% of that level's budget - a warning shows the old and new budget before anything is charged. Replays are free; demos earn no stars or EXP.
 
 ## The 10 levels
 

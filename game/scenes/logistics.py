@@ -27,6 +27,8 @@ class LogisticsScene(LevelScene):
                 "fleets. The calculator shows each mode's physics. 'Optimizer' plots every "
                 "feasible plan so you can see the Pareto frontier. RUN ships it.")
 
+    DEMO_STATE = ("plan", "result")
+
     def __init__(self, app, level):
         super().__init__(app, level)
         self.cfg = level.cfg
@@ -58,6 +60,25 @@ class LogisticsScene(LevelScene):
         sl(x2, y, "Trains (rakes)", 0, 4, p.rakes, "rakes", "{:.0f}", 1)
         sl(x2, y + 48, "Wagons per train", 10, 50, p.wagons, "wagons", "{:.0f}", 1)
         sl(x2, y + 96, "Barges", 0, 5, p.barges, "barges", "{:.0f}", 1)
+
+    # --- demonstration --------------------------------------------------------------------
+    def demo_prepare(self):
+        if self.state != "edit":
+            self.reset_after_failure()
+
+    def load_demo(self):
+        self.plan = Plan(road_t=0, rail_t=5000, barge_t=1000, trucks=0, rakes=1, wagons=30, barges=1)
+        self.result = evaluate(self.plan)
+        self.after_demo()
+
+    def run_demo(self):
+        self.toggle_run()
+
+    def after_demo(self):
+        self.result = evaluate(self.plan)
+        self.panel_widgets.clear()
+        self._build()
+        self.show_panel()
 
     def _set(self, attr, v):
         if self.state != "edit":
