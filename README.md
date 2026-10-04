@@ -18,6 +18,7 @@ Esc returns to the level menu. C toggles the calculator. F1 re-opens the briefin
 
 **3D view (bridge levels 1, 7, 8, 10):** the "3D view" button (or key **3**) shows the real bridge: your truss on both sides of the road, the deck and cross beams between them. You can build in 3D too: clicks land on the side truss facing you, and every beam appears on both sides. Turn the view by dragging on empty space with Select, middle-drag, Alt + drag, the arrow keys or the on-screen arrows. Zoom with the mouse wheel or + / -. Home or Reset goes back to the starting view. The physics is unchanged: the two side trusses share the load equally.
 **F2 switches between English and Bengali (বাংলা)** - also the button on the menu and in every level's top bar. The choice is remembered.
+**Help (H, the '?' button in a level, or 'Help: how to play' on the menu):** a step-by-step guide for new players with a walkthrough for every level, plus 200 questions & answers in four parts - Q1-50 trusses & materials, Q51-100 beams & the cantilever, Q101-150 wind, earthquakes, rail and maglev, Q151-200 money, loans and how to optimise every level. All of it is in English and Bengali and uses the game's real numbers. Inside a level it opens on that level's walkthrough. Type to search both languages (or a number such as Q37); Esc clears the search, then closes Help. The text lives in `game/guide/`.
 **IDEA hints:** hover over or click any button on the bottom bar and an IDEA box explains what it does, with a tip.
 **Demo:** the Demo button at the top of each level plays a working solution. It costs 0.5% of that level's budget - a warning shows the old and new budget before anything is charged. Replays are free; demos earn no stars or EXP.
 **Bank loan & government subsidised loan:** if a design costs more than the budget, a Business Plan appears before building. A bank loan (2%, 10 years) covers the shortfall; a government subsidised loan (0.5%, 15 years, up to half the budget) can take the first part. Loans are approved only if first-year toll income (after upkeep) is at least 1.5x the yearly payments - a 50% margin. Traffic grows 6% a year; the plan shows the payback year and 20-year profit. The Finance button shows the plan any time.
@@ -48,7 +49,8 @@ alternate route. All levels are unlocked for review (`UNLOCK_ALL` in `game/save.
   signals, railnet, traffic, dynamics, economy, logistics, failure, levels)
 - `game/` - pygame screens: `app.py`, `common.py` (calculator, black box, results, briefing),
   `scenes/` (one per level type), `bridge_sim.py` and `rail_sim.py` (headless simulations),
-  `reference.py` (known good/bad designs used by the tests)
+  `reference.py` (known good/bad designs used by the tests), `help_screen.py` and `guide/`
+  (the Help screen and its English/Bengali guide and 200 Q&A)
 - `tests/` - textbook checks for every formula, and end-to-end tests proving each level can
   be won within budget and that bad designs fail for the right reason
 

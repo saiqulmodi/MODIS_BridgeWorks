@@ -2,6 +2,9 @@
 
 HELP_BN = {
     "IDEA": "আইডিয়া",
+    # the Help screen buttons (its own text is stored in both languages in game/guide)
+    "Help: how to play (H)": "সাহায্য: কীভাবে খেলবে (H)",
+    "A guide for new players and 200 questions & answers": "নতুন খেলোয়াড়ের নির্দেশিকা আর 200টি প্রশ্নোত্তর",
     # 3D view
     "3D view": "3D দৃশ্য", "2D view": "2D দৃশ্য", "Reset": "শুরুর দৃশ্য",
     "Turn the view towards the side of the bridge to build here":

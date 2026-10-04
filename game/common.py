@@ -12,6 +12,7 @@ from . import sound
 from .demo import DEMO_TEXT, ConfirmDemo, DemoDone, demo_cost
 from .finance_ui import FinanceOverlay, plan_for
 from .fx import Confetti
+from .help_screen import CAPTURE as HELP_KEYS, HelpOverlay
 from .ui import (HINT, ACCENT, BAD, BG_DARK, BOTTOM_BAR, CYAN, DRAWER_W, GOOD, HEIGHT, LINE, MUTED,
                  PANEL, PANEL_EDGE, TEXT, TOP_BAR, WARN, WIDTH, Button, Slider, WidgetGroup,
                  line_height, measure, mini_chart, panel, text, text_block, wrap)
@@ -390,6 +391,8 @@ class LevelScene:
         self.demo_back_btn.visible = False
         self.finance_btn = self.top_buttons.add(Button((WIDTH - 462, 6, 78, 32), "Finance", self.show_finance,
                                                        size=14, tooltip="Business plan: tolls, loan, payback."))
+        self.help_btn = self.top_buttons.add(Button((WIDTH - 506, 6, 38, 32), "?", self.toggle_help, size=17,
+                                                    hotkey=pygame.K_h, tooltip="Help: how to play (H)"))
         self.loan = 0.0              # bank loan taken for the current design
         self.toll_factor = 1.0       # toll rate as a multiple of the standard rate
         self.govt_loan = False       # use the government subsidised loan first
@@ -486,6 +489,18 @@ class LevelScene:
         return 0.0
 
     # --- flow -----------------------------------------------------------------------
+    def toggle_help(self):
+        """Open the Help screen on this level's walkthrough; closing it returns to whatever
+        was open before (e.g. the briefing)."""
+        if isinstance(self.overlay, HelpOverlay):
+            self.overlay.close()
+            return
+        before = self.overlay
+
+        def back():
+            self.overlay = before
+        self.overlay = HelpOverlay(self.app, back, level_num=self.level.num)
+
     def show_briefing(self):
         self.overlay = Briefing(self)
 
@@ -566,6 +581,9 @@ class LevelScene:
 
     # --- event plumbing ------------------------------------------------------------------
     def handle(self, event):
+        if isinstance(self.overlay, HelpOverlay) and event.type in HELP_KEYS:
+            self.overlay.handle(event)          # typing goes to the Help search, not hotkeys
+            return
         if self.overlay is not None:
             if self.top_buttons.handle(event):
                 return
@@ -672,7 +690,10 @@ class LevelScene:
         if self.demo_penalty:
             money += f" (demo -{economy.format_rs(self.demo_penalty)})"
         x0 = max(390, measure(f"L{self.level.num}  {self.level.title}", 20, True)[0] + 34)
-        room = min(b.rect.x for b in self.top_buttons.items if b.visible and b.rect.y < TOP_BAR) - x0 - 12
+        others = [b.rect.x for b in self.top_buttons.items
+                  if b.visible and b.rect.y < TOP_BAR and b is not self.help_btn]
+        self.help_btn.rect.x = min(others) - self.help_btn.rect.w - 6   # left of the other buttons
+        room = self.help_btn.rect.x - x0 - 12
         size = 17
         while size > 11 and measure(money, size, True)[0] > room:
             size -= 1

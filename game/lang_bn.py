@@ -37,8 +37,8 @@ EXACT = {
     # ---------------------------------------------------------------- menu & common
     "Calculate. Construct. Route.  -  a hard-physics engineering sandbox":
         "হিসাব করো। নির্মাণ করো। পথ গড়ো।  -  আসল পদার্থবিজ্ঞানের প্রকৌশল খেলা",
-    "Click a level (or press 1-9, 0 for level 10).  Inside a level: C toggles the calculator, Esc returns here.":
-        "একটি লেভেলে ক্লিক করো (বা 1-9 চাপো, লেভেল 10-এর জন্য 0)।  লেভেলের ভিতরে: C চাপলে ক্যালকুলেটর খোলে/বন্ধ হয়, Esc চাপলে এখানে ফেরো।",
+    "Click a level (or press 1-9, 0 for level 10).  Inside a level: C toggles the calculator, H opens Help, Esc returns here.":
+        "একটি লেভেলে ক্লিক করো (বা 1-9 চাপো, লেভেল 10-এর জন্য 0)।  লেভেলের ভিতরে: C চাপলে ক্যালকুলেটর খোলে/বন্ধ হয়, H চাপলে সাহায্য খোলে, Esc চাপলে এখানে ফেরো।",
     "Quit": "বন্ধ করো", "LOCKED": "তালাবদ্ধ", "DONE": "সম্পন্ন",
     "Full screen (F11)": "পূর্ণ পর্দা (F11)",
     "Fill the whole screen; press F11 again to leave": "পুরো পর্দা জুড়ে দেখাও; বের হতে আবার F11 চাপো",

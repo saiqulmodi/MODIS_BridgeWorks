@@ -325,6 +325,19 @@ def run_all_flows():
     from game.demo import DEMO_TEXT
     for t in DEMO_TEXT.values():
         tr(t)
+    # --- the Help screen, from a level and from the menu ------------------------------------------
+    sc.toggle_help()
+    _draw(app)
     app.to_menu()
+    _draw(app)
+    app.scene.open_help()
+    for k in range(5):
+        app.scene.help.show_section(k)
+        _draw(app)
+    app.scene.help.query = "buckling"
+    _draw(app)
+    app.scene.help.query = "zzzz"
+    _draw(app)
+    app.scene.help.close()
     _draw(app)
     return app

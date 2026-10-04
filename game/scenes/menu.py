@@ -40,9 +40,24 @@ class MenuScene:
         self.widgets.add(Button((WIDTH - 230, 150 - 2, 190, 36), "Full screen (F11)",
                                 screen.toggle_fullscreen, size=15,
                                 tooltip="Fill the whole screen; press F11 again to leave"))
+        self.widgets.add(Button((222, 150, 250, 36), "Help: how to play (H)", self.open_help,
+                                hotkey=pygame.K_h, size=16,
+                                tooltip="A guide for new players and 200 questions & answers"))
+        self.help = None
         self.hover = None
 
+    def open_help(self):
+        from ..help_screen import HelpOverlay
+        sound.play("click")
+        self.help = HelpOverlay(self.app, self.close_help)
+
+    def close_help(self):
+        self.help = None
+
     def handle(self, event):
+        if self.help is not None:
+            self.help.handle(event)
+            return
         if self.widgets.handle(event):
             return
         if event.type == pygame.MOUSEMOTION:
@@ -102,5 +117,7 @@ class MenuScene:
                 s.blit(veil, r.topleft)
                 text(s, "LOCKED", r.center, 20, MUTED, bold=True, anchor="center")
         text(s, "Click a level (or press 1-9, 0 for level 10).  Inside a level: C toggles the "
-                "calculator, Esc returns here.", (40, HEIGHT - 44), 15, MUTED)
+                "calculator, H opens Help, Esc returns here.", (40, HEIGHT - 44), 15, MUTED)
         self.widgets.draw(s)
+        if self.help is not None:
+            self.help.draw(s)
