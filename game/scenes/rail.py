@@ -281,10 +281,12 @@ class RailScene(LevelScene):
         if self.overlay is not None:
             return
         if self.mode == "edit":
-            self.sim = RailSim(self.cfg, self.design)
-            self.mode = "run"
-            self.run_btn.label = "STOP"
-            sound.play("whoosh")
+            def go():
+                self.sim = RailSim(self.cfg, self.design)
+                self.mode = "run"
+                self.run_btn.label = "STOP"
+                sound.play("whoosh")
+            self.finance_gate(go)
         else:
             self.reset_after_failure()
 

@@ -10,6 +10,7 @@ from engine.failure import EXP_ALTERNATE, EXP_AUTOPSY, FailureReport
 
 from . import sound
 from .demo import DEMO_TEXT, ConfirmDemo, DemoDone, demo_cost
+from .finance_ui import FinanceOverlay, plan_for
 from .fx import Confetti
 from .ui import (HINT, ACCENT, BAD, BG_DARK, BOTTOM_BAR, CYAN, DRAWER_W, GOOD, HEIGHT, LINE, MUTED,
                  PANEL, PANEL_EDGE, TEXT, TOP_BAR, WARN, WIDTH, Button, Slider, WidgetGroup,
@@ -387,6 +388,11 @@ class LevelScene:
                                                          "Back to my design",
                                                          lambda: self.end_demo(restore=True), size=14))
         self.demo_back_btn.visible = False
+        self.finance_btn = self.top_buttons.add(Button((WIDTH - 462, 6, 78, 32), "Finance", self.show_finance,
+                                                       size=14, tooltip="Business plan: tolls, loan, payback."))
+        self.loan = 0.0              # bank loan taken for the current design
+        self.toll_factor = 1.0       # toll rate as a multiple of the standard rate
+        self.govt_loan = False       # use the government subsidised loan first
         self.demo_active = False
         self.demo_snapshot = None
 
@@ -407,6 +413,19 @@ class LevelScene:
     @property
     def budget(self):
         return self.level.budget + self.salvage - self.demo_penalty
+
+    # --- bank loan & business plan --------------------------------------------------------
+    def show_finance(self):
+        if self.overlay is None:
+            self.overlay = FinanceOverlay(self, "view")
+
+    def finance_gate(self, start):
+        """Before building: inside the budget -> go; over it -> the bank-loan business plan first."""
+        if self.demo_active or self.cost() <= self.budget:
+            self.loan = 0.0
+            start()
+            return
+        self.overlay = FinanceOverlay(self, "loan", on_accept=start)
 
     # --- demonstrations -----------------------------------------------------------------
     DEMO_STATE = ()           # attributes saved before a demo and restored afterwards
@@ -500,13 +519,14 @@ class LevelScene:
                                           attempts=self.app.save.level(self.level.num)["attempts"]))
 
     def succeed(self, cost, safety, time_s, fs=None, extra_goal=True, lines=None, verdict="",
-                revenue=None):
+                efficiency=1.0):
         if self.demo_active:
             sound.play("kaching")
             self.overlay = DemoDone(self, worked=True)
             return
-        stars = economy.star_rating(True, cost, self.level.par_cost, self.budget, fs, extra_goal)
-        if cost > self.budget:
+        funds = self.budget + self.loan
+        stars = economy.star_rating(True, cost, self.level.par_cost, funds, fs, extra_goal)
+        if cost > funds + 1e-6:
             report = FailureReport("budget", "OVER BUDGET", f"Cost {economy.format_rs(cost)} > budget "
                                    f"{economy.format_rs(self.budget)}", time=time_s, build_cost=cost)
             self.fail(report)
@@ -514,19 +534,31 @@ class LevelScene:
         exp = 100 + 50 * stars
         self.app.save.add_exp(exp)
         self.app.save.record(self.level.num, stars, cost, safety, time_s, True)
-        all_lines = [("Build cost", f"{economy.format_rs(cost)}  of  {economy.format_rs(self.budget)}",
-                      GOOD if cost <= self.level.par_cost else None)]
+        plan = plan_for(self, cost)      # same toll income the player approved before building
+        if plan.loan:
+            cost_text = f"{economy.format_rs(cost)} (loans {economy.format_rs(plan.loan)})"
+        else:
+            cost_text = f"{economy.format_rs(cost)}  of  {economy.format_rs(self.budget)}"
+        all_lines = [("Build cost", cost_text, GOOD if cost <= self.level.par_cost else None)]
         if fs is not None:
             grade, why = economy.fs_grade(fs)
             all_lines.append(("Factor of safety", f"{fs:.2f}  ({grade})",
                               GOOD if grade == "OPTIMAL" else WARN))
             verdict = verdict or why
-        if revenue is not None:
-            prof, penalty = economy.profit(revenue, cost, fs or 2.0, self.level.budget)
-            all_lines.append(("Toll revenue (5 yr)", economy.format_rs(revenue), None))
-            all_lines.append(("Profit", economy.format_rs(prof), GOOD if prof > 0 else BAD))
-            if penalty:
-                all_lines.append(("Over-engineering penalty", economy.format_rs(penalty), BAD))
+        if plan.govt_loan:
+            all_lines.append(("Govt loan (0.5%, 15 yr)", f"{economy.format_rs(plan.govt_loan)}, "
+                              f"{economy.format_rs(plan.govt_payment)} a year", GOOD))
+        if plan.bank_loan:
+            all_lines.append(("Bank loan (2%, 10 yr)", f"{economy.format_rs(plan.bank_loan)}, "
+                              f"{economy.format_rs(plan.bank_payment)} a year", WARN))
+        all_lines.append(("Year-1 toll income", economy.format_rs(plan.income1), None))
+        all_lines.append(("Investment recovered", f"year {plan.payback_year}" if plan.payback_year
+                          else "not within 20 years", GOOD if plan.payback_year else BAD))
+        _, penalty = economy.profit(0.0, 0.0, fs or 2.0, self.level.budget)
+        all_lines.append(("Profit after 20 years", economy.format_rs(plan.profit_horizon - penalty),
+                          GOOD if plan.profit_horizon - penalty > 0 else BAD))
+        if penalty:
+            all_lines.append(("Over-engineering penalty", economy.format_rs(penalty), BAD))
         all_lines += lines or []
         self.overlay = Results(self, dict(stars=stars, lines=all_lines, exp=exp, verdict=verdict,
                                           celebrate=cost <= self.level.par_cost,

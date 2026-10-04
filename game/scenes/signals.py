@@ -182,9 +182,11 @@ class SignalScene(LevelScene):
         if self.overlay is not None:
             return
         if self.mode == "edit":
-            self.net = self.make_net()
-            self.mode = "run"
-            self.run_btn.label = "STOP"
+            def go():
+                self.net = self.make_net()
+                self.mode = "run"
+                self.run_btn.label = "STOP"
+            self.finance_gate(go)
         else:
             self.reset_after_failure()
 

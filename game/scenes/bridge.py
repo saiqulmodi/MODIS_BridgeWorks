@@ -172,7 +172,7 @@ class BridgeScene(LevelScene):
         if self.cfg.get("grid_power"):
             hazard = "Grid & wind lab"
         if hazard:
-            self.top_buttons.add(Button((WIDTH - 546, 6, 162, 32), hazard, self.toggle_lab, size=14,
+            self.top_buttons.add(Button((WIDTH - 630, 6, 162, 32), hazard, self.toggle_lab, size=14,
                                         hotkey=pygame.K_l))
 
     def _build_lab(self):
@@ -608,7 +608,7 @@ class BridgeScene(LevelScene):
         if self.overlay is not None:
             return
         if self.mode == "edit":
-            self.start_run()
+            self.finance_gate(self.start_run)
         else:
             self.stop_run()
 
@@ -703,7 +703,6 @@ class BridgeScene(LevelScene):
         sim = self.sim
         cost = self.cost()
         fs = sim.factor_of_safety
-        revenue = 1.6 * self.level.par_cost * sim.toll_ratio()
         cb = design_cost(self.design, self.cfg)
         actual, ideal = sim.toll_numbers()
         lines = [("Toll = (t x km)/(h x L)", f"{100 * actual / ideal:.0f}% of an ideal flat, full-speed crossing", None),
@@ -714,7 +713,8 @@ class BridgeScene(LevelScene):
             lines.append(("Wind: f_n / U_crit", f"{sim.f_n:.2f} Hz / {sim.U_crit:.1f} m/s", None))
         if sim.quake:
             lines.append(("Quake: T / C", f"{sim.T:.2f} s / {sim.C:.2f}", None))
-        self.succeed(cost, min(100.0, 50 * fs), sim.time, fs=fs, lines=lines, revenue=revenue)
+        self.succeed(cost, min(100.0, 50 * fs), sim.time, fs=fs, lines=lines,
+                     efficiency=sim.toll_ratio())
 
     # --- drawing ---------------------------------------------------------------------------
     def joint_pos(self, k, result=None):

@@ -246,9 +246,11 @@ class CantileverScene(LevelScene):
             self.say("Stitch the girder before the truck test")
             return
         if self.truck is None and self.overlay is None:
-            self.truck = -12.0
-            self.truck_worst = 0.0
-            self.truck_hist = {"girder %": []}
+            def go():
+                self.truck = -12.0
+                self.truck_worst = 0.0
+                self.truck_hist = {"girder %": []}
+            self.finance_gate(go)
 
     def update_world(self, dt):
         self.tick += 1

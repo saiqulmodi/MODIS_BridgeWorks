@@ -272,6 +272,34 @@ def run_all_flows():
         sc.demo_clicked()
         _draw(app)
         sc.end_demo(restore=True)
+    # --- bank loan & business plan ---------------------------------------------------------
+    from game.finance_ui import FinanceOverlay
+    for num in range(1, 11):
+        app.start_level(num)
+        app.scene.overlay = None
+        app.scene.show_finance()
+        _draw(app)
+        app.scene.overlay = None
+    app.start_level(1)
+    sc = app.scene
+    sc.overlay = None
+    for design in (warren(get(1).cfg, 8, 2.0, mat="Steel", A=0.008, shape="Hollow box"),
+                   warren(get(1).cfg, 8, 3.0, mat="Steel", A=0.02, shape="Hollow box")):
+        sc.design = design
+        sc.dirty = True
+        sc.update(1 / 60)
+        sc.toggle_run()
+        _draw(app)
+        if isinstance(sc.overlay, FinanceOverlay):
+            sc.overlay.govt_btn.click()
+            sc.overlay.update(0)
+            _draw(app)
+        if isinstance(sc.overlay, FinanceOverlay) and sc.overlay.plan.viable:
+            sc.overlay.accept()
+            _until_overlay(app)
+        app.scene.overlay = None
+        if sc.mode != "edit":
+            sc.stop_run()
     from game.demo import DEMO_TEXT
     for t in DEMO_TEXT.values():
         tr(t)

@@ -14,6 +14,7 @@ Esc returns to the level menu. C toggles the calculator. F1 re-opens the briefin
 **F2 switches between English and Bengali (বাংলা)** - also the button on the menu and in every level's top bar. The choice is remembered.
 **IDEA hints:** hover over or click any button on the bottom bar and an IDEA box explains what it does, with a tip.
 **Demo:** the Demo button at the top of each level plays a working solution. It costs 0.5% of that level's budget - a warning shows the old and new budget before anything is charged. Replays are free; demos earn no stars or EXP.
+**Bank loan & government subsidised loan:** if a design costs more than the budget, a Business Plan appears before building. A bank loan (2%, 10 years) covers the shortfall; a government subsidised loan (0.5%, 15 years, up to half the budget) can take the first part. Loans are approved only if first-year toll income (after upkeep) is at least 1.5x the yearly payments - a 50% margin. Traffic grows 6% a year; the plan shows the payback year and 20-year profit. The Finance button shows the plan any time.
 
 ## The 10 levels
 

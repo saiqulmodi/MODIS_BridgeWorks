@@ -156,10 +156,12 @@ class LogisticsScene(LevelScene):
         if self.overlay is not None:
             return
         if self.state == "edit":
-            self.state = "run"
-            self.t = 0.0
-            self.run_btn.label = "STOP"
-            sound.play("whoosh")
+            def go():
+                self.state = "run"
+                self.t = 0.0
+                self.run_btn.label = "STOP"
+                sound.play("whoosh")
+            self.finance_gate(go)
         else:
             self.reset_after_failure()
 

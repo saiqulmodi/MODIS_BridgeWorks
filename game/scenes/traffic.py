@@ -159,10 +159,12 @@ class TrafficScene(LevelScene):
         if self.overlay is not None:
             return
         if self.state == "edit":
-            self.sim = self.make_sim()
-            self.state = "run"
-            self.run_btn.label = "STOP"
-            self.show_panel()
+            def go():
+                self.sim = self.make_sim()
+                self.state = "run"
+                self.run_btn.label = "STOP"
+                self.show_panel()
+            self.finance_gate(go)
         else:
             self.reset_after_failure()
 

@@ -568,6 +568,8 @@ from .lang_bn_help import HELP_BN  # noqa: E402  (bottom-bar IDEA help)
 EXACT.update(HELP_BN)
 from .lang_bn_demo import DEMO_BN, DEMO_PATTERNS  # noqa: E402  (paid demonstrations)
 EXACT.update(DEMO_BN)
+from .lang_bn_finance import FINANCE_BN, FINANCE_PATTERNS  # noqa: E402  (bank loan)
+EXACT.update(FINANCE_BN)
 
 # Slider and value labels ("Label: 12")
 LABELS = {
@@ -579,7 +581,7 @@ LABELS = {
     "Signal cycle C (s)": "সিগন্যাল চক্র C (s)", "Main-road share of green": "সবুজে প্রধান সড়কের ভাগ",
     "Speed limit (km/h)": "গতিসীমা (km/h)", "Rail share (t)": "রেলের ভাগ (t)", "Barge share (t)": "বার্জের ভাগ (t)",
     "Trucks hired": "ভাড়া করা ট্রাক", "Trains (rakes)": "ট্রেন (র‍্যাক)", "Wagons per train": "প্রতি ট্রেনে ওয়াগন",
-    "Barges": "বার্জ", "Wagons": "ওয়াগন",
+    "Barges": "বার্জ", "Wagons": "ওয়াগন", "Toll rate (x standard)": "টোলের হার (সাধারণের x গুণ)",
 }
 
 SIGNS = {"BUCKLED": "বাকলিং", "SNAPPED": "ছিঁড়ে গেছে", "CRUSHED": "চূর্ণ হয়েছে", "Tension": "টান",
@@ -842,7 +844,7 @@ PATTERNS = [
     (r"(.+ / .+)", lambda m: " / ".join(EXACT.get(p, p) for p in m.group(1).split(" / "))),
 ]
 
-PATTERNS = DEMO_PATTERNS + PATTERNS
+PATTERNS = DEMO_PATTERNS + FINANCE_PATTERNS + PATTERNS
 COMPILED = [(re.compile(p), r) for p, r in PATTERNS]
 
 # Technical words that may stay in Latin letters in Bengali mode (formula symbols, units,
