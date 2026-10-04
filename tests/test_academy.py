@@ -2,6 +2,7 @@
 once, they cover a shortfall before any loan, reading pays, and the Black Box challenge
 raises salvage to 75%."""
 import collections
+import re
 import os
 
 os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
@@ -41,8 +42,10 @@ def test_every_question_is_complete_in_both_languages():
         assert all(o.strip() for o in r["options"] + r["options_bn"]), r["id"]
         assert len(set(r["options"])) == 4 and len(set(r["options_bn"])) == 4, r["question"]
         assert 0 <= r["correct_idx"] <= 3
-        for k in ("question_bn", "explanation_bn"):
-            assert i18n.has_bengali(r[k]), (r["id"], k)
+        for k in ("question_bn", "explanation_bn"):     # Bengali, or pure numbers and symbols
+            assert i18n.has_bengali(r[k]) or not re.search("[A-Za-z]{3,}", r[k]), (r["id"], k)
+        for o in r["options_bn"]:
+            assert i18n.has_bengali(o) or not re.search("[A-Za-z]{3,}", o), (r["id"], o)
         for k in ("question", "explanation"):
             assert not i18n.has_bengali(r[k]), (r["id"], k)
 
