@@ -23,6 +23,14 @@ HELP = {
     "sag": "Exaggerates how far the bridge bends (x1, x10, x50) so you can see it sag and bulge.",
     "speed": "Changes how fast the simulation plays.",
     "run_bridge": "Sends the vehicles across. If something breaks, the Black Box shows exactly why.",
+    "view3d": "Switches between the flat drawing and a 3D view of the real bridge: your truss on both "
+              "sides of the road, the deck and cross beams between them. You can build in 3D too - "
+              "clicks land on the side facing you and every beam appears on both sides. Turn: drag "
+              "on empty space with Select, middle-drag, Alt + drag or the arrow keys. Zoom: mouse "
+              "wheel or + / -. Key 3 switches the view.",
+    "orbit": "Turns the 3D camera around the bridge (the arrow keys do the same).",
+    "zoom": "Moves the 3D camera closer or further away (mouse wheel, + / -).",
+    "reset_view": "Puts the 3D camera back to the starting view (Home key).",
     # --- rail levels
     "wagon_minus": "Removes a wagon: less cargo per trip, but the engine climbs more easily.",
     "wagon_plus": "Adds a wagon: more cargo per trip, but the engine can only pull mu x its own "

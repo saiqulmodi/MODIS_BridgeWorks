@@ -2,6 +2,18 @@
 
 HELP_BN = {
     "IDEA": "আইডিয়া",
+    # 3D view
+    "3D view": "3D দৃশ্য", "2D view": "2D দৃশ্য", "Reset": "শুরুর দৃশ্য",
+    "Turn the view towards the side of the bridge to build here":
+        "এখানে বানাতে দৃশ্যটা সেতুর পাশের দিকে ঘোরাও",
+    "Switches between the flat drawing and a 3D view of the real bridge: your truss on both sides of the road, the deck and cross beams between them. You can build in 3D too - clicks land on the side facing you and every beam appears on both sides. Turn: drag on empty space with Select, middle-drag, Alt + drag or the arrow keys. Zoom: mouse wheel or + / -. Key 3 switches the view.":
+        "সমতল নকশা আর আসল সেতুর 3D দৃশ্যের মধ্যে বদলায়: রাস্তার দুই পাশে তোমার ট্রাস, মাঝে ডেক আর আড়াআড়ি বিম। 3D-তেও বানানো যায় - ক্লিক পড়ে তোমার দিকের পাশে, আর প্রতিটি বিম দুই পাশেই তৈরি হয়। ঘোরাতে: 'বাছাই' দিয়ে ফাঁকা জায়গায় টানো, মাঝের বোতাম বা Alt চেপে টানো, অথবা তীর-চাবি। কাছে-দূরে: মাউসের চাকা বা + / -। 3 চাবি দৃশ্য বদলায়।",
+    "Turns the 3D camera around the bridge (the arrow keys do the same).":
+        "3D ক্যামেরাকে সেতুর চারপাশে ঘোরায় (তীর-চাবিও একই কাজ করে)।",
+    "Moves the 3D camera closer or further away (mouse wheel, + / -).":
+        "3D ক্যামেরাকে কাছে বা দূরে নেয় (মাউসের চাকা, + / -)।",
+    "Puts the 3D camera back to the starting view (Home key).":
+        "3D ক্যামেরাকে শুরুর দৃশ্যে ফেরায় (Home চাবি)।",
     # bridge
     "Click any beam, joint or vehicle to open its maths in the calculator. Idea: with TEST on, click the top chord and watch sigma = N / A change.":
         "যেকোনো বিম, জোড় বা গাড়িতে ক্লিক করলে ক্যালকুলেটরে তার গণিত খোলে। আইডিয়া: 'পরীক্ষা' চালু রেখে উপরের কর্ডে ক্লিক করো, দেখো sigma = N / A কীভাবে বদলায়।",

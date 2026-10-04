@@ -15,6 +15,8 @@ venv\Scripts\python.exe main.py
 ```
 
 Esc returns to the level menu. C toggles the calculator. F1 re-opens the briefing. **F11** (or the menu's Full screen button) toggles full screen.
+
+**3D view (bridge levels 1, 7, 8, 10):** the "3D view" button (or key **3**) shows the real bridge: your truss on both sides of the road, the deck and cross beams between them. You can build in 3D too: clicks land on the side truss facing you, and every beam appears on both sides. Turn the view by dragging on empty space with Select, middle-drag, Alt + drag, the arrow keys or the on-screen arrows. Zoom with the mouse wheel or + / -. Home or Reset goes back to the starting view. The physics is unchanged: the two side trusses share the load equally.
 **F2 switches between English and Bengali (বাংলা)** - also the button on the menu and in every level's top bar. The choice is remembered.
 **IDEA hints:** hover over or click any button on the bottom bar and an IDEA box explains what it does, with a tip.
 **Demo:** the Demo button at the top of each level plays a working solution. It costs 0.5% of that level's budget - a warning shows the old and new budget before anything is charged. Replays are free; demos earn no stars or EXP.

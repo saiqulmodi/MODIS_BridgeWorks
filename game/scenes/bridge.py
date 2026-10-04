@@ -9,7 +9,7 @@ from engine.failure import FailureReport
 from engine.materials import ALL as MATERIALS, BEAM_SIZES, CABLE_SIZES, SHAPES, second_moment
 from engine.truss import FAILED, UnstableStructure, euler_buckling_load
 
-from .. import sound
+from .. import sound, view3d
 from ..bridge_sim import BridgeSim, deck_path, design_cost, new_design
 from ..common import Card, LevelScene
 from ..help_texts import HELP, MATERIAL, SHAPE
@@ -59,6 +59,10 @@ class BridgeScene(LevelScene):
         super().__init__(app, level)
         self.cfg = level.cfg
         self.cam = Camera(self.cfg["view"])
+        self.cam3 = view3d.Camera3D(self.cfg)
+        self.view3d = getattr(app, "view3d", False)
+        self.mouse_pos = None
+        self.orbit = None
         self.design = new_design(self.cfg)
         self.undo_stack = []
         self.tool = "deck"
@@ -81,6 +85,7 @@ class BridgeScene(LevelScene):
         self.lab = WidgetGroup()
         self.run_under_overlay = False
         self._build_toolbar()
+        self._build_view_buttons()
         self._build_lab()
         self.drawer.show("Calculator", [], hint="Build with the tools below. Turn on TEST to "
                                                   "see live stress colours while you draw.")
@@ -208,6 +213,133 @@ class BridgeScene(LevelScene):
                                 lambda v: self._set_attr("grid_mw", v), "{:.1f}", 0.1))
             toggle("Power the smart alloy (E x2)", "power_alloy",
                    "Smart-alloy members double their stiffness but draw 50 kW per tonne.")
+
+    # --- 3D view ---------------------------------------------------------------------------
+    def _build_view_buttons(self):
+        right = WIDTH - DRAWER_W - 40
+        y = TOP_BAR + 10
+        self.view_btn = self.widgets.add(Button((right - 104, y, 104, 32), "", self.toggle_view3d,
+                                                toggle=True, hotkey=pygame.K_3, size=14,
+                                                help=HELP["view3d"]))
+        self.view_controls = []
+        steps = [("<", lambda: self.cam3.rotate(-0.25, 0), "orbit"),
+                 (">", lambda: self.cam3.rotate(0.25, 0), "orbit"),
+                 ("^", lambda: self.cam3.rotate(0, 0.15), "orbit"),
+                 ("v", lambda: self.cam3.rotate(0, -0.15), "orbit"),
+                 ("+", lambda: self.cam3.zoom(1 / 1.2), "zoom"),
+                 ("-", lambda: self.cam3.zoom(1.2), "zoom"),
+                 ("Reset", self.cam3.reset, "reset_view")]
+        x, y = right - 104, y + 38
+        for k, (label, fn, help_key) in enumerate(steps):
+            w = 104 if label == "Reset" else 24
+            if k == 4:
+                x, y = right - 104, y + 30
+            if label == "Reset":
+                x, y = right - 104, y + 30
+            self.view_controls.append(self.widgets.add(Button((x, y, w, 26), label, fn, size=14,
+                                                              help=HELP[help_key])))
+            x += 27
+        self._sync_view_buttons()
+
+    def _sync_view_buttons(self):
+        self.view_btn.active = self.view3d
+        self.view_btn.label = "2D view" if self.view3d else "3D view"
+        for b in self.view_controls:
+            b.visible = self.view3d
+
+    def toggle_view3d(self):
+        self.view3d = not self.view3d
+        self.app.view3d = self.view3d
+        self.pending = None
+        self.orbit = None
+        self._sync_view_buttons()
+
+    def build_z(self):
+        """The side truss you are building on: the one facing the camera."""
+        half = view3d.deck_width(self.cfg) / 2
+        return half if self.cam3.pos[2] >= 0 else -half
+
+    def world_joint(self, k, result=None):
+        x, y = self.design.joints[k]
+        if result is not None and self.deflect and k < len(result.displacements):
+            ux, uy = result.displacements[k]
+            x += ux * self.deflect
+            y += uy * self.deflect
+        return x, y
+
+    def _screen_points(self, x, y):
+        """Screen positions of a design point: once in 2D, on both side trusses in 3D."""
+        if not self.view3d:
+            return [self.cam.to_screen(x, y)]
+        half = view3d.deck_width(self.cfg) / 2
+        out = []
+        for z in (half, -half):
+            p = self.cam3.project((x, y, z))
+            if p:
+                out.append(p[:2])
+        return out
+
+    def pick_point(self, pos):
+        """Snapped design point under the mouse (None in 3D if the view is edge-on)."""
+        if not self.view3d:
+            return self.snap(*self.cam.to_world(*pos))
+        zb = self.build_z()
+        w = self.cam3.on_plane(pos, zb)
+        if w is None:
+            return None
+        best, bd = None, 14
+        for (jx, jy) in self.design.joints:
+            p = self.cam3.project((jx, jy, zb))
+            if p and math.hypot(p[0] - pos[0], p[1] - pos[1]) < bd:
+                best, bd = (jx, jy), math.hypot(p[0] - pos[0], p[1] - pos[1])
+        g = self.cfg["grid"]
+        return best or (float(round(w[0] / g) * g), float(round(w[1] / g) * g))
+
+    def pending_info(self, q):
+        L = math.hypot(q[0] - self.pending[0], q[1] - self.pending[1])
+        limit = self.cfg.get("max_cable", 0) if self.tool == "cable" else self.cfg.get("max_beam", 8)
+        ok = L <= limit + 1e-6 and not self.solid(*q)
+        mat, A, shape = self._style()
+        c, _ = economy.member_material_cost(MATERIALS[mat], A, L)
+        ang = math.degrees(math.atan2(q[1] - self.pending[1], q[0] - self.pending[0]))
+        return ok, f"{L:.1f} m  {ang:+.0f} deg  ~{economy.format_rs(c + 6500)}"
+
+    def _camera_event(self, event):
+        """Rotate / zoom the 3D view. Returns True if the event was used."""
+        if event.type == pygame.MOUSEWHEEL:
+            self.cam3.zoom(0.88 if event.y > 0 else 1 / 0.88)
+            return True
+        if event.type == pygame.KEYDOWN:
+            keys = {pygame.K_LEFT: (-0.12, 0), pygame.K_RIGHT: (0.12, 0),
+                    pygame.K_UP: (0, 0.08), pygame.K_DOWN: (0, -0.08)}
+            if event.key in keys:
+                self.cam3.rotate(*keys[event.key])
+                return True
+            if event.key in (pygame.K_PLUS, pygame.K_EQUALS, pygame.K_KP_PLUS, pygame.K_PAGEUP):
+                self.cam3.zoom(1 / 1.15)
+                return True
+            if event.key in (pygame.K_MINUS, pygame.K_KP_MINUS, pygame.K_PAGEDOWN):
+                self.cam3.zoom(1.15)
+                return True
+            if event.key == pygame.K_HOME:
+                self.cam3.reset()
+                return True
+        if event.type == pygame.MOUSEBUTTONDOWN and (
+                event.button == 2 or (event.button == 1 and pygame.key.get_mods() & pygame.KMOD_ALT)):
+            self.orbit = event.pos
+            return True
+        if event.type == pygame.MOUSEMOTION and self.orbit is not None:
+            if not any(event.buttons):
+                self.orbit = None
+                return False
+            dx, dy = event.pos[0] - self.orbit[0], event.pos[1] - self.orbit[1]
+            self.cam3.rotate(-dx * 0.008, dy * 0.006)
+            self.orbit = event.pos
+            return True
+        if event.type == pygame.MOUSEBUTTONUP and self.orbit is not None:
+            self.orbit = None
+            return True
+        return False
 
     def toggle_lab(self):
         self.lab_open = True
@@ -346,18 +478,19 @@ class BridgeScene(LevelScene):
     def beam_at(self, pos):
         best, bd = None, 9
         for k, bm in enumerate(self.design.beams):
-            a = self.cam.to_screen(*self.design.joints[bm.a])
-            b = self.cam.to_screen(*self.design.joints[bm.b])
-            d = seg_dist(pos, a, b)
-            if d < bd:
-                best, bd = k, d
+            ends = zip(self._screen_points(*self.design.joints[bm.a]),
+                       self._screen_points(*self.design.joints[bm.b]))
+            for a, b in ends:
+                d = seg_dist(pos, a, b)
+                if d < bd:
+                    best, bd = k, d
         return best
 
     def joint_at(self, pos):
         for k, (x, y) in enumerate(self.design.joints):
-            sx, sy = self.cam.to_screen(x, y)
-            if math.hypot(sx - pos[0], sy - pos[1]) < 10:
-                return k
+            for sx, sy in self._screen_points(x, y):
+                if math.hypot(sx - pos[0], sy - pos[1]) < 10:
+                    return k
         return None
 
     def vehicle_at(self, pos):
@@ -365,17 +498,24 @@ class BridgeScene(LevelScene):
             return None
         for k, v in enumerate(self.sim.vehicles):
             for p in v.axle_points():
-                sx, sy = self.cam.to_screen(*p)
-                if math.hypot(sx - pos[0], sy - pos[1]) < 30:
-                    return k
+                pts = [self.cam.to_screen(*p)]
+                if self.view3d:
+                    q = self.cam3.project((p[0], p[1] + 1.5, 0.0))
+                    pts = [q[:2]] if q else []
+                for sx, sy in pts:
+                    if math.hypot(sx - pos[0], sy - pos[1]) < 30:
+                        return k
         return None
 
     def handle_world(self, event):
         if event.type == pygame.KEYDOWN and event.key == pygame.K_z and (event.mod & pygame.KMOD_CTRL):
             self.undo()
             return
+        if self.view3d and self._camera_event(event):
+            return
         if event.type == pygame.MOUSEMOTION:
             self.mouse_world = self.cam.to_world(*event.pos)
+            self.mouse_pos = event.pos
             return
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 3 and self.mode == "edit":
             self.pending = None
@@ -403,7 +543,10 @@ class BridgeScene(LevelScene):
                     self.selected = None
                     self.dirty = True
                 return
-            p = self.snap(*self.cam.to_world(*event.pos))
+            p = self.pick_point(event.pos)
+            if p is None:
+                self.say("Turn the view towards the side of the bridge to build here")
+                return
             if self.pending is None:
                 self.pending = p
             else:
@@ -412,8 +555,8 @@ class BridgeScene(LevelScene):
             return
         if event.type == pygame.MOUSEBUTTONUP and event.button == 1 and self.pending is not None \
                 and self.mode == "edit" and self.tool in ("deck", "beam", "cable"):
-            q = self.snap(*self.cam.to_world(*event.pos))
-            if q != self.pending:
+            q = self.pick_point(event.pos)
+            if q is not None and q != self.pending:
                 self.try_add(self.pending, q)
                 self.pending = None
 
@@ -436,6 +579,8 @@ class BridgeScene(LevelScene):
                 self.shape_cycler.set(bm.shape)
             return
         self.select(None)
+        if self.view3d:
+            self.orbit = pos          # dragging on empty space turns the 3D view
 
     # --- selection -> calculator -----------------------------------------------------------
     def select(self, sel):
@@ -718,12 +863,7 @@ class BridgeScene(LevelScene):
 
     # --- drawing ---------------------------------------------------------------------------
     def joint_pos(self, k, result=None):
-        x, y = self.design.joints[k]
-        if result is not None and self.deflect and k < len(result.displacements):
-            ux, uy = result.displacements[k]
-            x += ux * self.deflect
-            y += uy * self.deflect
-        return self.cam.to_screen(x, y)
+        return self.cam.to_screen(*self.world_joint(k, result))
 
     def draw_terrain(self, s):
         c, cam = self.cfg, self.cam
@@ -758,6 +898,11 @@ class BridgeScene(LevelScene):
                 pygame.draw.line(s, (150, 150, 150), cam.to_screen(*a), cam.to_screen(*b), 4)
 
     def draw_world(self, s):
+        if self.view3d:
+            res = self.current_result()
+            view3d.draw(self, s, res)
+            self.draw_hud(s, res)
+            return
         blueprint_background(s, (0, TOP_BAR, WIDTH, HEIGHT - TOP_BAR - BOTTOM_BAR),
                              step=max(8, int(self.cfg["grid"] * self.cam.scale)))
         self.draw_terrain(s)
@@ -814,15 +959,9 @@ class BridgeScene(LevelScene):
         if self.mode == "edit" and self.pending and self.mouse_world:
             q = self.snap(*self.mouse_world)
             a, b = cam.to_screen(*self.pending), cam.to_screen(*q)
-            L = math.hypot(q[0] - self.pending[0], q[1] - self.pending[1])
-            limit = self.cfg.get("max_cable", 0) if self.tool == "cable" else self.cfg.get("max_beam", 8)
-            ok = L <= limit + 1e-6 and not self.solid(*q)
+            ok, label = self.pending_info(q)
             pygame.draw.line(s, ACCENT if ok else BAD, a, b, 3)
-            mat, A, shape = self._style()
-            c, _ = economy.member_material_cost(MATERIALS[mat], A, L)
-            ang = math.degrees(math.atan2(q[1] - self.pending[1], q[0] - self.pending[0]))
-            text(s, f"{L:.1f} m  {ang:+.0f} deg  ~{economy.format_rs(c + 6500)}", (b[0] + 12, b[1] - 22),
-                 14, ACCENT if ok else BAD)
+            text(s, label, (b[0] + 12, b[1] - 22), 14, ACCENT if ok else BAD)
         if self.sim and self.mode in ("run", "frozen"):
             self.draw_vehicles(s)
             self.draw_hazards(s)

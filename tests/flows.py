@@ -126,6 +126,28 @@ def run_all_flows():
             _until_overlay(app)
             _diagnose_and_close(app)
             sc.reset_after_failure()
+        # the same design in the 3D view: edit, test colours, run, vectors
+        sc.toggle_view3d()
+        sc.design = ds[0]
+        sc.dirty = True
+        sc.update(1 / 60)
+        sc.select(("beam", 1))
+        _draw(app)
+        sc.cam3.rotate(2.6, 0.4)
+        sc.cam3.zoom(0.6)
+        _draw(app)
+        sc.vectors = True
+        sc.start_run()
+        for _ in range(60):
+            sc.update(1 / 30)
+        _draw(app)
+        _until_overlay(app)
+        _diagnose_and_close(app)
+        sc.reset_after_failure()
+        sc.say("Turn the view towards the side of the bridge to build here")
+        _draw(app)
+        sc.cam3.reset()
+        sc.toggle_view3d()
         sc.say("Too long: 9.0 m (max 8 m for this tool)")
         _draw(app)
         sc.say("You can't build inside the rock")
