@@ -3,7 +3,7 @@ import pygame
 
 from engine.levels import LEVELS, get
 
-from . import sound
+from . import i18n, sound
 from .save import Save
 from .ui import HEIGHT, WIDTH
 
@@ -30,6 +30,7 @@ class App:
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         self.clock = pygame.time.Clock()
         self.save = save or Save()
+        i18n.set_lang(self.save.data.get("lang", "en"))
         self.headless = headless
         self.show_briefings = show_briefings
         if not headless:
@@ -47,6 +48,10 @@ class App:
 
     def quit(self):
         self.running = False
+
+    def toggle_language(self):
+        self.save.data["lang"] = i18n.toggle()
+        self.save.write()
 
     def frame(self, events, dt):
         for e in events:

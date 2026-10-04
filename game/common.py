@@ -11,7 +11,7 @@ from . import sound
 from .fx import Confetti
 from .ui import (ACCENT, BAD, BG_DARK, BOTTOM_BAR, CYAN, DRAWER_W, GOOD, HEIGHT, LINE, MUTED,
                  PANEL, PANEL_EDGE, TEXT, TOP_BAR, WARN, WIDTH, Button, Slider, WidgetGroup,
-                 font, mini_chart, panel, text, text_block, wrap)
+                 line_height, measure, mini_chart, panel, text, text_block, wrap)
 
 
 # --------------------------------------------------------------------------------------------
@@ -74,11 +74,11 @@ class CalculatorDrawer:
     @staticmethod
     def _card_height(c):
         w = DRAWER_W - 30
-        h = 24 + len(wrap(c.formula, w, 16, mono=True)) * (font(16, mono=True).get_linesize() + 2)
+        h = 24 + len(wrap(c.formula, w, 16, mono=True)) * (line_height(c.formula, 16, mono=True) + 2)
         if c.worked:
-            h += len(wrap(c.worked, w, 14, mono=True)) * (font(14, mono=True).get_linesize() + 2)
+            h += len(wrap(c.worked, w, 14, mono=True)) * (line_height(c.worked, 14, mono=True) + 2)
         if c.result:
-            h += len(wrap(c.result, w, 16, True)) * (font(16, True).get_linesize() + 2)
+            h += len(wrap(c.result, w, 16, True)) * (line_height(c.result, 16, True) + 2)
         return h + 4
 
     def handle(self, event):
@@ -261,7 +261,8 @@ class BlackBox(Overlay):
         text(surface, self.report.title[:90], (r.x + 16, r.y + 30), 18, TEXT, bold=True)
         y = text_block(surface, self.report.formula, (r.x + 16, r.y + 56), 480, 14, CYAN, mono=True)
         for d in self.report.details[:2]:
-            y = text_block(surface, d, (r.x + 16, y + 2), 480, 13, MUTED)
+            if d and y < r.y + 108:
+                y = text_block(surface, d, (r.x + 16, y + 2), 480, 13, MUTED)
         text(surface, "Diagnose it - what went wrong?", (r.x + 16, r.y + 128), 14, ACCENT, bold=True)
         if self.feedback:
             text_block(surface, self.feedback, (r.x + 500, r.y + 30), r.w - 770, 14,
@@ -370,6 +371,9 @@ class LevelScene:
         self.toast = ""
         self.toast_t = 0.0
         self.top_buttons = WidgetGroup()
+        self.lang_btn = self.top_buttons.add(Button((WIDTH - 292, 6, 76, 32), "", app.toggle_language,
+                                                    size=14, hotkey=pygame.K_F2,
+                                                    tooltip="English / Bengali (F2)"))
         self.top_buttons.add(Button((WIDTH - 210, 6, 96, 32), "Briefing", self.show_briefing,
                                     size=14, hotkey=pygame.K_F1))
         self.top_buttons.add(Button((WIDTH - 108, 6, 96, 32), "Menu", self.to_menu, size=14,
@@ -493,7 +497,7 @@ class LevelScene:
         self.widgets.draw(surface)
         self.drawer.draw(surface)
         if self.toast_t > 0 and self.toast:
-            w = font(17).size(self.toast)[0] + 30
+            w = measure(self.toast, 17)[0] + 30
             r = panel(surface, (WIDTH // 2 - w // 2 - 150, TOP_BAR + 10, w, 34), BG_DARK, ACCENT, 8)
             text(surface, self.toast, r.center, 17, ACCENT, anchor="center")
         if self.overlay is not None:
@@ -514,9 +518,11 @@ class LevelScene:
         col = GOOD if c <= self.level.par_cost else (WARN if c <= self.budget else BAD)
         money = f"Cost {economy.format_rs(c)} / {economy.format_rs(self.budget)}"
         if self.salvage:
-            money += f"  (incl. salvage {economy.format_rs(self.salvage)})"
-        text(surface, money, (420, 12), 17, col, bold=True)
-        text(surface, f"EXP {self.app.save.exp}", (WIDTH - 300, 12), 17, ACCENT, bold=True)
+            money += f" (+salvage {economy.format_rs(self.salvage)})"
+        text(surface, money, (390, 12), 17, col, bold=True)
+        text(surface, f"EXP {self.app.save.exp}", (720, 12), 17, ACCENT, bold=True)
+        from .i18n import lang
+        self.lang_btn.label = "English" if lang() == "bn" else "বাংলা"
 
     def draw_bottom_bar(self, surface):
         pygame.draw.rect(surface, BG_DARK, (0, HEIGHT - BOTTOM_BAR, WIDTH, BOTTOM_BAR))

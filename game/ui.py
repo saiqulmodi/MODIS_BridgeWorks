@@ -3,6 +3,8 @@ import math
 
 import pygame
 
+from .i18n import has_bengali, tr
+
 WIDTH, HEIGHT = 1280, 720
 TOP_BAR = 44
 BOTTOM_BAR = 58
@@ -29,25 +31,48 @@ CYAN = (90, 210, 240)
 STATUS = {"green": GOOD, "yellow": WARN, "red": BAD, "failed": (255, 40, 40)}
 
 _fonts = {}
+BENGALI_FONT = r"C:\Windows\Fonts\Nirmala.ttc"
 
 
-def font(size=18, bold=False, mono=False):
-    key = (size, bold, mono)
+def font(size=18, bold=False, mono=False, bengali=False):
+    key = (size, bold, mono, bengali)
     if key not in _fonts:
-        name = "consolas" if mono else "segoeui"
-        _fonts[key] = pygame.font.SysFont(name, size, bold=bold)
+        f = None
+        if bengali:
+            try:
+                f = pygame.font.Font(BENGALI_FONT, size)
+                f.set_script("Beng")        # proper joining of Bengali letters
+                f.bold = bold
+            except (OSError, FileNotFoundError, pygame.error, AttributeError):
+                f = None
+        if f is None:
+            f = pygame.font.SysFont("consolas" if mono else "segoeui", size, bold=bold)
+        _fonts[key] = f
     return _fonts[key]
 
 
-def text(surface, s, pos, size=18, colour=TEXT, bold=False, mono=False, anchor="topleft"):
-    img = font(size, bold, mono).render(str(s), True, colour)
+def font_for(s, size=18, bold=False, mono=False):
+    """The right font for this (already translated) string."""
+    return font(size, bold, mono, has_bengali(s))
+
+
+def text(surface, s, pos, size=18, colour=TEXT, bold=False, mono=False, anchor="topleft", raw=False):
+    """Draw one line. Strings are translated here unless raw=True (already translated)."""
+    s = str(s) if raw else tr(s)
+    img = font_for(s, size, bold, mono).render(s, True, colour)
     r = img.get_rect(**{anchor: pos})
     surface.blit(img, r)
     return r
 
 
+def measure(s, size=18, bold=False, mono=False):
+    s = tr(s)
+    return font_for(s, size, bold, mono).size(s)
+
+
 def wrap(s, width, size=18, bold=False, mono=False):
-    f = font(size, bold, mono)
+    s = tr(s)
+    f = font_for(s, size, bold, mono)
     lines = []
     for para in str(s).split("\n"):
         words, cur = para.split(" "), ""
@@ -65,10 +90,17 @@ def wrap(s, width, size=18, bold=False, mono=False):
 
 def text_block(surface, s, pos, width, size=18, colour=TEXT, bold=False, mono=False, gap=2):
     x, y = pos
+    s = tr(s)
+    step = font_for(s, size, bold, mono).get_linesize() + gap
     for line in wrap(s, width, size, bold, mono):
-        text(surface, line, (x, y), size, colour, bold, mono)
-        y += font(size, bold, mono).get_linesize() + gap
+        text(surface, line, (x, y), size, colour, bold, mono, raw=True)
+        y += step
     return y
+
+
+def line_height(s, size=18, bold=False, mono=False):
+    s = tr(s)
+    return font_for(s, size, bold, mono).get_linesize()
 
 
 def panel(surface, rect, colour=PANEL, edge=PANEL_EDGE, radius=10, alpha=None):
@@ -168,7 +200,10 @@ class Button(Widget):
         pygame.draw.rect(surface, col, self.rect, border_radius=8)
         pygame.draw.rect(surface, PANEL_EDGE, self.rect, 1, border_radius=8)
         tc = (20, 20, 30) if self.active else (TEXT if self.enabled else MUTED)
-        text(surface, self.label, self.rect.center, self.size, tc, bold=True, anchor="center")
+        size = self.size
+        while size > 10 and measure(self.label, size, True)[0] > self.rect.w - 8:
+            size -= 1          # longer (e.g. Bengali) labels shrink to fit their button
+        text(surface, self.label, self.rect.center, size, tc, bold=True, anchor="center")
 
 
 class Slider(Widget):

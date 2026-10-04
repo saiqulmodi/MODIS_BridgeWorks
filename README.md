@@ -11,6 +11,7 @@ venv\Scripts\python.exe main.py
 ```
 
 Esc returns to the level menu. C toggles the calculator. F1 re-opens the briefing.
+**F2 switches between English and Bengali (বাংলা)** - also the button on the menu and in every level's top bar. The choice is remembered.
 
 ## The 10 levels
 

@@ -9,7 +9,7 @@ UNLOCK_ALL = True      # every level open, so the whole game can be reviewed in 
 class Save:
     def __init__(self, path=PATH):
         self.path = path
-        self.data = {"exp": 0, "levels": {}}
+        self.data = {"exp": 0, "levels": {}, "lang": "en"}
         try:
             with open(path, encoding="utf-8") as f:
                 self.data.update(json.load(f))

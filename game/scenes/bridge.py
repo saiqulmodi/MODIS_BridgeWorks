@@ -145,7 +145,7 @@ class BridgeScene(LevelScene):
         if self.cfg.get("grid_power"):
             hazard = "Grid & wind lab"
         if hazard:
-            self.top_buttons.add(Button((WIDTH - 380, 6, 160, 32), hazard, self.toggle_lab, size=14,
+            self.top_buttons.add(Button((WIDTH - 462, 6, 162, 32), hazard, self.toggle_lab, size=14,
                                         hotkey=pygame.K_l))
 
     def _build_lab(self):

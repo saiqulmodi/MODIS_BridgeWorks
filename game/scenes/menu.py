@@ -9,6 +9,11 @@ from .. import sound
 from ..ui import (ACCENT, BG_DARK, CYAN, GOOD, HEIGHT, LINE, MUTED, PANEL, PANEL_EDGE, TEXT,
                   WIDTH, Button, WidgetGroup, blueprint_background, panel, text, text_block)
 
+def language_button_label():
+    from ..i18n import lang
+    return "বাংলা / English" if lang() == "bn" else "English / বাংলা"
+
+
 SCENE_LABEL = {"bridge": "Build a bridge", "rail": "Lay a railway", "cantilever": "Cast a cantilever",
                "signals": "Wire the signals", "traffic": "Tame the traffic",
                "logistics": "Plan the freight"}
@@ -27,6 +32,10 @@ class MenuScene:
             self.cards.append((r, lv))
         self.widgets.add(Button((WIDTH - 140, HEIGHT - 56, 120, 40), "Quit", app.quit,
                                 hotkey=pygame.K_ESCAPE))
+        self.lang_btn = self.widgets.add(Button((40, 150, 170, 36), "", app.toggle_language,
+                                                hotkey=pygame.K_F2, size=16,
+                                                tooltip="English / Bengali (F2)"))
+        self.lang_btn.label = language_button_label()
         self.hover = None
 
     def handle(self, event):
@@ -47,6 +56,7 @@ class MenuScene:
 
     def update(self, dt):
         self.t += dt
+        self.lang_btn.label = language_button_label()
 
     def draw(self, s):
         blueprint_background(s)
