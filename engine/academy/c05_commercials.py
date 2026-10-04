@@ -17,10 +17,10 @@ def trips(load, cap, what_en, what_bn):
     o = _o(r, load // cap if load % cap else r + 1, cap, r - 1 if r > 1 else r + 2)
     return mcq(f"{load} tonnes of {what_en} must be moved in trucks that carry {cap} tonnes each. How many truck trips are needed?",
                [str(x) for x in o], 0,
-               f"{load} ÷ {cap} = {load / cap:g}" + (", so round UP: a part-load still needs a whole trip." if load % cap else "."),
+               f"{load} ÷ {cap} = {round(load / cap, 1):g}" + (", so round UP: a part-load still needs a whole trip." if load % cap else "."),
                f"{load} টন {what_bn} {cap} টন-ধারী ট্রাকে সরাতে হবে। কতগুলো ট্রাক-যাত্রা লাগবে?",
                [str(x) for x in o],
-               f"{load} ÷ {cap} = {load / cap:g}" + ("; তাই উপরে আসন্ন করো: আংশিক বোঝাতেও একটা পুরো যাত্রা লাগে।" if load % cap else "।"))
+               f"{load} ÷ {cap} = {round(load / cap, 1):g}" + ("; তাই উপরে আসন্ন করো: আংশিক বোঝাতেও একটা পুরো যাত্রা লাগে।" if load % cap else "।"))
 
 
 def fuel(km, kmpl, price):
