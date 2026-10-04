@@ -101,6 +101,41 @@ class Save:
         self.add_grant(reward)
         return reward
 
+    # --- Donation Camps: Civil Grants given to nation-building causes ----------------------------
+    @property
+    def donations(self):
+        d = self.data.setdefault("donations", {})
+        d.setdefault("given", {})            # camp key -> Rs given
+        d.setdefault("ledger", [])           # [date, camp key, Rs]
+        d.setdefault("badges", [])           # camp keys completed
+        return d
+
+    def donated_total(self):
+        return sum(self.donations["given"].values())
+
+    def donate(self, camp_key, amount):
+        """Give Civil Grants to a camp. Returns (amount given, camp completed now, EXP earned).
+        A camp never takes more than it still needs, and never more than the wallet holds."""
+        import datetime
+        from engine.donations import EXP_CAMP_COMPLETE, EXP_PER_1000, camp
+        c = camp(camp_key)
+        d = self.donations
+        before = d["given"].get(camp_key, 0.0)
+        amount = max(0.0, min(amount, c.target - before, self.wallet))
+        if amount <= 0:
+            return 0.0, False, 0
+        self.academy["wallet"] -= amount
+        d["given"][camp_key] = before + amount
+        d["ledger"].append([datetime.date.today().isoformat(), camp_key, amount])
+        exp = int(EXP_PER_1000 * amount / 1000)
+        completed = d["given"][camp_key] >= c.target - 1e-6 and camp_key not in d["badges"]
+        if completed:
+            d["badges"].append(camp_key)
+            exp += EXP_CAMP_COMPLETE
+        self.data["exp"] += exp
+        self.write()
+        return amount, completed, exp
+
     def unlocked(self, num):
         if UNLOCK_ALL or num == 1:
             return True

@@ -14,6 +14,8 @@ FINANCE_BN = {
     "Answer one BridgeWorks Academy question correctly to recover 75% instead of 30%.":
         "একাডেমির একটি প্রশ্নের সঠিক উত্তর দিলে 30%-এর বদলে 75% ফেরত পাবে।",
     "BridgeWorks Academy (A)": "ব্রিজওয়ার্কস একাডেমি (A)",
+    "Donation Camps (D)": "দান-শিবির (D)",
+    "Give Civil Grants to causes that build opportunities": "সুযোগ তৈরির কাজে সিভিল অনুদান দান করো",
     "Class 1-12 quizzes in 6 subjects: earn Civil Grants for your bridges":
         "শ্রেণি 1-12-এর 6 বিষয়ের কুইজ: তোমার সেতুর জন্য সিভিল অনুদান অর্জন করো",
     "Finance": "অর্থ", "Business plan: tolls, loan, payback.": "ব্যবসার পরিকল্পনা: টোল, ঋণ, খরচ ফেরত।",

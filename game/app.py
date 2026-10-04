@@ -49,6 +49,10 @@ class App:
         from .scenes.academy import AcademyScene
         self.scene = AcademyScene(self)
 
+    def to_donations(self):
+        from .scenes.donations import DonationScene
+        self.scene = DonationScene(self)
+
     def start_level(self, num):
         self.scene = scene_for(self, get(num))
 

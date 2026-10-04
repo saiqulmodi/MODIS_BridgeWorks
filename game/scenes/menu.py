@@ -46,6 +46,9 @@ class MenuScene:
         self.widgets.add(Button((482, 150, 250, 36), "BridgeWorks Academy (A)", app.to_academy,
                                 hotkey=pygame.K_a, size=16, colour=(40, 90, 70),
                                 tooltip="Class 1-12 quizzes in 6 subjects: earn Civil Grants for your bridges"))
+        self.widgets.add(Button((WIDTH - 404, HEIGHT - 56, 250, 40), "Donation Camps (D)", app.to_donations,
+                                hotkey=pygame.K_d, size=16, colour=(90, 70, 30),
+                                tooltip="Give Civil Grants to causes that build opportunities"))
         self.help = None
         self.hover = None
 

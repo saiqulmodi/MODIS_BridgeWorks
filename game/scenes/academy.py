@@ -36,6 +36,7 @@ WORDS = {
     "menu": ("Menu (Esc)", "মেনু (Esc)"),
     "lang": ("বাংলা (F2)", "English (F2)"),
     "next": ("Next question (Enter)", "পরের প্রশ্ন (Enter)"),
+    "give": ("Donation Camps", "দান-শিবির"),
     "reward": ("Class {c}: {g} for a right first answer, +{b} for reading the explanation.",
                "শ্রেণি {c}: প্রথম চেষ্টায় সঠিক উত্তরে {g}, ব্যাখ্যা পড়লে আরও {b}।"),
     "count": ("{a} of {n} answered", "{n}টির মধ্যে {a}টির উত্তর দেওয়া"),
@@ -97,6 +98,7 @@ class AcademyScene:
                                         size=15))
             self.subject_btns[key] = b
             y += 46
+        self.give_btn = self.widgets.add(Button((WIDTH - 536, 16, 168, 36), "", app.to_donations, size=15))
         self.next_btn = self.widgets.add(Button((WIDTH - 300, HEIGHT - 62, 280, 44), "", self.next_question,
                                                 size=16, colour=(40, 110, 70), hotkey=pygame.K_RETURN))
         self.next_question()
@@ -189,6 +191,7 @@ class AcademyScene:
         self.menu_btn.label = w("menu")
         self.lang_btn.label = w("lang")
         self.next_btn.label = w("next")
+        self.give_btn.label = w("give")
         self.next_btn.enabled = self.card is None or self.card.answered
         for c, b in self.class_btns.items():
             b.active = c == self.cls

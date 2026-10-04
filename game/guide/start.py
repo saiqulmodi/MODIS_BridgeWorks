@@ -142,6 +142,21 @@ START = (
        "হ্যাঁ। তারা, EXP, উদ্ধার-মূল্য, কেনা প্রদর্শনী, তোমার চেষ্টাগুলো আর ভাষা নিজে থেকেই সংরক্ষিত হয়। যেকোনো লেভেল যেকোনো "
        "সময় আবার খেলতে পারো; তোমার সেরা তারা রাখা হয়, আর নতুন সাফল্যে আবার EXP যোগ হয়। সব লেভেল খোলা, তাই যেকোনো ক্রমে "
        "খেলতে পারো।"),
+    qa("What are the BridgeWorks Academy and the Donation Camps?",
+       "The Academy (A on the menu) has multiple-choice quizzes for Class 1 to 12 in Physics, "
+       "Chemistry, Math, Biology, Finance and Commercials. A right first answer pays Rs 1,000 x "
+       "the class in Civil Grants, reading an explanation pays Rs 200, and reading a Help answer "
+       "to the end pays Rs 500. Grants cover a bridge's shortfall before any loan, and one Academy "
+       "question in the Black Box raises salvage from 30% to 75%. In the Donation Camps (D) you "
+       "can give grants to causes like a school footbridge or a flood shelter and earn badges. "
+       "Only in-game money is used - nothing real is paid or collected.",
+       "ব্রিজওয়ার্কস একাডেমি আর দান-শিবির কী?",
+       "একাডেমিতে (মেনুতে A) শ্রেণি 1 থেকে 12-এর পদার্থবিজ্ঞান, রসায়ন, গণিত, জীববিজ্ঞান, অর্থসংস্থান "
+       "আর বাণিজ্যের বহুনির্বাচনী কুইজ আছে। প্রথম চেষ্টায় সঠিক উত্তরে সিভিল অনুদান মেলে 1,000 টাকা x "
+       "শ্রেণি, ব্যাখ্যা পড়লে 200 টাকা, আর সাহায্যের একটা উত্তর শেষ পর্যন্ত পড়লে 500 টাকা। অনুদান "
+       "যেকোনো ঋণের আগে সেতুর ঘাটতি মেটায়, আর ব্ল্যাক বক্সে একাডেমির একটা প্রশ্নের সঠিক উত্তরে "
+       "উদ্ধার-মূল্য 30% থেকে 75% হয়। দান-শিবিরে (D) স্কুলের হাঁটার সেতু বা বন্যা-আশ্রয়ের মতো কাজে "
+       "অনুদান দান করে ব্যাজ পাওয়া যায়। শুধু খেলার টাকা ব্যবহার হয় - আসল কিছু দেওয়া বা নেওয়া হয় না।"),
     qa("How do I win Level 1, The Creek Crossing?",
        "Goal: the 3.5 t bakery van crosses the 16 m gap (x = 12 to 28 m). Budget Rs 2.50 L, par "
        "Rs 1.00 L. Draw the deck along y = 0 from bank to bank in pieces of 8 m or less (beams "

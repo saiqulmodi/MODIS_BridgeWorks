@@ -366,6 +366,17 @@ def run_all_flows():
     sc.overlay.card.choose(0)
     sc.overlay.update(0)
     _draw(app)
+    # --- Donation Camps ------------------------------------------------------------------------
+    app.save.add_grant(20000)
+    app.to_donations()
+    sc = app.scene
+    sc.update(1 / 60)
+    _draw(app)
+    sc.give(1000)
+    sc.selected = 6
+    sc.give(None)
+    sc.update(1 / 60)
+    _draw(app)
     app.to_menu()
     _draw(app)
     return app
