@@ -68,6 +68,10 @@ def run_all_flows():
     for cause, lesson in CAUSES.values():
         tr(cause)
         tr(lesson)
+    from game.help_texts import all_texts
+    tr("IDEA")
+    for t in all_texts():
+        tr(t)
 
     # --- bridge levels -------------------------------------------------------------------
     designs = {1: [level1_good(), level1_bad()],

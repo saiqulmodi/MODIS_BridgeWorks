@@ -36,6 +36,34 @@ def test_every_displayed_string_is_translated_to_bengali(monkeypatch):
     assert len(shown) > 800          # the flows really visited the whole game
 
 
+def test_every_help_idea_has_bengali():
+    from game.help_texts import all_texts
+    i18n.set_lang("bn")
+    missing = [t for t in all_texts() + ["IDEA"] if not i18n.has_bengali(i18n.tr(t))]
+    assert not missing, missing
+
+
+def test_bottom_buttons_explain_themselves(tmp_path):
+    """Every bottom-bar button in every level has an IDEA; clicking one shows it."""
+    from game.ui import HINT, Button
+    app = App(save=Save(str(tmp_path / "s.json")), headless=True, show_briefings=False)
+    for num in range(1, 11):
+        app.start_level(num)
+        sc = app.scene
+        for w in sc.widgets.items:
+            if isinstance(w, Button):
+                assert w.help_text(), f"level {num}: '{w.label}' has no help"
+        btn = next(w for w in sc.widgets.items if isinstance(w, Button) and w.label != "RUN")
+        HINT["ttl"] = 0
+        app.frame([pygame.event.Event(pygame.MOUSEBUTTONDOWN, pos=btn.rect.center, button=1)], 1 / 60)
+        assert HINT["ttl"] > 0 and HINT["text"] == btn.help_text()
+        # hovering also shows it (drawn without errors)
+        app.frame([pygame.event.Event(pygame.MOUSEMOTION, pos=btn.rect.center, rel=(0, 0),
+                                      buttons=(0, 0, 0))], 1 / 60)
+        if sc.overlay is not None:
+            sc.overlay = None
+
+
 def test_patterns_keep_numbers_and_formulas():
     i18n.set_lang("bn")
     assert i18n.tr("Cost Rs 1.50 L / Rs 2.50 L") == "খরচ Rs 1.50 L / Rs 2.50 L"

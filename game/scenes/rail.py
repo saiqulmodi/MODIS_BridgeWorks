@@ -12,6 +12,7 @@ from .. import sound
 from ..common import Card, LevelScene
 from ..rail_sim import (LOCOS, RailSim, cost, default_design, fixed_station, grades,
                         ground_height, train_spec)
+from ..help_texts import HELP, LOCO
 from ..ui import (ACCENT, BAD, BG_DARK, BOTTOM_BAR, CYAN, DRAWER_W, GOOD, HEIGHT, LINE, MUTED,
                   PANEL_EDGE, TEXT, TOP_BAR, WARN, WIDTH, Button, Cycler, blueprint_background,
                   mini_chart, panel, text)
@@ -64,30 +65,35 @@ class RailScene(LevelScene):
         y = HEIGHT - BOTTOM_BAR + 9
         x = 10
         self.loco_cycler = self.widgets.add(Cycler((x, y, 210, 40), "", self.cfg["locos"],
-                                                   on_change=self._loco, size=15, hotkey=pygame.K_l))
+                                                   on_change=self._loco, size=15, hotkey=pygame.K_l,
+                                                   help=lambda: LOCO.get(self.loco_cycler.value, "")))
         x += 216
-        self.widgets.add(Button((x, y, 40, 40), "-", lambda: self._wagons(-1), size=20))
+        self.widgets.add(Button((x, y, 40, 40), "-", lambda: self._wagons(-1), size=20,
+                                help=HELP["wagon_minus"]))
         x += 44
         self.wagon_label_x = x
         x += 110
-        self.widgets.add(Button((x, y, 40, 40), "+", lambda: self._wagons(1), size=20))
+        self.widgets.add(Button((x, y, 40, 40), "+", lambda: self._wagons(1), size=20,
+                                help=HELP["wagon_plus"]))
         x += 50
         if self.cfg.get("banker"):
             self.banker_btn = self.widgets.add(Button((x, y, 170, 40),
                                                       f"Banker engine (+{economy.format_rs(250000)})",
-                                                      self._banker, toggle=True, size=13))
+                                                      self._banker, toggle=True, size=13,
+                                                      help=HELP["banker"]))
             x += 176
         self.widgets.add(Button((x, y, 120, 40), "Even grade", self.even_grade, size=14,
-                                tooltip="Re-shape the track to one steady slope between the "
-                                        "stations (costs earthworks)."))
+                                help=HELP["even_grade"]))
         x += 126
         self.widgets.add(Button((x, y, 110, 40), "Follow hill", self.follow_ground, size=14,
-                                tooltip="Lay the track straight on the ground: no earthworks."))
+                                help=HELP["follow_hill"]))
         x += 116
-        self.speed_btn = self.widgets.add(Button((x, y, 52, 40), "x1", self.cycle_speed, size=14))
+        self.speed_btn = self.widgets.add(Button((x, y, 52, 40), "x1", self.cycle_speed, size=14,
+                                                 help=HELP["speed"]))
         x += 56
         self.run_btn = self.widgets.add(Button((x, y, WIDTH - x - 10, 40), "RUN", self.toggle_run,
-                                               hotkey=pygame.K_SPACE, colour=(40, 110, 70)))
+                                               hotkey=pygame.K_SPACE, colour=(40, 110, 70),
+                                               help=HELP["run_rail"]))
 
     # --- design changes ---------------------------------------------------------------------
     def _loco(self, name):

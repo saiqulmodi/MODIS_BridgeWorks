@@ -9,7 +9,7 @@ from engine.failure import EXP_ALTERNATE, EXP_AUTOPSY, FailureReport
 
 from . import sound
 from .fx import Confetti
-from .ui import (ACCENT, BAD, BG_DARK, BOTTOM_BAR, CYAN, DRAWER_W, GOOD, HEIGHT, LINE, MUTED,
+from .ui import (HINT, ACCENT, BAD, BG_DARK, BOTTOM_BAR, CYAN, DRAWER_W, GOOD, HEIGHT, LINE, MUTED,
                  PANEL, PANEL_EDGE, TEXT, TOP_BAR, WARN, WIDTH, Button, Slider, WidgetGroup,
                  line_height, measure, mini_chart, panel, text, text_block, wrap)
 
@@ -477,6 +477,8 @@ class LevelScene:
         pass
 
     def update(self, dt):
+        if HINT["ttl"] > 0:
+            HINT["ttl"] -= dt
         if self.toast_t > 0:
             self.toast_t -= dt
         if self.overlay is not None:
@@ -500,9 +502,33 @@ class LevelScene:
             w = measure(self.toast, 17)[0] + 30
             r = panel(surface, (WIDTH // 2 - w // 2 - 150, TOP_BAR + 10, w, 34), BG_DARK, ACCENT, 8)
             text(surface, self.toast, r.center, 17, ACCENT, anchor="center")
+        if self.overlay is None:
+            self.draw_hint(surface)
         if self.overlay is not None:
             self.overlay.draw(surface)
         self.top_buttons.draw(surface)
+
+    def draw_hint(self, surface):
+        """'IDEA' box: for the bottom-bar button under the mouse, else the one last clicked."""
+        title, body = "", ""
+        for w in self.widgets.items:
+            if isinstance(w, Button) and w.visible and w.hover and w.help_text():
+                title, body = w.label, w.help_text()
+                break
+        if not body and HINT["ttl"] > 0:
+            title, body = HINT["title"], HINT["text"]
+        if not body:
+            return
+        width = WIDTH - DRAWER_W - 40
+        lines = wrap(body, width - 30, 15)
+        h = 36 + 21 * len(lines)
+        r = panel(surface, (16, HEIGHT - BOTTOM_BAR - h - 8, width, h), BG_DARK, ACCENT, 10, alpha=240)
+        x = text(surface, "IDEA", (r.x + 12, r.y + 7), 15, ACCENT, bold=True).right
+        text(surface, title, (x + 10, r.y + 7), 15, TEXT, bold=True)
+        y = r.y + 30
+        for line in lines:
+            text(surface, line, (r.x + 12, y), 15, TEXT, raw=True)
+            y += 21
 
     def draw_world(self, surface):
         pass

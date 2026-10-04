@@ -140,6 +140,15 @@ def blueprint_background(surface, rect=None, step=32):
         pygame.draw.line(surface, GRID_MAJOR if i % 5 == 0 else GRID, (rect.left, y), (rect.right, y))
 
 
+# The 'IDEA' hint shown above the bottom bar after a button with help text is clicked.
+HINT = {"title": "", "text": "", "ttl": 0.0}
+HINT_SECONDS = 8.0
+
+
+def show_hint(title, body):
+    HINT.update(title=title, text=body, ttl=HINT_SECONDS)
+
+
 class Widget:
     visible = True
     enabled = True
@@ -153,8 +162,9 @@ class Widget:
 
 class Button(Widget):
     def __init__(self, rect, label, on_click=None, toggle=False, active=False, hotkey=None,
-                 tooltip="", size=17, colour=None):
+                 tooltip="", size=17, colour=None, help=None):
         self.rect = pygame.Rect(rect)
+        self.help = help          # str, or a function returning str (e.g. depends on the value)
         self.label = label
         self.on_click = on_click
         self.toggle = toggle
@@ -185,6 +195,12 @@ class Button(Widget):
             self.active = not self.active
         if self.on_click:
             self.on_click()
+        body = self.help_text()
+        if body:
+            show_hint(self.label, body)
+
+    def help_text(self):
+        return self.help() if callable(self.help) else (self.help or "")
 
     def draw(self, surface):
         if not self.visible:
@@ -279,12 +295,13 @@ class Slider(Widget):
 class Cycler(Button):
     """A button that steps through a list of options."""
 
-    def __init__(self, rect, prefix, options, index=0, on_change=None, size=16, hotkey=None):
+    def __init__(self, rect, prefix, options, index=0, on_change=None, size=16, hotkey=None,
+                 help=None):
         self.prefix = prefix
         self.options = list(options)
         self.index = index
         self.on_change = on_change
-        super().__init__(rect, self._label(), self._next, size=size, hotkey=hotkey)
+        super().__init__(rect, self._label(), self._next, size=size, hotkey=hotkey, help=help)
 
     def _label(self):
         return f"{self.prefix}{self.options[self.index]}" if self.options else self.prefix

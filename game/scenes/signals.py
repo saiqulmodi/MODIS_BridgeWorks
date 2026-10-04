@@ -9,6 +9,7 @@ from engine.signals import DOUBLE_YELLOW, GREEN, RED, YELLOW, LogicRow, min_bloc
 
 from .. import sound
 from ..common import Card, LevelScene
+from ..help_texts import HELP
 from ..ui import (ACCENT, BAD, BG_DARK, BOTTOM_BAR, CYAN, GOOD, HEIGHT, LINE, MUTED, PANEL,
                   PANEL_EDGE, TEXT, TOP_BAR, WARN, WIDTH, Button, Cycler, WidgetGroup,
                   blueprint_background, panel, text)
@@ -47,12 +48,14 @@ class SignalScene(LevelScene):
     def _build_toolbar(self):
         y = HEIGHT - BOTTOM_BAR + 9
         self.aspect_btn = self.widgets.add(Button((10, y, 180, 40), "3-aspect signals", self.toggle_aspect,
-                                                  size=15, tooltip="4-aspect adds DOUBLE YELLOW so each "
-                                                                   "block only needs half the braking distance."))
-        self.widgets.add(Button((196, y, 170, 40), "Starter logic", self.reset_logic, size=15))
-        self.speed_btn = self.widgets.add(Button((372, y, 70, 40), "x8", self.cycle_speed, size=15))
+                                                  size=15, help=HELP["aspect"]))
+        self.widgets.add(Button((196, y, 170, 40), "Starter logic", self.reset_logic, size=15,
+                                help=HELP["starter_logic"]))
+        self.speed_btn = self.widgets.add(Button((372, y, 70, 40), "x8", self.cycle_speed, size=15,
+                                                 help=HELP["speed"]))
         self.run_btn = self.widgets.add(Button((448, y, WIDTH - 458, 40), "RUN 12 MINUTES",
-                                               self.toggle_run, hotkey=pygame.K_SPACE, colour=(40, 110, 70)))
+                                               self.toggle_run, hotkey=pygame.K_SPACE, colour=(40, 110, 70),
+                                               help=HELP["run_signals"]))
 
     def _build_logic(self):
         self.logic_widgets.clear()

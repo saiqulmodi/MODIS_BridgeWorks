@@ -12,6 +12,7 @@ from engine.truss import FAILED, UnstableStructure, euler_buckling_load
 from .. import sound
 from ..bridge_sim import BridgeSim, deck_path, design_cost, new_design
 from ..common import Card, LevelScene
+from ..help_texts import HELP, MATERIAL, SHAPE
 from ..ui import (ACCENT, BAD, BG_DARK, BOTTOM_BAR, CYAN, DRAWER_W, GOOD, HEIGHT, LINE, MUTED,
                   PANEL_EDGE, STATUS, TEXT, TOP_BAR, WARN, WIDTH, Button, Cycler, Slider,
                   WidgetGroup, arrow, blueprint_background, mini_chart, panel, text)
@@ -100,42 +101,44 @@ class BridgeScene(LevelScene):
         tools.append(("delete", "Delete", pygame.K_x))
         for key, label, hk in tools:
             b = self.widgets.add(Button((x, y, 72, 40), label, lambda k=key: self.set_tool(k),
-                                        hotkey=hk, size=15))
+                                        hotkey=hk, size=15, help=HELP[key]))
             self.tool_buttons[key] = b
             x += 76
         x += 6
         self.mat_cycler = self.widgets.add(Cycler((x, y, 150, 40), "", self._materials_for("deck"),
                                                   on_change=self._apply_style, size=14,
-                                                  hotkey=pygame.K_m))
+                                                  hotkey=pygame.K_m,
+                                                  help=lambda: MATERIAL.get(self.mat_cycler.value, "")))
         x += 154
         self.size_cycler = self.widgets.add(Cycler((x, y, 66, 40), "Size ", list(BEAM_SIZES), 1,
-                                                   on_change=self._apply_style, size=14))
+                                                   on_change=self._apply_style, size=14,
+                                                   help=HELP["size"]))
         x += 70
         self.shape_cycler = self.widgets.add(Cycler((x, y, 118, 40), "", list(SHAPES), 1,
-                                                    on_change=self._apply_style, size=14))
+                                                    on_change=self._apply_style, size=14,
+                                                    help=lambda: SHAPE.get(self.shape_cycler.value, "")))
         x += 128
-        self.widgets.add(Button((x, y, 60, 40), "Undo", self.undo, size=14))
+        self.widgets.add(Button((x, y, 60, 40), "Undo", self.undo, size=14, help=HELP["undo"]))
         x += 64
-        self.widgets.add(Button((x, y, 60, 40), "Clear", self.clear, size=14))
+        self.widgets.add(Button((x, y, 60, 40), "Clear", self.clear, size=14, help=HELP["clear"]))
         x += 70
         self.test_btn = self.widgets.add(Button((x, y, 64, 40), "TEST", self.toggle_preview,
                                                 toggle=True, active=True, hotkey=pygame.K_t, size=14,
-                                                tooltip="Live stress colours with the vehicle at "
-                                                        "its worst position."))
+                                                help=HELP["test"]))
         x += 68
         self.vec_btn = self.widgets.add(Button((x, y, 76, 40), "Vectors", self.toggle_vectors,
                                                toggle=True, hotkey=pygame.K_v, size=14,
-                                               tooltip="Show force arrows (length = kN)."))
+                                               help=HELP["vectors"]))
         x += 80
         self.def_btn = self.widgets.add(Button((x, y, 74, 40), "Sag x1", self.cycle_deflect,
-                                               hotkey=pygame.K_f, size=14,
-                                               tooltip="Exaggerate deflection 10x / 50x so you can "
-                                                       "see the sag and bulge."))
+                                               hotkey=pygame.K_f, size=14, help=HELP["sag"]))
         x += 78
-        self.speed_btn = self.widgets.add(Button((x, y, 52, 40), "x1", self.cycle_speed, size=14))
+        self.speed_btn = self.widgets.add(Button((x, y, 52, 40), "x1", self.cycle_speed, size=14,
+                                                 help=HELP["speed"]))
         x += 56
         self.run_btn = self.widgets.add(Button((x, y, WIDTH - x - 10, 40), "RUN", self.toggle_run,
-                                               hotkey=pygame.K_SPACE, colour=(40, 110, 70)))
+                                               hotkey=pygame.K_SPACE, colour=(40, 110, 70),
+                                               help=HELP["run_bridge"]))
         self.set_tool("deck")
         hazard = None
         if self.cfg.get("wind"):

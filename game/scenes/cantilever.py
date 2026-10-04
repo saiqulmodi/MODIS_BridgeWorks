@@ -15,6 +15,7 @@ from ..common import Card, LevelScene
 from ..ui import (ACCENT, BAD, BG_DARK, BOTTOM_BAR, CYAN, GOOD, HEIGHT, LINE, MUTED, PANEL_EDGE,
                   TEXT, TOP_BAR, WARN, WIDTH, Button, Slider, blueprint_background, mini_chart,
                   panel, text)
+from ..help_texts import HELP
 from .bridge import ROCK, ROCK_EDGE, Camera
 
 FLOOR = -44.0
@@ -51,24 +52,23 @@ class CantileverScene(LevelScene):
             for side, arrow_ in ((-1, "<"), (1, ">")):
                 label = f"{arrow_} Cast {name}" if side < 0 else f"Cast {name} {arrow_}"
                 b = self.widgets.add(Button((x, y, 104, 40), label,
-                                            lambda p=pier, s=side: self.cast(p, s), size=15))
+                                            lambda p=pier, s=side: self.cast(p, s), size=15,
+                                            help=HELP["cast"]))
                 self.cast_btns[(pier, side)] = b
                 x += 108
         x += 6
         for pier, name in ((0, "A"), (1, "B")):
             self.widgets.add(Button((x, y, 116, 40), f"Tie-down {name}", lambda p=pier: self.tie(p),
-                                    size=14, tooltip=f"Temporary high-strength anchor cables: +"
-                                                     f"{self.bridge.cfg.tie_down_capacity/1e6:.0f} MN*m "
-                                                     f"resistance for {economy.format_rs(TIE_DOWN_RS)}"))
+                                    size=14, help=HELP["tie"]))
             x += 120
-        self.widgets.add(Button((x, y, 80, 40), "Undo", self.undo, size=14))
+        self.widgets.add(Button((x, y, 80, 40), "Undo", self.undo, size=14, help=HELP["undo_cast"]))
         x += 86
         self.stitch_btn = self.widgets.add(Button((x, y, 190, 40), "STITCH & POST-TENSION",
-                                                  self.stitch, size=14))
+                                                  self.stitch, size=14, help=HELP["stitch"]))
         x += 196
         self.truck_btn = self.widgets.add(Button((x, y, WIDTH - x - 10, 40), "TRUCK TEST",
                                                  self.start_truck, colour=(40, 110, 70),
-                                                 hotkey=pygame.K_SPACE))
+                                                 hotkey=pygame.K_SPACE, help=HELP["truck_test"]))
 
     def cost(self):
         return construction_cost(self.bridge)

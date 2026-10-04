@@ -13,6 +13,7 @@ from engine.vehicles import G, max_climbable_grade
 
 from .. import sound
 from ..common import Card, LevelScene
+from ..help_texts import HELP
 from ..ui import (ACCENT, BAD, BG_DARK, BOTTOM_BAR, CYAN, GOOD, HEIGHT, LINE, MUTED, PANEL_EDGE,
                   TEXT, TOP_BAR, WARN, WIDTH, Button, Slider, WidgetGroup, blueprint_background,
                   panel, text)
@@ -38,10 +39,10 @@ class LogisticsScene(LevelScene):
         self._build()
         y = HEIGHT - BOTTOM_BAR + 9
         self.widgets.add(Button((10, y, 200, 40), "Optimizer: show all plans", self.optimize, size=14,
-                                tooltip="Brute-force search (a stand-in for linear programming) over "
-                                        "every split and fleet size."))
+                                help=HELP["optimizer"]))
         self.run_btn = self.widgets.add(Button((216, y, WIDTH - 226, 40), "SHIP IT", self.toggle_run,
-                                               hotkey=pygame.K_SPACE, colour=(40, 110, 70)))
+                                               hotkey=pygame.K_SPACE, colour=(40, 110, 70),
+                                               help=HELP["ship"]))
         self.result = evaluate(self.plan)
         self.show_panel()
 

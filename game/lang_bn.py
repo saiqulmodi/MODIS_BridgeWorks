@@ -564,6 +564,9 @@ EXACT.update({
     "Smart grid capacity (MW)": "স্মার্ট গ্রিডের ক্ষমতা (MW)",
 })
 
+from .lang_bn_help import HELP_BN  # noqa: E402  (bottom-bar IDEA help)
+EXACT.update(HELP_BN)
+
 # Slider and value labels ("Label: 12")
 LABELS = {
     "Cross-section area A (cm^2)": "প্রস্থচ্ছেদের ক্ষেত্রফল A (cm^2)", "TMD mass ratio mu": "TMD ভরের অনুপাত mu",

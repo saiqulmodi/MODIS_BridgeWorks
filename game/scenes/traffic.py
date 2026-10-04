@@ -11,6 +11,7 @@ from engine.traffic import (TrafficSim, critical_density, greenshields_flow, max
 
 from .. import sound
 from ..common import Card, LevelScene
+from ..help_texts import HELP, JUNCTION
 from ..ui import (ACCENT, BAD, BG_DARK, BOTTOM_BAR, CYAN, GOOD, HEIGHT, LINE, MUTED, PANEL_EDGE,
                   TEXT, TOP_BAR, WARN, WIDTH, Button, Cycler, Slider, blueprint_background,
                   mini_chart, panel, text)
@@ -50,10 +51,13 @@ class TrafficScene(LevelScene):
         y = HEIGHT - BOTTOM_BAR + 9
         self.mode_cycler = self.widgets.add(Cycler((10, y, 300, 40), "Junction: ",
                                                    [self._label(m) for m in MODES],
-                                                   on_change=self._mode, size=15))
-        self.speed_btn = self.widgets.add(Button((316, y, 60, 40), "x8", self.cycle_speed, size=15))
+                                                   on_change=self._mode, size=15,
+                                                   help=lambda: JUNCTION[MODES[self.mode_cycler.index]]))
+        self.speed_btn = self.widgets.add(Button((316, y, 60, 40), "x8", self.cycle_speed, size=15,
+                                                 help=HELP["speed"]))
         self.run_btn = self.widgets.add(Button((382, y, WIDTH - 392, 40), "RUN RUSH HOUR",
-                                               self.toggle_run, hotkey=pygame.K_SPACE, colour=(40, 110, 70)))
+                                               self.toggle_run, hotkey=pygame.K_SPACE, colour=(40, 110, 70),
+                                               help=HELP["run_traffic"]))
         self.show_panel()
 
     def _label(self, m):
