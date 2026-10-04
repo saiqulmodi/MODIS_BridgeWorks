@@ -26,6 +26,11 @@ UI = {
     "found": ("{n} answers for '{q}'", "'{q}'-এর জন্য {n}টি উত্তর"),
     "none": ("Nothing found for '{q}'. Try a shorter word.",
              "'{q}'-এর জন্য কিছু পাওয়া যায়নি। ছোট শব্দ চেষ্টা করো।"),
+    "reward": ("Reading an answer to the end earns a {g} Civil Grant (once per answer).",
+               "একটি উত্তর শেষ পর্যন্ত পড়লে {g} সিভিল অনুদান (প্রতি উত্তরে একবার)।"),
+    "paid": ("+{g} Civil Grant for reading {t}", "{t} পড়ার জন্য +{g} সিভিল অনুদান"),
+    "read": ("read", "পড়া"),
+    "wallet": ("Civil Grants: {w}", "সিভিল অনুদান: {w}"),
     "keys": ("Mouse wheel, arrow keys or Page Up / Down to scroll. Type to search, Backspace to "
              "delete, Esc to clear the search or close.",
              "স্ক্রল করতে মাউসের চাকা, তীর-চাবি বা Page Up / Down। খুঁজতে লেখো, মুছতে Backspace, "
@@ -89,6 +94,9 @@ class HelpOverlay:
         self.layout = []
         self.total_h = 0
         self.anchors = {}
+        self.spans = {}
+        self.read_t = {}              # seconds each answer has been fully on screen
+        self.toast, self.toast_t = "", 0.0
         self.highlight = None
         self.drag = False
         self._key = None
@@ -166,6 +174,7 @@ class HelpOverlay:
         self._key = key
         w = self.content.w - 16
         rows, y, anchors = [], 0, {}
+        self.spans = {}
         hits = self.matches()
         if self.query.strip():
             msg = ui("found" if hits else "none").format(n=len(hits), q=self.query.strip())
@@ -198,6 +207,7 @@ class HelpOverlay:
             for line in _wrap(fa, a, w - tag_w):
                 rows.append((y, fa, line, TEXT, tag_w))
                 y += fa.get_linesize() + 1
+            self.spans[(s, k)] = (anchors[(s, k)], y)
             y += 18
             rows.append((y - 10, None, "", PANEL_EDGE, 0))       # separator
         self.layout = [[ry, f, s, c, x, None] for ry, f, s, c, x in rows]
@@ -274,7 +284,26 @@ class HelpOverlay:
         return True
 
     def update(self, dt):
-        pass
+        """Pay the reading reward for every answer that stays fully on screen long enough."""
+        from engine.academy_data import HELP_READ_REWARD
+        from .academy_ui import reading_seconds
+        self._build()
+        if self.toast_t > 0:
+            self.toast_t -= dt
+        save = self.app.save
+        top, bottom = self.scroll, self.scroll + self.content.h
+        for (s, k), (y0, y1) in self.spans.items():
+            key = f"{SECTIONS[s].key}:{k}"
+            if y0 < top or y1 > bottom or key in save.academy["read_help"]:
+                continue
+            self.read_t[key] = self.read_t.get(key, 0.0) + dt
+            if self.read_t[key] >= reading_seconds(SECTIONS[s].items[k].a(i18n.lang())):
+                if save.help_read(key, HELP_READ_REWARD):
+                    from engine.economy import format_rs
+                    self.toast = ui("paid").format(g=format_rs(HELP_READ_REWARD),
+                                                  t=SECTIONS[s].tag(k, i18n.lang()))
+                    self.toast_t = 3.0
+                    sound.play("kaching")
 
     # --- drawing -------------------------------------------------------------------------------
     def draw(self, surface):
@@ -314,6 +343,16 @@ class HelpOverlay:
         for line in _wrap(fk, keys, sr.w):
             surface.blit(fk.render(line, True, MUTED), (sr.x + 2, ky))
             ky += fk.get_linesize()
+        from engine.academy_data import HELP_READ_REWARD
+        from engine.economy import format_rs
+        rew = ui("reward").format(g=format_rs(HELP_READ_REWARD))
+        fw = font_for(rew, 14, True)
+        ky += 10
+        for line in _wrap(fw, rew, sr.w):
+            surface.blit(fw.render(line, True, ACCENT), (sr.x + 2, ky))
+            ky += fw.get_linesize()
+        wal = ui("wallet").format(w=format_rs(self.app.save.wallet))
+        surface.blit(fw.render(wal, True, (70, 210, 110)), (sr.x + 2, ky + 4))
         # content
         c = self.content
         pygame.draw.rect(surface, BG_DARK, c.inflate(12, 8), border_radius=10)
@@ -334,7 +373,18 @@ class HelpOverlay:
             if img is None:
                 img = row[5] = f.render(s, True, col)
             surface.blit(img, (c.x + x, sy))
+        read = set(self.app.save.academy["read_help"])
+        fr = font_for(ui("read"), 12, True)
+        for (s, k), y0 in self.anchors.items():
+            sy = c.y + y0 - self.scroll + 22
+            if f"{SECTIONS[s].key}:{k}" in read and c.y - 20 < sy < c.bottom:
+                surface.blit(fr.render(ui("read"), True, (70, 210, 110)), (c.x, sy))
         surface.set_clip(None)
+        if self.toast_t > 0 and self.toast:
+            ft = font_for(self.toast, 16, True)
+            tw = ft.size(self.toast)[0] + 30
+            tr_ = panel(surface, (c.centerx - tw // 2, c.bottom - 50, tw, 36), BG_DARK, ACCENT, 8)
+            surface.blit(ft.render(self.toast, True, ACCENT), (tr_.x + 15, tr_.y + 7))
         thumb = self._thumb()
         if thumb:
             pygame.draw.rect(surface, PANEL_EDGE, self.track, border_radius=4)

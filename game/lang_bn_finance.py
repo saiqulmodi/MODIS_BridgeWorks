@@ -7,6 +7,15 @@ TOLL_NAMES = {"Bridge toll": "সেতুর টোল", "Freight charge": "ম
 UNITS = {"vehicle": "গাড়ি", "tonne": "টন", "train": "ট্রেন", "car": "গাড়ি", "passenger": "যাত্রী"}
 
 FINANCE_BN = {
+    # BridgeWorks Academy: Civil Grants
+    "CIVIL GRANT COVERS IT": "সিভিল অনুদানেই হয়ে যায়", "Civil Grant (Academy)": "সিভিল অনুদান (একাডেমি)",
+    "Use grant & build": "অনুদান নাও ও নির্মাণ করো",
+    "Academy: 75% salvage": "একাডেমি: 75% উদ্ধার",
+    "Answer one BridgeWorks Academy question correctly to recover 75% instead of 30%.":
+        "একাডেমির একটি প্রশ্নের সঠিক উত্তর দিলে 30%-এর বদলে 75% ফেরত পাবে।",
+    "BridgeWorks Academy (A)": "ব্রিজওয়ার্কস একাডেমি (A)",
+    "Class 1-12 quizzes in 6 subjects: earn Civil Grants for your bridges":
+        "শ্রেণি 1-12-এর 6 বিষয়ের কুইজ: তোমার সেতুর জন্য সিভিল অনুদান অর্জন করো",
     "Finance": "অর্থ", "Business plan: tolls, loan, payback.": "ব্যবসার পরিকল্পনা: টোল, ঋণ, খরচ ফেরত।",
     "BANK LOAN NEEDED": "ব্যাংক ঋণ দরকার", "BUSINESS PLAN": "ব্যবসার পরিকল্পনা",
     "Your budget": "তোমার বাজেট", "Shortfall = loans": "ঘাটতি = ঋণ",
@@ -32,6 +41,9 @@ FINANCE_BN = {
 }
 
 FINANCE_PATTERNS = [
+    (r"Civil Grant committed: (Rs .+)", r"সিভিল অনুদান নির্ধারিত: "),
+    (r"Use Civil Grants: ON \(wallet (.+)\)", r"সিভিল অনুদান ব্যবহার: চালু (তহবিল )"),
+    (r"Use Civil Grants: OFF \(wallet (.+)\)", r"সিভিল অনুদান ব্যবহার: বন্ধ (তহবিল )"),
     (r"= (Rs .+?) x 0\.02 / \(1 - 1\.02\^-10\) = (Rs .+?) a year", r"= \1 x 0.02 / (1 - 1.02^-10) = বছরে \2"),
     (r"(.+?): (Rs .+?) per (\w+), about ([\d,]+) a day",
      lambda m: f"{TOLL_NAMES.get(m.group(1), m.group(1))}: প্রতি {UNITS.get(m.group(3), m.group(3))} "

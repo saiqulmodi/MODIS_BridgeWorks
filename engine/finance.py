@@ -3,6 +3,8 @@
     Loan instalment (equal yearly payments):   A = P r / (1 - (1 + r)^-n)
     Net operating income (year y):             NOI = toll income - upkeep
     Debt-service coverage ratio:               DSCR = NOI / A
+    Civil Grants (earned in the BridgeWorks Academy) cover the shortfall first: free money,
+    never repaid, so they shrink the loans.
     The bank lends only if DSCR >= 1.5 - toll income must beat the loan payment
     with a 50% margin. Traffic grows every year, so the business grows too.
     A government subsidised loan (0.5%, 15 years, up to half the budget) can take the
@@ -92,12 +94,13 @@ class Plan:
 
 
 def business_plan(level_num, budget, build_cost, toll_factor=1.0, efficiency=1.0,
-                  rate=LOAN_RATE, years=LOAN_YEARS, horizon=HORIZON, govt=False):
+                  rate=LOAN_RATE, years=LOAN_YEARS, horizon=HORIZON, govt=False, grant=0.0):
     """Cash-flow plan for a project: own funds first, then loans for anything above the budget.
     govt=True: a subsidised government loan covers up to GOVT_CAP_SHARE of the budget first,
-    and the bank lends the rest."""
+    and the bank lends the rest. grant: Civil Grants available to cover the shortfall first."""
     own = min(build_cost, budget)
-    loan = max(0.0, build_cost - budget)
+    grant_used = max(0.0, min(grant, build_cost - budget))
+    loan = max(0.0, build_cost - budget - grant_used)
     govt_loan = min(loan, GOVT_CAP_SHARE * budget) if govt else 0.0
     bank_loan = loan - govt_loan
     loans = [(bank_loan, rate, years), (govt_loan, GOVT_RATE, GOVT_YEARS)]
@@ -133,6 +136,7 @@ def business_plan(level_num, budget, build_cost, toll_factor=1.0, efficiency=1.0
     plan = Plan(build_cost, own, loan, A, income1, upkeep, coverage, viable, payback, repaid,
                 cum, total_interest, rows, users_per_day(level_num, budget, toll_factor), toll_factor)
     plan.govt_loan, plan.bank_loan = govt_loan, bank_loan
+    plan.grant_used = grant_used
     plan.govt_payment, plan.bank_payment = pays[1], pays[0]
     # what the same money would have cost entirely from the bank
     bank_only_interest = annuity_payment(loan, rate, years) * years - loan

@@ -43,6 +43,9 @@ class MenuScene:
         self.widgets.add(Button((222, 150, 250, 36), "Help: how to play (H)", self.open_help,
                                 hotkey=pygame.K_h, size=16,
                                 tooltip="A guide for new players and 200 questions & answers"))
+        self.widgets.add(Button((482, 150, 250, 36), "BridgeWorks Academy (A)", app.to_academy,
+                                hotkey=pygame.K_a, size=16, colour=(40, 90, 70),
+                                tooltip="Class 1-12 quizzes in 6 subjects: earn Civil Grants for your bridges"))
         self.help = None
         self.hover = None
 
@@ -75,6 +78,8 @@ class MenuScene:
 
     def update(self, dt):
         self.t += dt
+        if self.help is not None:
+            self.help.update(dt)
         self.lang_btn.label = language_button_label()
 
     def draw(self, s):

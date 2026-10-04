@@ -226,9 +226,17 @@ class BlackBox(Overlay):
             self.widgets.add(Button((r.x + 16, r.y + 150 + k * 34, 470, 30), o,
                                     lambda o=o: self.answer(o), size=14))
         bx = r.right - 250
-        self.widgets.add(Button((bx, r.bottom - 132, 234, 36),
-                                f"Edit & retry (+{economy.format_rs(report.salvage)})",
-                                self.retry, size=15, hotkey=pygame.K_r))
+        self.retry_btn = self.widgets.add(Button((bx, r.bottom - 132, 234, 36),
+                                                 f"Edit & retry (+{economy.format_rs(report.salvage)})",
+                                                 self.retry, size=15, hotkey=pygame.K_r))
+        self.challenge_done = False
+        from .academy_ui import pick_question
+        self.challenge_q = pick_question(scene.app.save) if report.build_cost > 0 else None
+        self.challenge_btn = self.widgets.add(Button((bx, r.y + 30, 234, 36), "Academy: 75% salvage",
+                                                     self.challenge, size=14, colour=(40, 90, 70),
+                                                     tooltip="Answer one BridgeWorks Academy question "
+                                                             "correctly to recover 75% instead of 30%."))
+        self.challenge_btn.visible = self.challenge_q is not None
         alt = scene.level.alternate
         if alt:
             self.widgets.add(Button((bx, r.bottom - 90, 234, 36), f"Alternate: {alt['name']}",
@@ -249,6 +257,16 @@ class BlackBox(Overlay):
         else:
             self.feedback = "Not quite - look at the formula and the chart again."
             sound.play("click")
+
+    def challenge(self):
+        if self.challenge_done or self.challenge_q is None:
+            return
+        from .academy_ui import AcademyChallenge
+        self.scene.overlay = AcademyChallenge(self.scene, self, self.challenge_q)
+
+    def update(self, dt):
+        self.retry_btn.label = f"Edit & retry (+{economy.format_rs(self.report.salvage)})"
+        self.challenge_btn.enabled = not self.challenge_done
 
     def retry(self):
         self.scene.add_salvage(self.report.salvage)
@@ -396,6 +414,8 @@ class LevelScene:
         self.loan = 0.0              # bank loan taken for the current design
         self.toll_factor = 1.0       # toll rate as a multiple of the standard rate
         self.govt_loan = False       # use the government subsidised loan first
+        self.use_grant = True        # let Academy Civil Grants cover a shortfall first
+        self.grant_used = 0.0        # Civil Grant committed to the current build
         self.demo_active = False
         self.demo_snapshot = None
 
@@ -424,6 +444,9 @@ class LevelScene:
 
     def finance_gate(self, start):
         """Before building: inside the budget -> go; over it -> the bank-loan business plan first."""
+        if self.grant_used:          # a grant only stays spent on a success: give it back first
+            self.app.save.refund_grant(self.grant_used)
+            self.grant_used = 0.0
         if self.demo_active or self.cost() <= self.budget:
             self.loan = 0.0
             start()
@@ -539,7 +562,7 @@ class LevelScene:
             sound.play("kaching")
             self.overlay = DemoDone(self, worked=True)
             return
-        funds = self.budget + self.loan
+        funds = self.budget + self.loan + self.grant_used
         stars = economy.star_rating(True, cost, self.level.par_cost, funds, fs, extra_goal)
         if cost > funds + 1e-6:
             report = FailureReport("budget", "OVER BUDGET", f"Cost {economy.format_rs(cost)} > budget "
@@ -560,6 +583,8 @@ class LevelScene:
             all_lines.append(("Factor of safety", f"{fs:.2f}  ({grade})",
                               GOOD if grade == "OPTIMAL" else WARN))
             verdict = verdict or why
+        if plan.grant_used:
+            all_lines.append(("Civil Grant (Academy)", economy.format_rs(plan.grant_used), GOOD))
         if plan.govt_loan:
             all_lines.append(("Govt loan (0.5%, 15 yr)", f"{economy.format_rs(plan.govt_loan)}, "
                               f"{economy.format_rs(plan.govt_payment)} a year", GOOD))
@@ -575,6 +600,7 @@ class LevelScene:
         if penalty:
             all_lines.append(("Over-engineering penalty", economy.format_rs(penalty), BAD))
         all_lines += lines or []
+        self.grant_used = 0.0         # the grant is now spent on this bridge for good
         self.overlay = Results(self, dict(stars=stars, lines=all_lines, exp=exp, verdict=verdict,
                                           celebrate=cost <= self.level.par_cost,
                                           attempts=self.app.save.level(self.level.num)["attempts"]))

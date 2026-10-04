@@ -11,10 +11,18 @@ from .ui import (ACCENT, BAD, BG_DARK, CYAN, GOOD, HEIGHT, MUTED, PANEL, PANEL_E
 rs = economy.format_rs
 
 
+def grant_for(scene):
+    """Civil Grants this design may use: what was already committed to it, else the wallet."""
+    if scene.grant_used:
+        return scene.grant_used
+    return scene.app.save.wallet if scene.use_grant else 0.0
+
+
 def plan_for(scene, cost=None):
     cost = scene.cost() if cost is None else cost
     return F.business_plan(scene.level.num, scene.budget, cost, scene.toll_factor,
-                           getattr(scene, "toll_efficiency", 1.0), govt=scene.govt_loan)
+                           getattr(scene, "toll_efficiency", 1.0), govt=scene.govt_loan,
+                           grant=grant_for(scene))
 
 
 class FinanceOverlay:
@@ -29,14 +37,17 @@ class FinanceOverlay:
         self.rect = pygame.Rect(60, 52, WIDTH - 120, HEIGHT - 96)
         r = self.rect
         self.widgets = WidgetGroup()
-        self.chart = pygame.Rect(r.x + 570, r.y + 56, r.w - 594, r.h - 270)
+        self.chart = pygame.Rect(r.x + 570, r.y + 56, r.w - 594, r.h - 310)
         cx = self.chart.x
-        self.slider = self.widgets.add(Slider((cx, self.chart.bottom + 112, self.chart.w, 40),
+        self.slider = self.widgets.add(Slider((cx, self.chart.bottom + 152, self.chart.w, 40),
                                               "Toll rate (x standard)", F.TOLL_RANGE[0], F.TOLL_RANGE[1],
                                               scene.toll_factor, self._set_toll, "{:.2f}", 0.05))
-        self.govt_btn = self.widgets.add(Button((cx, self.chart.bottom + 36, self.chart.w, 34), "",
+        self.govt_btn = self.widgets.add(Button((cx, self.chart.bottom + 72, self.chart.w, 34), "",
                                                 self._toggle_govt, toggle=True, active=scene.govt_loan,
                                                 size=14))
+        self.grant_btn = self.widgets.add(Button((cx, self.chart.bottom + 32, self.chart.w, 34), "",
+                                                 self._toggle_grant, toggle=True, active=scene.use_grant,
+                                                 size=14))
         if mode == "loan":
             self.take_btn = self.widgets.add(Button((r.x + 24, r.bottom - 60, 300, 44), "Take loan & build",
                                                     self.accept, size=16, colour=(40, 110, 70),
@@ -53,6 +64,10 @@ class FinanceOverlay:
         self.scene.govt_loan = self.govt_btn.active
         self.plan = plan_for(self.scene)
 
+    def _toggle_grant(self):
+        self.scene.use_grant = self.grant_btn.active
+        self.plan = plan_for(self.scene)
+
     def _set_toll(self, v):
         self.scene.toll_factor = v
         self.plan = plan_for(self.scene)
@@ -62,6 +77,8 @@ class FinanceOverlay:
             sound.play("click")
             return
         self.scene.loan = self.plan.loan
+        if self.plan.grant_used and not self.scene.grant_used:
+            self.scene.grant_used = self.scene.app.save.spend_grant(self.plan.grant_used)
         self.scene.overlay = None
         sound.play("kaching")
         if self.on_accept:
@@ -77,8 +94,17 @@ class FinanceOverlay:
         self.govt_btn.label = ("Govt subsidised loan: ON (0.5%, 15 yr, up to half the budget)"
                                if self.scene.govt_loan else
                                "Govt subsidised loan: OFF - click to apply (0.5%, 15 yr)")
+        w = self.scene.app.save.wallet
+        if self.scene.grant_used:
+            self.grant_btn.label = f"Civil Grant committed: {rs(self.scene.grant_used)}"
+        elif self.scene.use_grant:
+            self.grant_btn.label = f"Use Civil Grants: ON (wallet {rs(w)})"
+        else:
+            self.grant_btn.label = f"Use Civil Grants: OFF (wallet {rs(w)})"
+        self.grant_btn.enabled = not self.scene.grant_used
         if self.take_btn is not None:
             self.take_btn.enabled = self.plan.viable
+            self.take_btn.label = "Take loan & build" if self.plan.loan else "Use grant & build"
 
     def draw(self, surface):
         veil = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
@@ -87,11 +113,14 @@ class FinanceOverlay:
         p = self.plan
         sc = self.scene
         r = panel(surface, self.rect, PANEL, ACCENT if self.mode == "loan" else CYAN, 14)
-        title = "BANK LOAN NEEDED" if self.mode == "loan" and p.loan > 0 else "BUSINESS PLAN"
+        title = ("BANK LOAN NEEDED" if self.mode == "loan" and p.loan > 0 else
+                 "CIVIL GRANT COVERS IT" if self.mode == "loan" and p.grant_used else "BUSINESS PLAN")
         text(surface, title, (r.x + 24, r.y + 14), 26, TEXT, bold=True)
         name, rate, unit = F.TOLLS[sc.level.num]
         x, y, w = r.x + 24, r.y + 56, 520
         rows = [("Build cost", rs(p.build_cost), None), ("Your budget", rs(sc.budget), None)]
+        if p.grant_used:
+            rows.append(("Civil Grant (Academy)", rs(p.grant_used), GOOD))
         if p.loan:
             rows.append(("Shortfall = loans", rs(p.loan), WARN))
         for label, value, col in rows:
@@ -136,7 +165,7 @@ class FinanceOverlay:
         text_block(surface, f"Profit after {F.HORIZON} years: {rs(p.profit_horizon)} - traffic grows "
                             f"6% a year, so the business keeps growing", (x, y + 2), w, 15, ACCENT)
         text_block(surface, "Higher tolls earn more per user, but some users stay away "
-                            "(users fall as 1 / sqrt(toll)).", (self.chart.x, self.chart.bottom + 74),
+                            "(users fall as 1 / sqrt(toll)).", (self.chart.x, self.chart.bottom + 112),
                    self.chart.w, 12, MUTED)
         # chart
         chart = self.chart

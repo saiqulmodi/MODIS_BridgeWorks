@@ -36,6 +36,71 @@ class Save:
         lv["attempts"] = lv["attempts"][-20:]
         self.write()
 
+    # --- BridgeWorks Academy: Civil Grant wallet and what has been answered / read -------------
+    @property
+    def academy(self):
+        a = self.data.setdefault("academy", {})
+        a.setdefault("wallet", 0.0)          # Civil Grants not yet spent, Rs
+        a.setdefault("earned", 0.0)          # all grants ever earned, Rs
+        a.setdefault("class", 5)             # the class the student studies in
+        a.setdefault("answered", {})         # question id -> True if right on the first try
+        a.setdefault("explained", [])        # ids whose explanation earned the reading bonus
+        a.setdefault("read_help", [])        # Help answers read to the end ("start:3", "truss:12")
+        return a
+
+    @property
+    def wallet(self):
+        return self.academy["wallet"]
+
+    def add_grant(self, amount):
+        a = self.academy
+        a["wallet"] += amount
+        a["earned"] += amount
+        self.write()
+
+    def spend_grant(self, amount):
+        a = self.academy
+        used = max(0.0, min(amount, a["wallet"]))
+        a["wallet"] -= used
+        self.write()
+        return used
+
+    def refund_grant(self, amount):
+        """A grant committed to a build that did not succeed goes back to the wallet."""
+        self.academy["wallet"] += amount
+        self.write()
+
+    def answer_question(self, qid, correct, reward):
+        """First attempt at a question decides its grant; later attempts are practice.
+        Returns the grant paid now."""
+        a = self.academy
+        key = str(qid)
+        if key in a["answered"]:
+            return 0.0
+        a["answered"][key] = bool(correct)
+        paid = reward if correct else 0.0
+        if paid:
+            self.add_grant(paid)
+        else:
+            self.write()
+        return paid
+
+    def explanation_read(self, qid, bonus):
+        a = self.academy
+        if qid in a["explained"]:
+            return 0.0
+        a["explained"].append(qid)
+        self.add_grant(bonus)
+        return bonus
+
+    def help_read(self, key, reward):
+        a = self.academy
+        if key in a["read_help"]:
+            return 0.0
+        a["read_help"].append(key)
+        self.add_grant(reward)
+        return reward
+
     def unlocked(self, num):
         if UNLOCK_ALL or num == 1:
             return True

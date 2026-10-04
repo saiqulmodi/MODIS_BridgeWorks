@@ -340,4 +340,32 @@ def run_all_flows():
     _draw(app)
     app.scene.help.close()
     _draw(app)
+    # --- BridgeWorks Academy: a question, its answer, the Daily 5 and the Black Box challenge -------
+    app.to_academy()
+    sc = app.scene
+    sc.pick_class(1)
+    sc.pick_subject("physics")
+    sc.update(1 / 60)
+    _draw(app)
+    sc.card.choose(sc.card.r["correct_idx"])
+    sc.update(1 / 60)
+    _draw(app)
+    sc.pick_subject("daily")
+    sc.update(1 / 60)
+    _draw(app)
+    app.start_level(1)
+    sc = app.scene
+    sc.overlay = None
+    from engine.failure import FailureReport
+    sc.fail(FailureReport("yield", "STRUCTURE FOLDED UP", "sigma = N / A", build_cost=100000))
+    bb = sc.overlay
+    bb.update(0)
+    _draw(app)
+    bb.challenge()
+    _draw(app)
+    sc.overlay.card.choose(0)
+    sc.overlay.update(0)
+    _draw(app)
+    app.to_menu()
+    _draw(app)
     return app

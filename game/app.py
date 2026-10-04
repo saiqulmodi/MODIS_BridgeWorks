@@ -45,6 +45,10 @@ class App:
         from .scenes.menu import MenuScene
         self.scene = MenuScene(self)
 
+    def to_academy(self):
+        from .scenes.academy import AcademyScene
+        self.scene = AcademyScene(self)
+
     def start_level(self, num):
         self.scene = scene_for(self, get(num))
 

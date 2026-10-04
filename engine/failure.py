@@ -13,6 +13,7 @@ EXP_AUTOPSY = 10          # for opening the investigation and reading it
 EXP_DIAGNOSIS = 50        # correct diagnosis on the first try
 EXP_ALTERNATE = 30        # completing a level by its alternate route
 SALVAGE_FRACTION = 0.30   # share of the failed build cost refunded as salvage credit
+ACADEMY_SALVAGE_FRACTION = 0.75   # ... after a correct BridgeWorks Academy challenge answer
 
 # kind -> (correct diagnosis, short lesson)
 CAUSES = {
@@ -75,10 +76,11 @@ class FailureReport:
     diagnosed: bool = False
     diagnosis_attempts: int = 0
     options: list = None
+    academy_bonus: bool = False       # Academy challenge answered correctly
 
     @property
     def salvage(self):
-        return SALVAGE_FRACTION * self.build_cost
+        return (ACADEMY_SALVAGE_FRACTION if self.academy_bonus else SALVAGE_FRACTION) * self.build_cost
 
     @property
     def correct_cause(self):
