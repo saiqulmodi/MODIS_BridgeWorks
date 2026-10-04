@@ -4,13 +4,17 @@ A hard-physics infrastructure sandbox: **Calculate, Construct, Route.**
 Every result comes from real formulas, and a built-in scientific calculator shows them with
 your numbers plugged in. Built from the 10-prompt design brief in `docs/PROMPTS_10_PHASES.md`.
 
+## Play in the browser
+
+https://saiqulmodi.github.io/MODIS_BridgeWorks/ - click once to start (browsers need a click before a game may play sound). The first load downloads about 15 MB (Python + numpy) and takes 10-20 seconds. Use the full-screen button at the bottom right, or F11.
+
 ## Run it
 
 ```
 venv\Scripts\python.exe main.py
 ```
 
-Esc returns to the level menu. C toggles the calculator. F1 re-opens the briefing.
+Esc returns to the level menu. C toggles the calculator. F1 re-opens the briefing. **F11** (or the menu's Full screen button) toggles full screen.
 **F2 switches between English and Bengali (বাংলা)** - also the button on the menu and in every level's top bar. The choice is remembered.
 **IDEA hints:** hover over or click any button on the bottom bar and an IDEA box explains what it does, with a tip.
 **Demo:** the Demo button at the top of each level plays a working solution. It costs 0.5% of that level's budget - a warning shows the old and new budget before anything is charged. Replays are free; demos earn no stars or EXP.

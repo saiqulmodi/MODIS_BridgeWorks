@@ -63,8 +63,8 @@ def font(size=18, bold=False, mono=False, bengali=False):
                     f.set_script("Beng")        # proper joining of Bengali letters
                 except (AttributeError, pygame.error):
                     pass
-        elif WEB and not mono:
-            # the browser has no Segoe UI: use the bundled font for a similar look
+        elif WEB:
+            # the browser has no Segoe UI / Consolas: use the bundled font for a similar look
             f = _load(BUNDLED_BOLD if bold else BUNDLED_REGULAR, size)
         if f is None:
             f = pygame.font.SysFont("consolas" if mono else "segoeui", size, bold=bold)

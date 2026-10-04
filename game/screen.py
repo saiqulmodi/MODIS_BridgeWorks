@@ -56,13 +56,14 @@ def is_fullscreen():
         return False
 
 
-_BUTTON_JS = """
+# ASCII only, with \u escapes: non-ASCII text gets garbled on its way into the page.
+_BUTTON_JS = r"""
 (function () {
   if (document.getElementById('bw-fullscreen')) return;
   var b = document.createElement('button');
   b.id = 'bw-fullscreen';
-  b.textContent = '⛶';
-  b.title = 'Full screen / পূর্ণ পর্দা';
+  b.textContent = '\u26F6';
+  b.title = 'Full screen / \u09AA\u09C2\u09B0\u09CD\u09A3 \u09AA\u09B0\u09CD\u09A6\u09BE';
   b.style.cssText = 'position:fixed;right:10px;bottom:10px;z-index:9999;width:44px;height:44px;' +
     'font-size:24px;border-radius:8px;border:1px solid #4670a5;background:#16304f;color:#e6eefa;' +
     'cursor:pointer;opacity:0.85';
