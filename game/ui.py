@@ -1,5 +1,7 @@
 """Shared look and simple widgets (Prompt 10): blueprint style, big touch-friendly targets."""
 import math
+import os
+import sys
 
 import pygame
 
@@ -31,7 +33,18 @@ CYAN = (90, 210, 240)
 STATUS = {"green": GOOD, "yellow": WARN, "red": BAD, "failed": (255, 40, 40)}
 
 _fonts = {}
-BENGALI_FONT = r"C:\Windows\Fonts\Nirmala.ttc"
+WEB = sys.platform == "emscripten"            # running in the browser (pygbag / WebAssembly)
+FONT_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "assets", "fonts")
+WINDOWS_BENGALI = r"C:\Windows\Fonts\Nirmala.ttc"
+BUNDLED_REGULAR = os.path.join(FONT_DIR, "HindSiliguri-Regular.ttf")    # Bengali + Latin, SIL OFL
+BUNDLED_BOLD = os.path.join(FONT_DIR, "HindSiliguri-SemiBold.ttf")
+
+
+def _load(path, size):
+    try:
+        return pygame.font.Font(path, size)
+    except (OSError, FileNotFoundError, pygame.error):
+        return None
 
 
 def font(size=18, bold=False, mono=False, bengali=False):
@@ -39,12 +52,20 @@ def font(size=18, bold=False, mono=False, bengali=False):
     if key not in _fonts:
         f = None
         if bengali:
-            try:
-                f = pygame.font.Font(BENGALI_FONT, size)
-                f.set_script("Beng")        # proper joining of Bengali letters
-                f.bold = bold
-            except (OSError, FileNotFoundError, pygame.error, AttributeError):
-                f = None
+            if not WEB and os.path.exists(WINDOWS_BENGALI):
+                f = _load(WINDOWS_BENGALI, size)
+                if f is not None:
+                    f.bold = bold
+            if f is None:
+                f = _load(BUNDLED_BOLD if bold else BUNDLED_REGULAR, size)
+            if f is not None:
+                try:
+                    f.set_script("Beng")        # proper joining of Bengali letters
+                except (AttributeError, pygame.error):
+                    pass
+        elif WEB and not mono:
+            # the browser has no Segoe UI: use the bundled font for a similar look
+            f = _load(BUNDLED_BOLD if bold else BUNDLED_REGULAR, size)
         if f is None:
             f = pygame.font.SysFont("consolas" if mono else "segoeui", size, bold=bold)
         _fonts[key] = f

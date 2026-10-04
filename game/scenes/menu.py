@@ -36,6 +36,10 @@ class MenuScene:
                                                 hotkey=pygame.K_F2, size=16,
                                                 tooltip="English / Bengali (F2)"))
         self.lang_btn.label = language_button_label()
+        from .. import screen
+        self.widgets.add(Button((WIDTH - 230, 150 - 2, 190, 36), "Full screen (F11)",
+                                screen.toggle_fullscreen, size=15,
+                                tooltip="Fill the whole screen; press F11 again to leave"))
         self.hover = None
 
     def handle(self, event):
@@ -73,7 +77,7 @@ class MenuScene:
         bob = 4 * math.sin(self.t * 2)
         text(s, "MODIS BridgeWorks", (560, 40 + bob), 54, TEXT, bold=True)
         text(s, "Calculate. Construct. Route.  -  a hard-physics engineering sandbox", (564, 112), 18, CYAN)
-        text(s, f"EXP {self.app.save.exp}", (WIDTH - 40, 150), 20, ACCENT, bold=True, anchor="topright")
+        text(s, f"EXP {self.app.save.exp}", (WIDTH - 250, 154), 20, ACCENT, bold=True, anchor="topright")
         for r, lv in self.cards:
             prog = self.app.save.level(lv.num)
             unlocked = self.app.save.unlocked(lv.num)

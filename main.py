@@ -1,13 +1,19 @@
 """MODIS BridgeWorks - a hard-physics infrastructure sandbox.
 
-Run:  venv\\Scripts\\python.exe main.py
+Desktop:  venv\\Scripts\\python.exe main.py
+Browser:  built with pygbag (see README) and served from docs/ on GitHub Pages.
 """
+import asyncio
+
+import numpy  # noqa: F401  (imported here so pygbag bundles it for the browser)
+import pygame  # noqa: F401
+
 from game.app import App
 
 
-def main():
-    App().run()
+async def main():
+    await App().run()
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
