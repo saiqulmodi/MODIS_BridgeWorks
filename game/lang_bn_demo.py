@@ -39,7 +39,7 @@ DEMO_BN = {
 
 DEMO_PATTERNS = [
     (r"Yes, pay (Rs .+)", r"হ্যাঁ, \1 দাও"),
-    (r"It costs (Rs .+) \((\d+)% of this level's budget\)\.", r"এর দাম \1 (এই লেভেলের বাজেটের \2%)।"),
+    (r"It costs (Rs .+) \(([\d.]+)% of this level's budget\)\.", r"এর দাম \1 (এই লেভেলের বাজেটের \2%)।"),
     (r"WARNING: your total budget for this level will drop from (Rs .+?) to (Rs .+?)\. This cannot be undone\.",
      r"সতর্কতা: এই লেভেলে তোমার মোট বাজেট \1 থেকে কমে \2 হয়ে যাবে। এটি আর ফেরানো যাবে না।"),
 ]

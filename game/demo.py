@@ -12,7 +12,7 @@ from . import sound
 from .ui import (ACCENT, BAD, CYAN, GOOD, HEIGHT, MUTED, PANEL, TEXT, WARN, WIDTH, Button,
                  panel, text, text_block)
 
-DEMO_FRACTION = 0.01        # share of the level's base budget a demonstration costs (1%)
+DEMO_FRACTION = 0.005       # share of the level's base budget a demonstration costs (0.5%)
 
 # Why each level's demonstration design works (shown in the demo banner and at the end)
 DEMO_TEXT = {
@@ -81,7 +81,7 @@ class ConfirmDemo:
         y = text_block(surface, "A demonstration shows one design that solves this level.",
                        (r.x + 30, r.y + 70), r.w - 60, 17, TEXT)
         y = text_block(surface, f"It costs {economy.format_rs(cost)} "
-                                f"({DEMO_FRACTION * 100:.0f}% of this level's budget).",
+                                f"({DEMO_FRACTION * 100:g}% of this level's budget).",
                        (r.x + 30, y + 6), r.w - 60, 17, ACCENT)
         y = text_block(surface, f"WARNING: your total budget for this level will drop from "
                                 f"{economy.format_rs(old)} to {economy.format_rs(new)}. "
