@@ -1,0 +1,14 @@
+def handle(self, event):
+        # Priority check: if the NCERT overlay is open, trap all events here!
+        if self.ncert_overlay is not None:
+            self.ncert_overlay.handle(event)
+            return
+        if self.register_overlay is not None:
+            self.register_overlay.handle(event)
+            return
+        if self.help is not None:
+            self.help.handle(event)
+            return
+        if self.widgets.handle(event):
+            return
+        # ... rest of handle logic ...

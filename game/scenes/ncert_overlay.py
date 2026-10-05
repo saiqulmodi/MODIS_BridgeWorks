@@ -1,5 +1,6 @@
 """Tabbed and Phase-Gated Question Bank Browser & Practice Overlay."""
 import pygame
+from .. import sound  # <--- Essential import for sound.play("click")
 from ..ui import ACCENT, BG_DARK, CYAN, GOOD, BAD, HEIGHT, LINE, MUTED, PANEL, PANEL_EDGE, TEXT, WIDTH, Button, WidgetGroup, font_for, panel, text
 
 class NCERTBrowserOverlay:
@@ -37,7 +38,6 @@ class NCERTBrowserOverlay:
         self.widgets.add(Button((r.right - 140, r.y + 16, 120, 36), "Close (Esc)", self.close, size=15))
         
     def close(self):
-        from .. import sound
         sound.play("click")
         self.on_close()
 
@@ -45,7 +45,6 @@ class NCERTBrowserOverlay:
         if tab_idx == 0:
             return True  # Phase 1 is always unlocked
             
-        # Check if all questions in the previous phase are completed
         profile = getattr(self.app, "player_profile", None)
         if not profile:
             return False
@@ -60,7 +59,6 @@ class NCERTBrowserOverlay:
             
         r = self.rect
         
-        # Handle tab clicks at the top
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             tab_w = (r.w - 160) // 5
             for idx in range(5):
@@ -74,7 +72,6 @@ class NCERTBrowserOverlay:
                     sound.play("click")
                     return True
             
-            # Handle question card interactions if tab is unlocked
             if self.is_phase_unlocked(self.current_tab):
                 current_q_list = self.phases[self.current_tab]["questions"]
                 rx = r.x + 30
@@ -90,7 +87,6 @@ class NCERTBrowserOverlay:
                         self.feedback_msg = ""
                         q_id = f"p{self.current_tab}_{i}"
                         
-                        # Award +1 Rs for exploring
                         if hasattr(self.app, "player_profile") and self.app.player_profile:
                             self.app.player_profile.read_content(q_id)
                         
@@ -140,7 +136,6 @@ class NCERTBrowserOverlay:
             rs_text = f"Earnings: ₹{self.app.player_profile.rupees:.1f}"
             surface.blit(font_for(rs_text, 16, True).render(rs_text, True, GOOD), (r.right - 280, r.y + 20))
 
-        # Draw Phase Tabs
         tab_w = (r.w - 160) // 5
         for idx, phase_info in enumerate(self.phases):
             tab_rect = pygame.Rect(r.x + 20 + idx * (tab_w + 5), r.y + 60, tab_w, 30)
@@ -157,7 +152,6 @@ class NCERTBrowserOverlay:
             label_color = TEXT if is_unlocked else MUTED
             surface.blit(font_for(short_name, 12, True).render(short_name, True, label_color), (tab_rect.x + 8, tab_rect.y + 8))
 
-        # Content Area
         content_rect = pygame.Rect(r.x + 20, r.y + 100, r.w - 40, r.h - 120)
         surface.set_clip(content_rect)
         

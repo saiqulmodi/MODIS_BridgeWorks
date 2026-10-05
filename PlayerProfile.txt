@@ -4,12 +4,8 @@ class PlayerProfile:
         self.phone = phone
         self.email = email
         self.rupees = 0.0
+        self.completed_questions = set()  # Tracks IDs of correctly answered questions
 
-    def read_content(self, content_id):
-        # 1 Rs awarded for attending / exploring a question or concept
-        self.rupees += 1.0
-
-    def submit_answer(self, content_id, is_correct):
-        if is_correct:
-            # 10 Rs awarded for getting the right answer
-            self.rupees += 10.0
+    def is_phase_complete(self, phase_question_list):
+        # Checks if every question ID in the phase has been correctly answered
+        return all(f"q_{q_id}" in self.completed_questions for q_id in phase_question_list)
