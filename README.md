@@ -57,5 +57,22 @@ alternate route. All levels are unlocked for review (`UNLOCK_ALL` in `game/save.
   be won within budget and that bad designs fail for the right reason
 
 ```
-venv\Scripts\python.exe -m pytest -q
+venv\Scripts\python.exe -m pytest -q\
+# MODIS BridgeWorks
+
+**MODIS BridgeWorks** is an educational engineering and commerce foundation platform designed to build national capability through a gamified "learn and earn" system.
+
+## Features
+- **5 Progressive Phases:** Ranging from early foundational concepts (Classes 1–3) to elite engineering & business preparation (IIT/NIT level).
+- **Core Disciplines:** Mathematics, Physics, Chemistry, Biology, Geography, and Commerce.
+- **Earn-While-You-Learn Wallet:** 
+  - **₹10** rewarded per question attempt.
+  - **+₹90 bonus (Total ₹100)** for every correct answer.
+- **Automated Progression:** Dynamic question randomization, session persistence (`save.json`), and automatic phase promotion.
+
+## Getting Started
+1. Install dependencies (if applicable): `pip install -r requirements.txt`
+2. Run the main application:
+   ```bash
+   python main.py
 ```

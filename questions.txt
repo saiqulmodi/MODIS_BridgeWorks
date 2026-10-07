@@ -1,0 +1,37 @@
+{
+  "1": [
+    {"id": "p1_q1", "question": "What is 5 + 7?", "options": ["10", "11", "12", "13"], "answer": "12"},
+    {"id": "p1_q2", "question": "Which shape has 3 straight sides?", "options": ["Square", "Triangle", "Circle", "Rectangle"], "answer": "Triangle"},
+    {"id": "p1_q3", "question": "What is the color of a clear daytime sky?", "options": ["Green", "Blue", "Red", "Yellow"], "answer": "Blue"},
+    {"id": "p1_q4", "question": "How many days are there in a standard week?", "options": ["5", "6", "7", "8"], "answer": "7"},
+    {"id": "p1_q5", "question": "Which animal is known as the 'Ship of the Desert'?", "options": ["Horse", "Elephant", "Camel", "Donkey"], "answer": "Camel"}
+  ],
+  "2": [
+    {"id": "p2_q1", "question": "What is 1/2 expressed as a percentage?", "options": ["25%", "50%", "75%", "100%"], "answer": "50%"},
+    {"id": "p2_q2", "question": "Which organ pumps blood throughout the human body?", "options": ["Brain", "Lungs", "Heart", "Kidney"], "answer": "Heart"},
+    {"id": "p2_q3", "question": "What is the primary source of energy for the Earth?", "options": ["The Moon", "The Sun", "Geothermal Energy", "Wind"], "answer": "The Sun"},
+    {"id": "p2_q4", "question": "Which of these is a Kharif (monsoon) crop in India?", "options": ["Wheat", "Rice", "Barley", "Mustard"], "answer": "Rice"},
+    {"id": "p2_q5", "question": "What is the chemical formula for ordinary table salt?", "options": ["H2O", "CO2", "NaCl", "HCl"], "answer": "NaCl"}
+  ],
+  "3": [
+    {"id": "p3_q1", "question": "What is the chemical symbol for Pure Water?", "options": ["O2", "H2O", "CO2", "NaCl"], "answer": "H2O"},
+    {"id": "p3_q2", "question": "Which imaginary line divides the Earth into Northern and Southern Hemispheres?", "options": ["Prime Meridian", "Equator", "Tropic of Cancer", "International Date Line"], "answer": "Equator"},
+    {"id": "p3_q3", "question": "If a business buys goods for ₹5,000 and sells them for ₹7,000, what is the gross profit?", "options": ["₹1,000", "₹2,000", "₹5,000", "₹12,000"], "answer": "₹2,000"},
+    {"id": "p3_q4", "question": "What is the SI unit of Force?", "options": ["Joule", "Watt", "Newton", "Pascal"], "answer": "Newton"},
+    {"id": "p3_q5", "question": "Which cell organelle is known as the 'Powerhouse of the Cell'?", "options": ["Nucleus", "Ribosome", "Mitochondria", "Golgi Body"], "answer": "Mitochondria"}
+  ],
+  "4": [
+    {"id": "p4_q1", "question": "What is the derivative of x^2 with respect to x?", "options": ["x", "2x", "x^2", "2"], "answer": "2x"},
+    {"id": "p4_q2", "question": "Which law states that pressure is inversely proportional to volume at constant temperature?", "options": ["Boyle's Law", "Charles's Law", "Gay-Lussac's Law", "Avogadro's Law"], "answer": "Boyle's Law"},
+    {"id": "p4_q3", "question": "In double-entry bookkeeping, what is recorded on the debit side of an expense account?", "options": ["Decrease in expense", "Increase in expense", "Liability creation", "Revenue recognition"], "answer": "Increase in expense"},
+    {"id": "p4_q4", "question": "What is the hybridization of carbon in an ethene (C2H4) molecule?", "options": ["sp", "sp2", "sp3", "sp3d"], "answer": "sp2"},
+    {"id": "p4_q5", "question": "Which geographical phenomenon is caused by the Coriolis effect in the Northern Hemisphere?", "options": ["Deflection of winds to the right", "Deflection of winds to the left", "Tidal locking", "Equinox formation"], "answer": "Deflection of winds to the right"}
+  ],
+  "5": [
+    {"id": "p5_q1", "question": "What is the quantum number that describes the spatial orientation of an atomic orbital?", "options": ["Principal Quantum Number", "Azimuthal Quantum Number", "Magnetic Quantum Number", "Spin Quantum Number"], "answer": "Magnetic Quantum Number"},
+    {"id": "p5_q2", "question": "In corporate finance and valuation, what does EBITDA stand for?", "options": ["Earnings Before Interest, Taxes, Depreciation, and Amortization", "Equity Balance In Total Debt and Assets", "Estimated Business Income Tax Deduction Allocation", "Earnings Before Investments, Trade, and Debt Accounts"], "answer": "Earnings Before Interest, Taxes, Depreciation, and Amortization"},
+    {"id": "p5_q3", "question": "According to Coulomb's Law, if the distance between two point charges is halved, the electrostatic force between them is:", "options": ["Halved", "Doubled", "Quadrupled", "Quartered"], "answer": "Quadrupled"},
+    {"id": "p5_q4", "question": "What limit represents continuity of a function f(x) at x = c?", "options": ["Limit equals f(c)", "Limit is zero", "Derivative exists", "Integral is finite"], "answer": "Limit equals f(c)"},
+    {"id": "p5_q5", "question": "Which market structure is characterized by a single seller, high barriers to entry, and no close substitutes?", "options": ["Perfect Competition", "Monopolistic Competition", "Oligopoly", "Monopoly"], "answer": "Monopoly"}
+  ]
+}
