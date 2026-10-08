@@ -44,9 +44,10 @@ def quad(r1, r2):
             seen.append(o)
     while len(seen) < 4:
         seen.append(pair(r1 + len(seen), r2))
-    return _same(f"Solve {eq} = 0.", f"সমাধান করো: {eq} = 0।", seen,
-                 f"Factorise: {f1}{f2} = 0, so x = {r1} or x = {r2}. Check: {r1} x {r2} = {c} and {r1} + {r2} = {-b}.",
-                 f"উৎপাদকে ভাঙো: {f1}{f2} = 0, তাই x = {r1} বা x = {r2}। যাচাই: {r1} x {r2} = {c} আর {r1} + {r2} = {-b}।")
+    return mcq(f"Solve {eq} = 0.", seen, 0,
+               f"Factorise: {f1}{f2} = 0, so x = {r1} or x = {r2}. Check: {r1} x {r2} = {c} and {r1} + {r2} = {-b}.",
+               f"সমাধান করো: {eq} = 0।", [o.replace(' or ', ' বা ') for o in seen],
+               f"উৎপাদকে ভাঙো: {f1}{f2} = 0, তাই x = {r1} বা x = {r2}। যাচাই: {r1} x {r2} = {c} আর {r1} + {r2} = {-b}।")
 
 
 def diag3d(a, b, c, what_en, what_bn):
