@@ -1,0 +1,11 @@
+class PlayerProfile:
+    def __init__(self, name, phone="", email=""):
+        self.name = name
+        self.phone = phone
+        self.email = email
+        self.rupees = 0.0
+        self.completed_questions = set()  # <--- Tracks answered question IDs
+
+    def is_phase_complete(self, phase_question_list):
+        # <--- Checks if every question ID in the phase has been correctly answered
+        return all(f"q_{q_id}" in self.completed_questions for q_id in phase_question_list)

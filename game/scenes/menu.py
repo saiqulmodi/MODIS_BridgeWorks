@@ -7,7 +7,7 @@ from engine.levels import LEVELS
 
 from .. import sound
 from ..ui import (ACCENT, BG_DARK, CYAN, GOOD, HEIGHT, LINE, MUTED, PANEL, PANEL_EDGE, TEXT,
-                  WIDTH, Button, WidgetGroup, blueprint_background, panel, text, text_block)
+                  WARN, WIDTH, Button, WidgetGroup, blueprint_background, panel, text, text_block)
 
 def language_button_label():
     from ..i18n import lang
@@ -40,16 +40,27 @@ class MenuScene:
         self.widgets.add(Button((WIDTH - 230, 150 - 2, 190, 36), "Full screen (F11)",
                                 screen.toggle_fullscreen, size=15,
                                 tooltip="Fill the whole screen; press F11 again to leave"))
-        self.widgets.add(Button((222, 150, 250, 36), "Help: how to play (H)", self.open_help,
+        self.widgets.add(Button((222, 150, 210, 36), "Help: how to play (H)", self.open_help,
                                 hotkey=pygame.K_h, size=16,
                                 tooltip="A guide for new players and 200 questions & answers"))
-        self.widgets.add(Button((482, 150, 250, 36), "BridgeWorks Academy (A)", app.to_academy,
+        self.widgets.add(Button((444, 150, 250, 36), "BridgeWorks Academy (A)", app.to_academy,
                                 hotkey=pygame.K_a, size=16, colour=(40, 90, 70),
                                 tooltip="Class 1-12 quizzes in 6 subjects: earn Civil Grants for your bridges"))
         self.widgets.add(Button((WIDTH - 404, HEIGHT - 56, 250, 40), "Donation Camps (D)", app.to_donations,
                                 hotkey=pygame.K_d, size=16, colour=(90, 70, 30),
                                 tooltip="Give Civil Grants to causes that build opportunities"))
+
+        # Register ID button
+        self.widgets.add(Button((706, 150, 130, 36), "Register ID", self.open_register,
+                                size=15, tooltip="Register with Name to unlock earnings"))
+
+        # NCERT Bank button right next to Register ID
+        self.widgets.add(Button((846, 150, 130, 36), "NCERT Bank", self.open_ncert_bank,
+                                size=15, tooltip="Browse Phase 1 & 2 Question Bank"))
+
         self.help = None
+        self.register_overlay = None
+        self.ncert_overlay = None
         self.hover = None
 
     def open_help(self):
@@ -60,7 +71,31 @@ class MenuScene:
     def close_help(self):
         self.help = None
 
+    def open_register(self):
+        from .register import RegisterOverlay
+        sound.play("click")
+        self.register_overlay = RegisterOverlay(self.app, self.on_register_success)
+
+    def on_register_success(self, name, phone, email):
+        from ..player_economy import PlayerProfile
+        self.app.player_profile = PlayerProfile(name, phone, email)
+        self.register_overlay = None
+
+    def open_ncert_bank(self):
+        from .ncert_overlay import NCERTBrowserOverlay
+        sound.play("click")
+        self.ncert_overlay = NCERTBrowserOverlay(self.app, self.close_ncert_bank)
+
+    def close_ncert_bank(self):
+        self.ncert_overlay = None
+
     def handle(self, event):
+        if self.ncert_overlay is not None:
+            self.ncert_overlay.handle(event)
+            return
+        if self.register_overlay is not None:
+            self.register_overlay.handle(event)
+            return
         if self.help is not None:
             self.help.handle(event)
             return
@@ -100,7 +135,13 @@ class MenuScene:
         bob = 4 * math.sin(self.t * 2)
         text(s, "MODIS BridgeWorks", (560, 40 + bob), 54, TEXT, bold=True)
         text(s, "Calculate. Construct. Route.  -  a hard-physics engineering sandbox", (564, 112), 18, CYAN)
-        text(s, f"EXP {self.app.save.exp}", (WIDTH - 250, 154), 20, ACCENT, bold=True, anchor="topright")
+        
+        # Player Profile status check on top bar
+        has_profile = hasattr(self.app, "player_profile") and self.app.player_profile is not None
+        profile_text = f"Player: {self.app.player_profile.name}" if has_profile else "Not Registered"
+        text(s, profile_text, (WIDTH - 320, 154), 16, GOOD if has_profile else WARN, bold=True, anchor="topright")
+        text(s, f"EXP {self.app.save.exp}", (WIDTH - 250, 194), 20, ACCENT, bold=True, anchor="topright")
+
         for r, lv in self.cards:
             prog = self.app.save.level(lv.num)
             unlocked = self.app.save.unlocked(lv.num)
@@ -129,3 +170,7 @@ class MenuScene:
         self.widgets.draw(s)
         if self.help is not None:
             self.help.draw(s)
+        if self.register_overlay is not None:
+            self.register_overlay.draw(s)
+        if self.ncert_overlay is not None:
+            self.ncert_overlay.draw(s)

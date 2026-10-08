@@ -5,6 +5,12 @@ HELP_BN = {
     # the Help screen buttons (its own text is stored in both languages in game/guide)
     "Help: how to play (H)": "সাহায্য: কীভাবে খেলবে (H)",
     "A guide for new players and 200 questions & answers": "নতুন খেলোয়াড়ের নির্দেশিকা আর 200টি প্রশ্নোত্তর",
+    # player registration and the NCERT question bank buttons on the title screen
+    "Register ID": "নাম নথিভুক্ত করো",
+    "Register with Name to unlock earnings": "আয় চালু করতে নাম দিয়ে নথিভুক্ত হও",
+    "NCERT Bank": "এনসিইআরটি প্রশ্নভান্ডার",
+    "Browse Phase 1 & 2 Question Bank": "ধাপ ১ ও ২-এর প্রশ্নভান্ডার দেখো",
+    "Not Registered": "নথিভুক্ত হয়নি",
     # 3D view
     "3D view": "3D দৃশ্য", "2D view": "2D দৃশ্য", "Reset": "শুরুর দৃশ্য",
     "Turn the view towards the side of the bridge to build here":
