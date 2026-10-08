@@ -30,9 +30,7 @@ def _c(x):
 
 
 def compound(p, rate, years):
-    a = p
-    for _ in range(years):
-        a = a * (100 + rate) // 100
+    a = round(p * (1 + rate / 100) ** years)
     si = p + p * rate * years // 100
     return _rs(f"Rs {p:,} is invested at {rate}% a year, compounded yearly. What is it worth after {years} years?",
                f"{p:,} টাকা বছরে {rate}% চক্রবৃদ্ধি হারে বিনিয়োগ করা হলো। {years} বছর পরে মূল্য কত?", a,
@@ -70,9 +68,7 @@ def pv(future, rate):
 
 
 def inflate(price, rate, years, item_en, item_bn):
-    p = price
-    for _ in range(years):
-        p = p * (100 + rate) // 100
+    p = round(price * (1 + rate / 100) ** years)
     return _rs(f"{item_en} costs Rs {price:,} today. If prices rise {rate}% a year, roughly what will it cost in {years} years?",
                f"{item_bn}-এর দাম আজ {price:,} টাকা। দাম বছরে {rate}% বাড়লে {years} বছরে মোটামুটি কত হবে?", p,
                f"Compound the rise: {price:,} x 1.{rate:02d}^{years} ≈ Rs {p:,}.",
