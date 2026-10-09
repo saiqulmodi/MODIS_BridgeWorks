@@ -30,6 +30,24 @@ questions_db = {
     ]
 }
 
+# More questions: the whole BridgeWorks Academy bank (English), sorted into the 5 phases.
+#   Phase 1: Classes 1-3   Phase 2: Classes 4-6   Phase 3: Classes 7-9
+#   Phase 4: Classes 10-12   Phase 5: Game skills (bridge engineering, from the Help screen)
+from engine.academy_data import all_items
+from engine.academy_skills import items as skill_items
+
+
+def _phase_of(class_level):
+    return "5" if class_level == 0 else str((class_level - 1) // 3 + 1)
+
+
+for _r in all_items() + skill_items():
+    questions_db[_phase_of(_r["class_level"])].append({
+        "id": f"a{_r['id']}", "question": _r["question"], "options": _r["options"],
+        "answer": _r["options"][_r["correct_idx"]]})
+
+print("Question bank: " + ", ".join(f"Phase {k}: {len(v)}" for k, v in sorted(questions_db.items())))
+
 # Fetch a random question for the player's current phase
 current_q = get_random_question(state.get("phase", 1), questions_db)
 
