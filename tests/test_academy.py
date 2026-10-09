@@ -12,7 +12,7 @@ import pygame
 import pytest
 
 from engine import finance as F
-from engine.academy import CLASSES, SUBJECTS
+from engine.academy import CLASSES, SUBJECTS, target_per_subject
 from engine.academy_data import all_items, by_id, export_json, grant_reward, items
 from engine.academy_skills import items as skill_items
 from engine.failure import FailureReport
@@ -53,7 +53,7 @@ def test_every_question_is_complete_in_both_languages():
 def test_batches_hold_at_most_100_and_no_question_repeats():
     for c in CLASSES:
         for s in SUBJECTS:
-            assert len(items(c, s)) <= 100, (c, s)
+            assert len(items(c, s)) <= target_per_subject(c), (c, s)
     for group in (all_items(), skill_items()):
         qs = collections.Counter(r["question"] for r in group)
         assert not [q for q, n in qs.items() if n > 1]

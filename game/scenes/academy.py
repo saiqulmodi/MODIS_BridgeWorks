@@ -5,8 +5,8 @@ import random
 import pygame
 
 from engine import economy
-from engine.academy import CLASSES, SUBJECTS
-from engine.academy_data import TARGET_PER_SUBJECT, items
+from engine.academy import CLASSES, SUBJECTS, class_label, target_per_subject
+from engine.academy_data import items
 from engine.academy_pass import has_access
 
 from .. import i18n, sound
@@ -37,11 +37,13 @@ WORDS = {
     "lang": ("বাংলা (F2)", "English (F2)"),
     "next": ("Next question (Enter)", "পরের প্রশ্ন (Enter)"),
     "give": ("Donation Camps", "দান-শিবির"),
-    "reward": ("Class {c}: {g} for a right first answer, +{b} for reading the explanation.",
-               "শ্রেণি {c}: প্রথম চেষ্টায় সঠিক উত্তরে {g}, ব্যাখ্যা পড়লে আরও {b}।"),
+    "reward": ("{c}: {g} for a right first answer, +{b} for reading the explanation.",
+               "{c}: প্রথম চেষ্টায় সঠিক উত্তরে {g}, ব্যাখ্যা পড়লে আরও {b}।"),
+    "class_n": ("Class {c}", "শ্রেণি {c}"),
+    "level_n": ("{c} level", "{c} স্তর"),
     "count": ("{a} of {n} answered", "{n}টির মধ্যে {a}টির উত্তর দেওয়া"),
-    "empty": ("Class {c} {s} is still being written ({n} of 100 ready). Pick another subject or "
-              "class.", "শ্রেণি {c} {s} এখনো লেখা হচ্ছে (100-এর মধ্যে {n}টি তৈরি)। অন্য বিষয় বা শ্রেণি বাছো।"),
+    "empty": ("{c} {s} is still being written ({n} of {t} ready). Pick another subject or "
+              "class.", "{c} {s} এখনো লেখা হচ্ছে ({t}-এর মধ্যে {n}টি তৈরি)। অন্য বিষয় বা শ্রেণি বাছো।"),
     "done": ("Every question here is answered. Great work! Pick another subject - or keep "
              "practising (no new grants).", "এখানের সব প্রশ্নের উত্তর দেওয়া হয়েছে। দারুণ! অন্য বিষয় বাছো - "
              "অথবা অনুশীলন চালিয়ে যাও (নতুন অনুদান নেই)।"),
@@ -87,8 +89,8 @@ class AcademyScene:
         self.lang_btn = self.widgets.add(Button((WIDTH - 360, 16, 168, 36), "", app.toggle_language,
                                                 size=15, hotkey=pygame.K_F2))
         self.class_btns = {}
-        for k, c in enumerate(CLASSES):
-            b = self.widgets.add(Button((24 + (k % 4) * 76, 142 + (k // 4) * 42, 70, 36), str(c),
+        for k, c in enumerate(CLASSES):        # 5 per row: 1-5, 6-10, 11 12 NIT IIT
+            b = self.widgets.add(Button((24 + (k % 5) * 61, 142 + (k // 5) * 42, 56, 36), class_label(c),
                                         lambda c=c: self.pick_class(c), size=16))
             self.class_btns[c] = b
         self.subject_btns = {}
@@ -104,6 +106,11 @@ class AcademyScene:
         self.next_question()
 
     # --- choosing what to study ---------------------------------------------------------------
+    def cls_name(self):
+        """'Class 7', or 'NIT level' / 'IIT level'."""
+        label = class_label(self.cls, i18n.lang())
+        return w("class_n" if label.isdigit() else "level_n", c=label)
+
     def pick_class(self, c):
         sound.play("click")
         self.cls = c
@@ -153,7 +160,8 @@ class AcademyScene:
         pool = self.pool()
         if not pool:
             self.card = None
-            self.message = w("empty", c=self.cls, s=name(self.subject), n=0)
+            self.message = w("empty", c=self.cls_name(), s=name(self.subject), n=0,
+                             t=target_per_subject(self.cls))
             return
         answered = self.save.academy["answered"]
         current = self.card.r["id"] if self.card else None
@@ -203,7 +211,7 @@ class AcademyScene:
                 continue
             pool = self.pool(key)
             done = sum(1 for r in pool if str(r["id"]) in answered)
-            total = 200 if key == "skills" else TARGET_PER_SUBJECT
+            total = 200 if key == "skills" else target_per_subject(self.cls)
             b.label = f"{name(key)}   {done}/{total}"
 
     def draw(self, s):
@@ -234,7 +242,7 @@ class AcademyScene:
                 my += fm.get_linesize()
         info = (w("daily_left", k=self.daily_k + 1, n=len(self.daily))
                 if self.daily is not None and self.daily_k < len(self.daily)
-                else w("reward", c=self.cls, g=rs(1000.0 * self.cls), b=rs(200.0)))
+                else w("reward", c=self.cls_name(), g=rs(1000.0 * self.cls), b=rs(200.0)))
         s.blit(font_for(info, 14).render(info, True, CYAN), (360, HEIGHT - 58))
         free = w("free")
         s.blit(font_for(free, 13).render(free, True, MUTED), (360, HEIGHT - 34))

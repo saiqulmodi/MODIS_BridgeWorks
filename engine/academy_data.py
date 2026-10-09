@@ -1,7 +1,7 @@
 """BridgeWorks Academy: the question bank in its public record format, rewards and export.
 
 Record format (one dict per question):
-    {"id": int, "class_level": 1-12, "subject": "physics"|"chemistry"|"math"|"biology"|
+    {"id": int, "class_level": 1-14 (13 = NIT, 14 = IIT), "subject": "physics"|"chemistry"|"math"|"biology"|
      "finance"|"commercials", "question": str, "options": [4 str], "correct_idx": 0-3,
      "explanation": str, "grant_reward": float,
      "question_bn": str, "options_bn": [4 str], "explanation_bn": str}
@@ -14,12 +14,12 @@ import importlib
 import json
 import sys
 
-from .academy import CLASSES, SUBJECTS
+from .academy import CLASSES, SUBJECTS, target_per_subject
 
 GRANT_PER_CLASS = 1000.0       # a correct first answer in Class n earns Rs 1000 x n
 READING_BONUS = 200.0          # reading the explanation to the end (right or wrong)
 HELP_READ_REWARD = 500.0       # reading one Help answer to the end, once
-TARGET_PER_SUBJECT = 100
+TARGET_PER_SUBJECT = 100       # Classes 1-12; NIT and IIT hold 200 (target_per_subject)
 
 _cache = {}
 
@@ -74,7 +74,7 @@ def by_id(qid):
 
 
 def coverage():
-    """{(class, subject): number of questions written} - progress towards 7,200."""
+    """{(class, subject): number of questions written} - progress towards 7,200 + 2,400 (NIT, IIT)."""
     return {(c, s): len(items(c, s)) for c in CLASSES for s in SUBJECTS}
 
 
