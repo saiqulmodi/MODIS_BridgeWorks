@@ -134,16 +134,16 @@ class NCERTBrowserOverlay:
                             if box.collidepoint(event.pos):
                                 self.selected_option = opt_idx
                                 is_correct = (opt_text.strip().lower() == correct_ans.strip().lower())
+                                earned = None
+                                if hasattr(self.app, "player_profile") and self.app.player_profile:
+                                    profile = self.app.player_profile
+                                    if hasattr(profile, "submit_answer"):
+                                        earned = profile.submit_answer(q_id, is_correct)
+                                paid = f" +{earned} Rs" if earned else ""
                                 if is_correct:
-                                    self.feedback_msg = "Correct! +10 Rs"
-                                    if hasattr(self.app, "player_profile") and self.app.player_profile:
-                                        profile = self.app.player_profile
-                                        if hasattr(profile, "completed_questions"):
-                                            profile.completed_questions.add(q_id)
-                                        if hasattr(profile, "submit_answer"):
-                                            profile.submit_answer(q_id, True)
+                                    self.feedback_msg = "Correct!" + paid
                                 else:
-                                    self.feedback_msg = f"Incorrect. Correct answer was: {correct_ans}"
+                                    self.feedback_msg = f"Incorrect{paid}. Right answer: {correct_ans}"
                                 return True
                         return True
 
@@ -219,7 +219,7 @@ class NCERTBrowserOverlay:
                 surface.blit(font_for(opt_lbl, 13).render(opt_lbl, True, TEXT), (box.x + 8, box.y + 3))
 
             if i == self.selected_idx and self.feedback_msg:
-                fb_col = GOOD if "Correct" in self.feedback_msg else WARN
+                fb_col = GOOD if self.feedback_msg.startswith("Correct") else WARN
                 surface.blit(font_for(self.feedback_msg, 13, True).render(self.feedback_msg, True, fb_col), 
                              (item_rect.right - 240, item_rect.y + 8))
 

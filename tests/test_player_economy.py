@@ -13,13 +13,20 @@ def test_player_registration_and_scoring():
     player.read_content("q1") # Duplicate read should not re-add
     assert player.balance_rupees == 1
 
-    # Rule 2 & 3: Answering grants 2 marks/rupees + 10 bonus if correct on first attempt
+    # Rule 2 & 3: every attempt grants 2 rupees; the first correct answer grants 100
     player.submit_answer("q1", is_correct=True)
-    # Total: 1 (read) + 2 (attempt) + 10 (first attempt correct bonus) = 13
-    assert player.balance_rupees == 13
+    # Total: 1 (read) + 2 (attempt) + 100 (correct answer) = 103
+    assert player.balance_rupees == 103
 
-    # Subsequent attempt on same question: grants 2 marks/rupees for trying, but NO first-attempt bonus
+    # Answering the same question again: 2 rupees for trying, but NO second 100
     player.submit_answer("q1", is_correct=True)
-    # Total: 13 + 2 = 15
-    assert player.balance_rupees == 15
+    # Total: 103 + 2 = 105
+    assert player.balance_rupees == 105
+
+    # A wrong attempt still pays for trying; getting it right later still earns the 100 once
+    player.read_content("q2")
+    player.submit_answer("q2", is_correct=False)
+    assert player.balance_rupees == 105 + 1 + 2
+    player.submit_answer("q2", is_correct=True)
+    assert player.balance_rupees == 108 + 2 + 100
 

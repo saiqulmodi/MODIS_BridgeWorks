@@ -3,12 +3,12 @@
 Rules:
   - Reading an item pays 1 Rs, once per item.
   - Every answer attempt pays 2 Rs.
-  - A correct answer on the first attempt at an item pays a 10 Rs bonus.
+  - The first correct answer to an item pays 100 Rs (once per item, so repeats cannot farm it).
 """
 
 READ_REWARD = 1
 ATTEMPT_REWARD = 2
-FIRST_TRY_BONUS = 10
+CORRECT_REWARD = 100
 
 
 class PlayerProfile:
@@ -34,10 +34,9 @@ class PlayerProfile:
 
     def submit_answer(self, content_id, is_correct):
         earned = ATTEMPT_REWARD
-        if is_correct and content_id not in self.attempted_items:
-            earned += FIRST_TRY_BONUS
         self.attempted_items.add(content_id)
-        if is_correct:
+        if is_correct and content_id not in self.completed_questions:
+            earned += CORRECT_REWARD
             self.completed_questions.add(content_id)
         self.balance_rupees += earned
         return earned
