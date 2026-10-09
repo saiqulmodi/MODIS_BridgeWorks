@@ -203,6 +203,7 @@ class AcademyScene:
         self.next_btn.enabled = self.card is None or self.card.answered
         for c, b in self.class_btns.items():
             b.active = c == self.cls
+            b.label = class_label(c, i18n.lang())
         answered = self.save.academy["answered"]
         for key, b in self.subject_btns.items():
             b.active = (key == "daily") if self.daily is not None else (key == self.subject)

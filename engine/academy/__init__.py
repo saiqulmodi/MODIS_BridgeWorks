@@ -10,7 +10,7 @@ from dataclasses import dataclass
 SUBJECTS = ("physics", "chemistry", "math", "biology", "finance", "commercials")
 CLASSES = tuple(range(1, 15))
 NIT, IIT = 13, 14
-LEVEL_NAMES = {NIT: ("NIT", "NIT"), IIT: ("IIT", "IIT")}   # shown instead of a class number
+LEVEL_NAMES = {NIT: ("NIT", "এনআইটি"), IIT: ("IIT", "আইআইটি")}   # shown instead of a class number
 
 
 def target_per_subject(class_level):
