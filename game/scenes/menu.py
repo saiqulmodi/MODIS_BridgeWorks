@@ -78,7 +78,8 @@ class MenuScene:
 
     def on_register_success(self, name, phone, email):
         from ..player_economy import PlayerProfile
-        self.app.player_profile = PlayerProfile(name, phone, email)
+        self.app.player_profile = PlayerProfile(name, phone, email, data=self.app.save.data,
+                                                on_change=self.app.save.write)
         self.register_overlay = None
 
     def open_ncert_bank(self):

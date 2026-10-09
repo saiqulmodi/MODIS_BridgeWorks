@@ -4,6 +4,7 @@ import json
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from engine.game_logic import load_game_state, save_game_state, get_random_question, submit_answer
+from engine import daily_limit
 
 QUESTIONS_FILE = "questions.txt"
 
@@ -36,6 +37,7 @@ def main():
         print("       MODIS BRIDGEWORKS - NATIONAL FOUNDATION SYSTEM       ")
         print("=" * 60)
         print(f"Player: {state.get('player_name', 'Student')} | Current Phase: {state.get('phase', 1)} | Wallet: ₹{state.get('wallet', 0)}")
+        print(f"Answers left today: {daily_limit.answers_left(state)}/{daily_limit.DAILY_ANSWER_LIMIT} (any phase)")
         print("-" * 60)
         print("1. Play & Earn (Answer Questions)")
         print("2. Change Phase (1 to 5)")
@@ -45,6 +47,10 @@ def main():
         choice = input("\nSelect an option (1-4): ").strip()
         
         if choice == "1":
+            if daily_limit.answers_left(state) == 0:
+                print(f"\nDaily limit reached: {daily_limit.DAILY_ANSWER_LIMIT} answers today. "
+                      "Logging in again does not reset it. Come back tomorrow!")
+                continue
             phase = str(state.get("phase", 1))
             question = get_random_question(phase, questions_db)
             

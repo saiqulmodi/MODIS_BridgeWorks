@@ -39,8 +39,11 @@ if current_q:
     user_answer = current_q['answer']
     is_correct, earned, total_wallet, promoted = submit_answer(current_q["id"], user_answer, current_q["answer"], questions_db)
     
-    print(f"\nResult: {'Correct! 🎉' if is_correct else 'Incorrect.'}")
-    print(f"Earned this round: ₹{earned} (₹10 attempt + ₹90 correct bonus)")
+    if earned is None:
+        print("\nDaily limit reached: 25 answers today. Nothing paid. Come back tomorrow.")
+    else:
+        print(f"\nResult: {'Correct! 🎉' if is_correct else 'Incorrect.'}")
+        print(f"Earned this round: ₹{earned} (₹10 attempt + ₹90 correct bonus)")
     print(f"Updated Wallet Balance: ₹{total_wallet}")
     if promoted:
         print("Phase complete! You have been promoted to the next phase.")

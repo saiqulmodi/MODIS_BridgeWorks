@@ -139,6 +139,9 @@ class NCERTBrowserOverlay:
                                     profile = self.app.player_profile
                                     if hasattr(profile, "submit_answer"):
                                         earned = profile.submit_answer(q_id, is_correct)
+                                if earned is None and hasattr(self.app.player_profile, "answers_left"):
+                                    self.feedback_msg = "Daily limit reached: 25 answers today. Come back tomorrow."
+                                    return True
                                 paid = f" +{earned} Rs" if earned else ""
                                 if is_correct:
                                     self.feedback_msg = "Correct!" + paid
@@ -166,8 +169,14 @@ class NCERTBrowserOverlay:
         
         r = panel(surface, self.rect, PANEL, ACCENT, 14)
         
-        title_str = "Curriculum Bank & Interactive Practice [+1 Rs Read, +10 Rs Correct]"
+        title_str = "Curriculum Bank & Interactive Practice [+1 Rs Read, +2 Rs Try, +100 Rs Correct]"
         surface.blit(font_for(title_str, 20, True).render(title_str, True, TEXT), (r.x + 20, r.y + 16))
+        profile = getattr(self.app, "player_profile", None)
+        if profile is not None and hasattr(profile, "answers_left"):
+            left = profile.answers_left()
+            info = f"Answers left today: {left}/25   Wallet: Rs {profile.balance_rupees}"
+            surface.blit(font_for(info, 14, True).render(info, True, GOOD if left else WARN),
+                         (r.x + 20, r.y + 40))
         
         tab_w = (r.w - 160) // 5
         for idx, phase in enumerate(self.phases):

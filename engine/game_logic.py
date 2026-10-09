@@ -2,6 +2,8 @@ import json
 import random
 import os
 
+from engine import daily_limit
+
 SAVE_FILE = "save.json"
 
 def load_game_state():
@@ -51,15 +53,19 @@ def submit_answer(question_id, user_choice, correct_choice, all_questions_dict=N
     - Awards ₹10 for attempting.
     - Awards an extra ₹90 (+₹100 total) if correct.
     - Checks if phase is complete and automatically promotes player if true.
+    - At most daily_limit.DAILY_ANSWER_LIMIT answers a day: past that nothing is paid or
+      recorded and earned is None.
     """
     state = load_game_state()
+    is_correct = (str(user_choice).strip().lower() == str(correct_choice).strip().lower())
+    if not daily_limit.use_answer(state):
+        return is_correct, None, state["wallet"], False
     
     # Track attempted question ID
     if question_id not in state["attempted_ids"]:
         state["attempted_ids"].append(question_id)
     
     earned = 10  # Base attempt reward
-    is_correct = (str(user_choice).strip().lower() == str(correct_choice).strip().lower())
     
     if is_correct:
         earned += 90  # Correct answer bonus (Total ₹100)
