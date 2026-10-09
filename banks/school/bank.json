@@ -1,0 +1,316 @@
+{
+ "id": "school",
+ "title": "School MCQ Bank",
+ "title_bn": "স্কুল প্রশ্নব্যাংক",
+ "source": "mcq_bank.db",
+ "levels": {},
+ "subjects": {
+  "evs": [
+   "EVS",
+   "পরিবেশ পরিচিতি"
+  ],
+  "general_safety": [
+   "General Safety",
+   "সাধারণ নিরাপত্তা"
+  ],
+  "geography": [
+   "Geography",
+   "ভূগোল"
+  ]
+ },
+ "chunks": {
+  "1/evs": [
+   "1_evs_1.json"
+  ],
+  "1/general_safety": [
+   "1_general_safety_1.json"
+  ],
+  "1/geography": [
+   "1_geography_1.json"
+  ],
+  "1/math": [
+   "1_math_1.json",
+   "1_math_2.json"
+  ],
+  "10/biology": [
+   "10_biology_1.json"
+  ],
+  "10/chemistry": [
+   "10_chemistry_1.json"
+  ],
+  "10/commercials": [
+   "10_commercials_1.json"
+  ],
+  "10/general_safety": [
+   "10_general_safety_1.json"
+  ],
+  "10/geography": [
+   "10_geography_1.json"
+  ],
+  "10/math": [
+   "10_math_1.json"
+  ],
+  "10/physics": [
+   "10_physics_1.json"
+  ],
+  "11/biology": [
+   "11_biology_1.json"
+  ],
+  "11/chemistry": [
+   "11_chemistry_1.json"
+  ],
+  "11/commercials": [
+   "11_commercials_1.json"
+  ],
+  "11/general_safety": [
+   "11_general_safety_1.json"
+  ],
+  "11/geography": [
+   "11_geography_1.json"
+  ],
+  "11/math": [
+   "11_math_1.json"
+  ],
+  "11/physics": [
+   "11_physics_1.json"
+  ],
+  "12/biology": [
+   "12_biology_1.json"
+  ],
+  "12/chemistry": [
+   "12_chemistry_1.json"
+  ],
+  "12/commercials": [
+   "12_commercials_1.json"
+  ],
+  "12/general_safety": [
+   "12_general_safety_1.json"
+  ],
+  "12/geography": [
+   "12_geography_1.json"
+  ],
+  "12/math": [
+   "12_math_1.json"
+  ],
+  "12/physics": [
+   "12_physics_1.json"
+  ],
+  "2/evs": [
+   "2_evs_1.json"
+  ],
+  "2/general_safety": [
+   "2_general_safety_1.json"
+  ],
+  "2/geography": [
+   "2_geography_1.json"
+  ],
+  "2/math": [
+   "2_math_1.json",
+   "2_math_2.json"
+  ],
+  "3/commercials": [
+   "3_commercials_1.json"
+  ],
+  "3/evs": [
+   "3_evs_1.json"
+  ],
+  "3/general_safety": [
+   "3_general_safety_1.json"
+  ],
+  "3/geography": [
+   "3_geography_1.json"
+  ],
+  "3/math": [
+   "3_math_1.json"
+  ],
+  "4/commercials": [
+   "4_commercials_1.json"
+  ],
+  "4/evs": [
+   "4_evs_1.json"
+  ],
+  "4/general_safety": [
+   "4_general_safety_1.json"
+  ],
+  "4/geography": [
+   "4_geography_1.json"
+  ],
+  "4/math": [
+   "4_math_1.json"
+  ],
+  "5/commercials": [
+   "5_commercials_1.json"
+  ],
+  "5/evs": [
+   "5_evs_1.json"
+  ],
+  "5/general_safety": [
+   "5_general_safety_1.json"
+  ],
+  "5/geography": [
+   "5_geography_1.json"
+  ],
+  "5/math": [
+   "5_math_1.json"
+  ],
+  "6/biology": [
+   "6_biology_1.json"
+  ],
+  "6/chemistry": [
+   "6_chemistry_1.json"
+  ],
+  "6/commercials": [
+   "6_commercials_1.json"
+  ],
+  "6/general_safety": [
+   "6_general_safety_1.json"
+  ],
+  "6/geography": [
+   "6_geography_1.json"
+  ],
+  "6/math": [
+   "6_math_1.json"
+  ],
+  "6/physics": [
+   "6_physics_1.json"
+  ],
+  "7/biology": [
+   "7_biology_1.json"
+  ],
+  "7/chemistry": [
+   "7_chemistry_1.json"
+  ],
+  "7/commercials": [
+   "7_commercials_1.json"
+  ],
+  "7/general_safety": [
+   "7_general_safety_1.json"
+  ],
+  "7/geography": [
+   "7_geography_1.json"
+  ],
+  "7/math": [
+   "7_math_1.json"
+  ],
+  "7/physics": [
+   "7_physics_1.json"
+  ],
+  "8/biology": [
+   "8_biology_1.json"
+  ],
+  "8/chemistry": [
+   "8_chemistry_1.json"
+  ],
+  "8/commercials": [
+   "8_commercials_1.json"
+  ],
+  "8/general_safety": [
+   "8_general_safety_1.json"
+  ],
+  "8/geography": [
+   "8_geography_1.json"
+  ],
+  "8/math": [
+   "8_math_1.json"
+  ],
+  "8/physics": [
+   "8_physics_1.json"
+  ],
+  "9/biology": [
+   "9_biology_1.json"
+  ],
+  "9/chemistry": [
+   "9_chemistry_1.json"
+  ],
+  "9/commercials": [
+   "9_commercials_1.json"
+  ],
+  "9/general_safety": [
+   "9_general_safety_1.json"
+  ],
+  "9/geography": [
+   "9_geography_1.json"
+  ],
+  "9/math": [
+   "9_math_1.json"
+  ],
+  "9/physics": [
+   "9_physics_1.json"
+  ]
+ },
+ "counts": {
+  "1/evs": 357,
+  "1/general_safety": 74,
+  "1/geography": 47,
+  "1/math": 1358,
+  "10/biology": 260,
+  "10/chemistry": 330,
+  "10/commercials": 193,
+  "10/general_safety": 114,
+  "10/geography": 194,
+  "10/math": 500,
+  "10/physics": 350,
+  "11/biology": 258,
+  "11/chemistry": 400,
+  "11/commercials": 300,
+  "11/general_safety": 70,
+  "11/geography": 80,
+  "11/math": 450,
+  "11/physics": 399,
+  "12/biology": 298,
+  "12/chemistry": 400,
+  "12/commercials": 300,
+  "12/general_safety": 69,
+  "12/geography": 80,
+  "12/math": 450,
+  "12/physics": 400,
+  "2/evs": 309,
+  "2/general_safety": 89,
+  "2/geography": 74,
+  "2/math": 1224,
+  "3/commercials": 250,
+  "3/evs": 305,
+  "3/general_safety": 129,
+  "3/geography": 199,
+  "3/math": 929,
+  "4/commercials": 250,
+  "4/evs": 336,
+  "4/general_safety": 141,
+  "4/geography": 194,
+  "4/math": 910,
+  "5/commercials": 250,
+  "5/evs": 399,
+  "5/general_safety": 147,
+  "5/geography": 195,
+  "5/math": 898,
+  "6/biology": 255,
+  "6/chemistry": 191,
+  "6/commercials": 230,
+  "6/general_safety": 114,
+  "6/geography": 249,
+  "6/math": 491,
+  "6/physics": 221,
+  "7/biology": 273,
+  "7/chemistry": 263,
+  "7/commercials": 230,
+  "7/general_safety": 125,
+  "7/geography": 241,
+  "7/math": 500,
+  "7/physics": 300,
+  "8/biology": 234,
+  "8/chemistry": 236,
+  "8/commercials": 230,
+  "8/general_safety": 152,
+  "8/geography": 234,
+  "8/math": 500,
+  "8/physics": 300,
+  "9/biology": 223,
+  "9/chemistry": 330,
+  "9/commercials": 191,
+  "9/general_safety": 118,
+  "9/geography": 190,
+  "9/math": 483,
+  "9/physics": 350
+ },
+ "total": 22413
+}
