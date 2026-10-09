@@ -1,8 +1,11 @@
-from engine.game_logic import load_game_state, get_random_question, submit_answer
+from engine.game_logic import load_game_state, save_game_state, get_random_question, submit_answer
+from engine import login_limit
 import os
 
-# Load player session
+# Load player session (each run is a login: 25 fresh answers)
 state = load_game_state()
+login_limit.start_login(state)
+save_game_state(state)
 print(f"Welcome back, {state.get('player_name', 'Student')}! Current Phase: {state.get('phase', 1)} | Current Wallet: ₹{state.get('wallet', 0)}")
 
 # Comprehensive multi-phase question database (covering Phases 1 to 5)
@@ -40,7 +43,7 @@ if current_q:
     is_correct, earned, total_wallet, promoted = submit_answer(current_q["id"], user_answer, current_q["answer"], questions_db)
     
     if earned is None:
-        print("\nDaily limit reached: 25 answers today. Nothing paid. Come back tomorrow.")
+        print("\n25 answers used for this login. Nothing paid. Log in again for 25 more.")
     else:
         print(f"\nResult: {'Correct! 🎉' if is_correct else 'Incorrect.'}")
         print(f"Earned this round: ₹{earned} (₹10 attempt + ₹90 correct bonus)")

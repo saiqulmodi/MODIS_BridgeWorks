@@ -4,13 +4,13 @@ Rules:
   - Reading an item pays 1 Rs, once per item.
   - Every answer attempt pays 2 Rs.
   - The first correct answer to an item pays 100 Rs (once per item, so repeats cannot farm it).
-  - At most 25 answers a day, in any phase (engine.daily_limit). The count is kept in the save
-    file, so logging in again does not give another 25.
+  - At most 25 paid answers per login, in any phase (engine.login_limit). Logging in again
+    gives a fresh 25, so a student keeps earning by learning.
 
 With save data (the game's save.json dict) the profile is stored under "ncert_players" by name,
 so the balance and the already-paid questions survive a restart or a new login.
 """
-from engine import daily_limit
+from engine import login_limit
 
 READ_REWARD = 1
 ATTEMPT_REWARD = 2
@@ -18,13 +18,12 @@ CORRECT_REWARD = 100
 
 
 class PlayerProfile:
-    def __init__(self, name, phone="", email="", data=None, on_change=None, today=None):
+    def __init__(self, name, phone="", email="", data=None, on_change=None):
         self.name = name
         self.phone = phone
         self.email = email
         self.data = {} if data is None else data
         self.on_change = on_change
-        self.today = today
         rec = self.data.setdefault("ncert_players", {}).setdefault(name.strip().lower(), {})
         rec.update(name=name, phone=phone or rec.get("phone", ""), email=email or rec.get("email", ""))
         rec.setdefault("balance", 0)
@@ -32,6 +31,7 @@ class PlayerProfile:
         self.read_items = set(rec.get("read", []))
         self.attempted_items = set(rec.get("attempted", []))
         self.completed_questions = set(rec.get("completed", []))
+        login_limit.start_login(self.data)   # creating the profile is a login
 
     @property
     def balance_rupees(self):
@@ -42,7 +42,7 @@ class PlayerProfile:
         return self.balance_rupees
 
     def answers_left(self):
-        return daily_limit.answers_left(self.data, self.today)
+        return login_limit.answers_left(self.data)
 
     def _store(self):
         self.rec["read"] = sorted(self.read_items)
@@ -60,8 +60,8 @@ class PlayerProfile:
         return READ_REWARD
 
     def submit_answer(self, content_id, is_correct):
-        """Pay for one answer. Returns the rupees paid, or None when today's 25 are used up."""
-        if not daily_limit.use_answer(self.data, self.today):
+        """Pay for one answer. Returns the rupees paid, or None when this login's 25 are used up."""
+        if not login_limit.use_answer(self.data):
             return None
         earned = ATTEMPT_REWARD
         self.attempted_items.add(content_id)

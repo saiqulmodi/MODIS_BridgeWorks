@@ -4,7 +4,7 @@ import json
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from engine.game_logic import load_game_state, save_game_state, get_random_question, submit_answer
-from engine import daily_limit
+from engine import login_limit
 
 QUESTIONS_FILE = "questions.txt"
 
@@ -29,6 +29,9 @@ def load_questions_from_file():
 
 def main():
     questions_db = load_questions_from_file()
+    state = load_game_state()
+    login_limit.start_login(state)   # each start of the game is a login: 25 fresh answers
+    save_game_state(state)
     
     while True:
         state = load_game_state()
@@ -37,7 +40,7 @@ def main():
         print("       MODIS BRIDGEWORKS - NATIONAL FOUNDATION SYSTEM       ")
         print("=" * 60)
         print(f"Player: {state.get('player_name', 'Student')} | Current Phase: {state.get('phase', 1)} | Wallet: ₹{state.get('wallet', 0)}")
-        print(f"Answers left today: {daily_limit.answers_left(state)}/{daily_limit.DAILY_ANSWER_LIMIT} (any phase)")
+        print(f"Answers left this login: {login_limit.answers_left(state)}/{login_limit.LOGIN_ANSWER_LIMIT} (any phase)")
         print("-" * 60)
         print("1. Play & Earn (Answer Questions)")
         print("2. Change Phase (1 to 5)")
@@ -47,9 +50,9 @@ def main():
         choice = input("\nSelect an option (1-4): ").strip()
         
         if choice == "1":
-            if daily_limit.answers_left(state) == 0:
-                print(f"\nDaily limit reached: {daily_limit.DAILY_ANSWER_LIMIT} answers today. "
-                      "Logging in again does not reset it. Come back tomorrow!")
+            if login_limit.answers_left(state) == 0:
+                print(f"\n{login_limit.LOGIN_ANSWER_LIMIT} answers used for this login. "
+                      "Exit and start again (log in again) for 25 more!")
                 continue
             phase = str(state.get("phase", 1))
             question = get_random_question(phase, questions_db)

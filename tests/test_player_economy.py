@@ -32,37 +32,39 @@ def test_player_registration_and_scoring():
 
 
 
-def test_daily_limit_25_answers_survives_relogin():
-    import datetime
-    day = datetime.date(2026, 10, 9)
+
+def test_login_limit_25_answers_and_relogin_gives_25_more():
     save = {}
-    player = PlayerProfile(name="Student Player", data=save, today=day)
+    player = PlayerProfile(name="Student Player", data=save)
     for i in range(25):
         assert player.submit_answer(f"p{i % 5}_{i}", is_correct=True) == 102
     assert player.balance_rupees == 25 * 102
     assert player.answers_left() == 0
-    # The 26th answer pays nothing, in any phase
+    # The 26th answer in the same login pays nothing, in any phase
     assert player.submit_answer("p4_99", is_correct=True) is None
     assert player.balance_rupees == 2550
 
-    # Logging in again (same or a new name) on the same save does not give another 25
-    again = PlayerProfile(name="student player", data=save, today=day)
+    # Logging in again with the same name on the same device: wallet kept, 25 fresh answers
+    again = PlayerProfile(name="Student Player", data=save)
     assert again.balance_rupees == 2550
-    assert again.submit_answer("p1_50", is_correct=True) is None
-    other = PlayerProfile(name="New Name", data=save, today=day)
-    assert other.submit_answer("p1_51", is_correct=True) is None
-
-    # Already-paid questions stay paid after a new login
-    tomorrow = PlayerProfile(name="Student Player", data=save, today=day + datetime.timedelta(days=1))
-    assert tomorrow.answers_left() == 25
-    assert tomorrow.submit_answer("p0_0", is_correct=True) == 2
+    assert again.answers_left() == 25
+    assert again.submit_answer("p1_50", is_correct=True) == 102
+    assert again.balance_rupees == 2652
+    # A question already paid its 100 pays only the 2 for trying
+    assert again.submit_answer("p0_0", is_correct=True) == 2
 
 
-def test_console_game_daily_limit(tmp_path, monkeypatch):
-    from engine import game_logic
+def test_console_game_login_limit(tmp_path, monkeypatch):
+    from engine import game_logic, login_limit
     monkeypatch.setattr(game_logic, "SAVE_FILE", str(tmp_path / "save.json"))
     for i in range(25):
         ok, earned, wallet, _ = game_logic.submit_answer(f"q{i}", "12", "12")
         assert ok and earned == 100
     ok, earned, wallet, promoted = game_logic.submit_answer("q99", "12", "12")
     assert earned is None and wallet == 2500 and not promoted
+    # Log in again: 25 more
+    state = game_logic.load_game_state()
+    login_limit.start_login(state)
+    game_logic.save_game_state(state)
+    ok, earned, wallet, _ = game_logic.submit_answer("q100", "12", "12")
+    assert earned == 100 and wallet == 2600
