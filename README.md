@@ -80,3 +80,17 @@ venv\Scripts\python.exe -m pytest -q\
    ```bash
    python quiz_console.py
 ```
+
+## Big question banks
+Very large MCQ collections (JEE Main/Advanced, NIT/IIT, international olympiads, school banks) plug in
+without changing the game code. `tools/build_bank.py` turns a SQLite, CSV or JSON file into `banks/<id>/`
+(small JSON pieces by level and subject); the game reads only the piece a student opens, on desktop and
+in the browser. Banks can add new levels (e.g. `--new-level "15=International Olympiad|আন্তর্জাতিক অলিম্পিয়াড"`)
+and new subjects (EVS, Geography, ...), which appear as Academy buttons. Rewards, the wallet and the
+25-answers-per-login limit work the same for every question.
+```bash
+python tools/build_bank.py --id school --title "School MCQ Bank" --sqlite ../School_MCQ_Bank/output/mcq_bank.db --publish
+python tools/build_bank.py --remove school --publish
+```
+`--publish` copies `banks/` to `docs/banks/` for the website. The Stratos hub box stays without banks
+(20 MB limit).
