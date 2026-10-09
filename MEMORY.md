@@ -28,7 +28,7 @@
 
 &#x20;  - Added safe game state loading with default fallback parameters.
 
-3\. \*\*Interactive Main Loop (`main.py`):\*\*
+3\. \*\*Interactive Main Loop (`quiz_console.py`, moved out of `main.py` so `main.py` starts the bridge game again):\*\*
 
 &#x20;  - Created a continuous CLI menu supporting gameplay, phase switching (Phases 1–5), wallet status reporting, and safe exit.
 

@@ -72,7 +72,11 @@ venv\Scripts\python.exe -m pytest -q\
 
 ## Getting Started
 1. Install dependencies (if applicable): `pip install -r requirements.txt`
-2. Run the main application:
+2. Run the bridge game (also what the website runs):
    ```bash
    python main.py
+   ```
+3. Run the text-based question game (Phases 1-5, wallet):
+   ```bash
+   python quiz_console.py
 ```
