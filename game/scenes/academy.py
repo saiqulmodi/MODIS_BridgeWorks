@@ -5,8 +5,9 @@ import random
 import pygame
 
 from engine import economy
+from engine import question_bank
 from engine.academy import CLASSES, SUBJECTS, class_label, target_per_subject
-from engine.academy_data import items
+from engine.academy_data import levels, pool as bank_pool, subjects
 from engine.academy_pass import has_access
 
 from .. import i18n, sound
@@ -62,7 +63,7 @@ def w(key, **kw):
 
 
 def name(key):
-    en, bn = NAMES[key]
+    en, bn = NAMES.get(key) or question_bank.extra_subjects().get(key) or (key.title(), key.title())
     return bn if i18n.lang() == "bn" else en
 
 
@@ -89,17 +90,23 @@ class AcademyScene:
         self.lang_btn = self.widgets.add(Button((WIDTH - 360, 16, 168, 36), "", app.toggle_language,
                                                 size=15, hotkey=pygame.K_F2))
         self.class_btns = {}
-        for k, c in enumerate(CLASSES):        # 5 per row: 1-5, 6-10, 11 12 NIT IIT
+        all_levels = levels()                  # built-in 1-12, NIT, IIT, then any big-bank level
+        for k, c in enumerate(all_levels):     # 5 per row: 1-5, 6-10, 11 12 NIT IIT, ...
             b = self.widgets.add(Button((24 + (k % 5) * 61, 142 + (k // 5) * 42, 56, 36), class_label(c),
                                         lambda c=c: self.pick_class(c), size=16))
             self.class_btns[c] = b
+        self.subject_y = 142 + -(-len(all_levels) // 5) * 42 + 2
         self.subject_btns = {}
-        y = 292
-        for key in SUBJECTS + ("skills", "daily"):
-            b = self.widgets.add(Button((24, y, 300, 40), "", lambda key=key: self.pick_subject(key),
-                                        size=15))
+        keys = subjects() + ("skills", "daily")
+        top = self.subject_y + 22
+        one_col = top + len(keys) * 46 <= HEIGHT - 8
+        for k, key in enumerate(keys):         # one column, or two when a big bank adds subjects
+            rect = ((24, top + k * 46, 300, 40) if one_col else
+                    (24 + (k % 2) * 153, top + (k // 2) * 46, 147, 40))
+            b = self.widgets.add(Button(rect, "", lambda key=key: self.pick_subject(key),
+                                        size=15 if one_col else 13))
             self.subject_btns[key] = b
-            y += 46
+        self._labels_key = None
         self.give_btn = self.widgets.add(Button((WIDTH - 536, 16, 168, 36), "", app.to_donations, size=15))
         self.next_btn = self.widgets.add(Button((WIDTH - 300, HEIGHT - 62, 280, 44), "", self.next_question,
                                                 size=16, colour=(40, 110, 70), hotkey=pygame.K_RETURN))
@@ -132,11 +139,11 @@ class AcademyScene:
         subject = subject or self.subject
         if subject == "skills":
             return skill_items()
-        return items(self.cls, subject)
+        return bank_pool(self.cls, subject)
 
     def start_daily(self, rng=random):
         answered = self.save.academy["answered"]
-        pool = [r for s in SUBJECTS for r in items(self.cls, s) if str(r["id"]) not in answered]
+        pool = [r for s in subjects() for r in bank_pool(self.cls, s) if str(r["id"]) not in answered]
         if len(pool) < 5:
             pool += [r for r in skill_items() if str(r["id"]) not in answered]
         self.daily = rng.sample(pool, min(5, len(pool)))
@@ -207,12 +214,21 @@ class AcademyScene:
         answered = self.save.academy["answered"]
         for key, b in self.subject_btns.items():
             b.active = (key == "daily") if self.daily is not None else (key == self.subject)
+        labels_key = (self.cls, i18n.lang(), len(answered))
+        if labels_key == self._labels_key:     # big banks: count only when something changed
+            return
+        self._labels_key = labels_key
+        for key, b in self.subject_btns.items():
             if key == "daily":
                 b.label = name(key)
                 continue
             pool = self.pool(key)
             done = sum(1 for r in pool if str(r["id"]) in answered)
-            total = 200 if key == "skills" else target_per_subject(self.cls)
+            if key == "skills":
+                total = 200
+            else:
+                built_in = target_per_subject(self.cls) if self.cls in CLASSES and key in SUBJECTS else 0
+                total = built_in + question_bank.count(self.cls, key)
             b.label = f"{name(key)}   {done}/{total}"
 
     def draw(self, s):
@@ -231,7 +247,7 @@ class AcademyScene:
         lab = w("class")
         s.blit(font_for(lab, 15, True).render(lab, True, ACCENT), (26, 118))
         lab = w("subject")
-        s.blit(font_for(lab, 15, True).render(lab, True, ACCENT), (26, 270))
+        s.blit(font_for(lab, 15, True).render(lab, True, ACCENT), (26, self.subject_y))
         panel(s, (348, 112, WIDTH - 360, HEIGHT - 186), BG_DARK, PANEL_EDGE, 12, alpha=235)
         if self.card is not None:
             self.card.draw(s)

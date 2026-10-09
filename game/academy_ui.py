@@ -29,6 +29,9 @@ WORDS = {
     "read_paid": ("Reading bonus +{g} paid. Well read!", "পড়ার বোনাস +{g} দেওয়া হয়েছে। ভালো পড়েছ!"),
     "read_done": ("Explanation read.", "ব্যাখ্যা পড়া হয়েছে।"),
     "keys": ("Press 1-4 or click an answer.", "1-4 চাপো বা একটি উত্তরে ক্লিক করো।"),
+    "source": ("From the big question bank: {b}", "বড় প্রশ্নব্যাংক থেকে: {b}"),
+    "no_bn": ("From the big question bank: {b} (Bengali not available yet)",
+              "বড় প্রশ্নব্যাংক থেকে: {b} (এই প্রশ্নের বাংলা এখনো নেই)"),
 }
 
 
@@ -107,6 +110,11 @@ class QuizCard:
     def draw(self, surface):
         r = self.rect
         x, y, w = r.x, r.y, r.w
+        if self.r.get("bank"):                 # a question from engine/question_bank.py
+            key = "no_bn" if self.r.get("bn_missing") and i18n.lang() == "bn" else "source"
+            s = word(key, b=self.r.get("bank_bn") if i18n.lang() == "bn" else self.r["bank"])
+            surface.blit(font_for(s, 13).render(s, True, MUTED), (x, y))
+            y += 20
         q = self._t("question")
         fq = font_for(q, 21, True)
         for line in _wrap(fq, q, w):
@@ -188,13 +196,12 @@ def challenge_word(key, **kw):
 
 def pick_question(save, rng=random):
     """A question from the student's class (unanswered first), else from any written class."""
-    from engine.academy import CLASSES, SUBJECTS
-    from engine.academy_data import items
+    from engine.academy_data import levels, pool as bank_pool, subjects
     answered = save.academy["answered"]
     cls = save.academy["class"]
-    order = [cls] + sorted((c for c in CLASSES if c != cls), key=lambda c: abs(c - cls))
+    order = [cls] + sorted((c for c in levels() if c != cls), key=lambda c: abs(c - cls))
     for c in order:
-        pool = [r for s in SUBJECTS for r in items(c, s)]
+        pool = [r for s in subjects() for r in bank_pool(c, s)]
         if pool:
             fresh = [r for r in pool if str(r["id"]) not in answered]
             return rng.choice(fresh or pool)

@@ -58,6 +58,26 @@ def items(class_level, subject):
     return _cache[key]
 
 
+def levels():
+    """Built-in classes plus any level a big bank adds (engine/question_bank.py)."""
+    from . import question_bank
+    extra = set(question_bank.extra_levels()) | question_bank.levels_with_questions()
+    return tuple(sorted(set(CLASSES) | extra))
+
+
+def subjects():
+    """Built-in subjects, then any subject a big bank adds."""
+    from . import question_bank
+    return SUBJECTS + tuple(k for k in question_bank.extra_subjects() if k not in SUBJECTS)
+
+
+def pool(class_level, subject):
+    """Every question for one class and subject: the built-in Academy plus all big banks."""
+    from . import question_bank
+    built_in = items(class_level, subject) if class_level in CLASSES and subject in SUBJECTS else []
+    return built_in + question_bank.items(class_level, subject, grant_reward(class_level))
+
+
 def all_items():
     return [r for c in CLASSES for s in SUBJECTS for r in items(c, s)]
 

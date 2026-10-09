@@ -18,9 +18,14 @@ def target_per_subject(class_level):
 
 
 def class_label(class_level, lang="en"):
-    """'7' for Class 7, 'NIT' / 'IIT' for the two entrance-exam levels."""
-    if class_level in LEVEL_NAMES:
-        return LEVEL_NAMES[class_level][1 if lang == "bn" else 0]
+    """'7' for Class 7, 'NIT' / 'IIT' for the two entrance-exam levels, a big bank's own name for its
+    extra levels (e.g. 15 = International)."""
+    names = LEVEL_NAMES.get(class_level)
+    if names is None and class_level not in CLASSES:
+        from engine.question_bank import extra_levels
+        names = extra_levels().get(class_level)
+    if names:
+        return names[1 if lang == "bn" else 0]
     return str(class_level)
 
 
