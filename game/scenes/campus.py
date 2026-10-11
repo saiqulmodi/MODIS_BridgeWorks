@@ -15,6 +15,8 @@ import pygame
 
 from engine import campus3d as world
 from engine import economy
+from engine.academy import SUBJECTS
+from engine.academy_data import items as academy_items
 from engine.levels import get as get_level
 
 from .. import i18n, sound
@@ -71,6 +73,7 @@ WORDS = {
     "tip4": ("Click a building or the map to choose it, then Zip there.",
              "কোনো ভবন বা মানচিত্রে ক্লিক করো, তারপর উড়ে যাও।"),
     "got_it": ("Let's go!", "চলো যাই!"),
+    "ready": ("{r} of {n} subjects ready", "{n}টির মধ্যে {r}টি বিষয় তৈরি"),
 }
 
 TOUR = ["primary", "library", "site1", "middle", "high", "college", "nit", "iit", "archive", "camp",
@@ -196,6 +199,7 @@ class CampusScene:
         self.hit_polys = {}
         self.anchor = None
         self.show_tips = not app.save.data.get("campus_seen")
+        self._ready = {}
         self.widgets = WidgetGroup()
         self.lang_btn = self.widgets.add(Button((14, 10, 120, 34), "", app.toggle_language,
                                                 hotkey=pygame.K_F2, size=15))
@@ -282,7 +286,15 @@ class CampusScene:
     def box_sub(self, b):
         if b.kind == "level":
             return i18n.tr(get_level(b.payload).title)
+        if b.kind == "school" and b.payload[0] >= 13:   # NIT / IIT: say how much is ready
+            ready = self.ready_subjects(b.payload[0])
+            return f"{pair(b.sub)} - {w('ready', r=ready, n=len(SUBJECTS))}"
         return pair(b.sub)
+
+    def ready_subjects(self, c):
+        if c not in self._ready:
+            self._ready[c] = sum(1 for subj in SUBJECTS if academy_items(c, subj))
+        return self._ready[c]
 
     def say(self, msg, secs=3.5):
         self.toast = (msg, secs)
@@ -853,6 +865,12 @@ class CampusScene:
             size = int(max(13, min(28, 1500 / p[2])))
             r = pygame.Rect(0, 0, measure(self.box_name(b), size, True)[0] + 22, size + 14)
             r.midbottom = (int(p[0]), int(p[1]))
+            if r.top < 62:
+                # a tall building's roof is above the screen: keep its sign just under the top bar
+                base = cam.project((cx, b.y0, cz))
+                if base is None or base[1] < 62 + r.h:
+                    continue
+                r.top = 62
             show_sub = p[2] < 60
             area = r.inflate(0, 2 * (size + 2)).move(0, size + 2) if show_sub else r
             cands.append((p[2], b, r, size, show_sub, area))

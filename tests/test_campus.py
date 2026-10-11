@@ -196,3 +196,22 @@ def test_clicking_the_map_targets_a_building(app):
     assert sc.target is iit and MAP.collidepoint(pos)
     app.frame([pygame.event.Event(pygame.MOUSEBUTTONDOWN, pos=pos, button=1)], 1 / 60)
     assert sc.player.zip is not None                     # second click: zip there
+
+
+def test_signs_and_academy_show_what_is_ready(app):
+    from engine.academy import SUBJECTS
+    from engine.academy_data import items
+    sc = app.scene
+    ready = sum(1 for s in SUBJECTS if items(14, s))
+    assert f"{ready} of {len(SUBJECTS)} subjects ready" in sc.box_sub(sc.by_key["iit"])
+    assert len(items(14, "chemistry")) == 200                       # IIT chemistry is complete
+    app.to_academy()
+    ac = app.scene
+    ac.pick_class(14)
+    ac.update(1 / 60)
+    from game.scenes.academy import READY, SOON
+    assert ac.ready["chemistry"] == READY and "/200" in ac.subject_btns["chemistry"].label
+    for s in SUBJECTS:
+        if not items(14, s):
+            assert ac.ready[s] == SOON and "coming soon" in ac.subject_btns[s].label
+    ac.draw(app.screen)

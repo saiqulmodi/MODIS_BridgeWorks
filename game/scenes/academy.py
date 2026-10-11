@@ -54,7 +54,10 @@ WORDS = {
     "free": ("Scholarship Pass: free during the preview - every class is open.",
              "স্কলারশিপ পাস: প্রিভিউর সময় বিনামূল্যে - সব শ্রেণি খোলা।"),
     "locked": ("This class needs the Scholarship Pass.", "এই শ্রেণির জন্য স্কলারশিপ পাস লাগবে।"),
+    "soon": ("{s} - coming soon", "{s} - শীঘ্রই আসছে"),
 }
+
+READY, PARTLY, SOON = (70, 210, 110), (245, 200, 50), (110, 120, 140)
 
 
 def w(key, **kw):
@@ -107,6 +110,7 @@ class AcademyScene:
                                         size=15 if one_col else 13))
             self.subject_btns[key] = b
         self._labels_key = None
+        self.ready = {}                        # subject -> dot colour: all written / part / not yet
         self.give_btn = self.widgets.add(Button((WIDTH - 536, 16, 168, 36), "", app.to_donations, size=15))
         self.next_btn = self.widgets.add(Button((WIDTH - 300, HEIGHT - 62, 280, 44), "", self.next_question,
                                                 size=16, colour=(40, 110, 70), hotkey=pygame.K_RETURN))
@@ -225,11 +229,18 @@ class AcademyScene:
             pool = self.pool(key)
             done = sum(1 for r in pool if str(r["id"]) in answered)
             if key == "skills":
-                total = 200
+                target = 200
             else:
                 built_in = target_per_subject(self.cls) if self.cls in CLASSES and key in SUBJECTS else 0
-                total = built_in + question_bank.count(self.cls, key)
-            b.label = f"{name(key)}   {done}/{total}"
+                target = built_in + question_bank.count(self.cls, key)
+            # show what is really there: a green dot when the subject is complete, amber while
+            # it is still being written, grey (and "coming soon") when nothing is ready yet
+            if not pool:
+                b.label = w("soon", s=name(key))
+                self.ready[key] = SOON
+            else:
+                b.label = f"{name(key)}   {done}/{len(pool)}"
+                self.ready[key] = READY if len(pool) >= target else PARTLY
 
     def draw(self, s):
         blueprint_background(s)
@@ -264,3 +275,7 @@ class AcademyScene:
         free = w("free")
         s.blit(font_for(free, 13).render(free, True, MUTED), (360, HEIGHT - 34))
         self.widgets.draw(s)
+        for key, col in self.ready.items():
+            r = self.subject_btns[key].rect
+            pygame.draw.circle(s, col, (r.x + 9, r.centery), 5)
+            pygame.draw.circle(s, (20, 30, 50), (r.x + 9, r.centery), 5, 1)
