@@ -40,6 +40,8 @@ EXACT = {
     "Click a level (or press 1-9, 0 for level 10).  Inside a level: C toggles the calculator, H opens Help, Esc returns here.":
         "একটি লেভেলে ক্লিক করো (বা 1-9 চাপো, লেভেল 10-এর জন্য 0)।  লেভেলের ভিতরে: C চাপলে ক্যালকুলেটর খোলে/বন্ধ হয়, H চাপলে সাহায্য খোলে, Esc চাপলে এখানে ফেরো।",
     "Quit": "বন্ধ করো", "LOCKED": "তালাবদ্ধ", "DONE": "সম্পন্ন",
+    "Campus World": "ক্যাম্পাস জগৎ",
+    "Walk and swing around the 3D campus": "ত্রিমাত্রিক ক্যাম্পাসে হাঁটো আর দোল খাও",
     "Full screen (F11)": "পূর্ণ পর্দা (F11)",
     "Fill the whole screen; press F11 again to leave": "পুরো পর্দা জুড়ে দেখাও; বের হতে আবার F11 চাপো",
     "English / Bengali (F2)": "ইংরেজি / বাংলা (F2)",

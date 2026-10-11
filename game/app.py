@@ -39,11 +39,27 @@ class App:
             sound.init()
         self.running = True
         self.scene = None
-        self.to_menu()
+        self.home = "menu"           # "campus" after a building in Campus World opened a screen
+        self.campus_state = None     # (door position, facing) to return to in Campus World
+        self.to_campus()
 
     def to_menu(self):
+        """Back from a level/Academy/Donations: to the campus door you came from, else the menu."""
+        if self.home == "campus":
+            self.to_campus()
+            return
         from .scenes.menu import MenuScene
         self.scene = MenuScene(self)
+
+    def to_classic_menu(self):
+        self.home = "menu"
+        from .scenes.menu import MenuScene
+        self.scene = MenuScene(self)
+
+    def to_campus(self):
+        from .scenes.campus import CampusScene
+        self.home = "menu"
+        self.scene = CampusScene(self)
 
     def to_academy(self):
         from .scenes.academy import AcademyScene

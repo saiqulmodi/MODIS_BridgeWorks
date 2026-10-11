@@ -142,6 +142,7 @@ def test_black_box_offers_the_academy_challenge(app):
 
 
 def test_academy_screen_answers_reads_and_pays(app):
+    app.to_classic_menu()            # the game opens in Campus World; these keys are the menu's
     app.frame([pygame.event.Event(pygame.KEYDOWN, key=pygame.K_a, mod=0, unicode="a")], 1 / 60)
     sc = app.scene
     sc.pick_class(1)

@@ -58,6 +58,7 @@ def test_titles_grow_with_giving():
 
 
 def test_donation_screen_from_menu_and_academy(app):
+    app.to_classic_menu()            # the game opens in Campus World; these keys are the menu's
     app.frame([pygame.event.Event(pygame.KEYDOWN, key=pygame.K_d, mod=0, unicode="d")], 1 / 60)
     sc = app.scene
     assert type(sc).__name__ == "DonationScene"

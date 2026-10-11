@@ -50,6 +50,10 @@ class MenuScene:
                                 hotkey=pygame.K_d, size=16, colour=(90, 70, 30),
                                 tooltip="Give Civil Grants to causes that build opportunities"))
 
+        self.widgets.add(Button((WIDTH - 216, 30, 196, 44), "Campus World", app.to_campus,
+                                hotkey=pygame.K_w, size=18, colour=(200, 120, 30),
+                                tooltip="Walk and swing around the 3D campus"))
+
         # Register ID button
         self.widgets.add(Button((706, 150, 130, 36), "Register ID", self.open_register,
                                 size=15, tooltip="Register with Name to unlock earnings"))
