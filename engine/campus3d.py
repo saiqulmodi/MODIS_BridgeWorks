@@ -17,6 +17,8 @@ GRAVITY = 26.0
 WALK_SPEED = 13.0
 TURN_SPEED = 2.6            # rad/s
 JUMP_SPEED = 11.5
+SUPER_JUMP_SPEED = 21.0     # magic boots
+GLIDE_FALL = 3.0            # the magic cape caps the falling speed (m/s)
 RADIUS = 0.6                # the player's body, for collisions
 ROPE_MIN, ROPE_MAX = 6.0, 48.0
 RIVER_Z = (96.0, 114.0)
@@ -257,6 +259,7 @@ class Player:
         self.rope = None            # [anchor (x,y,z), length]
         self.zip = None             # [start, end, t, duration]
         self.splash = 0.0           # >0 just after falling in the river
+        self.gliding = False        # the magic cape is open
         self.walk_phase = 0.0
 
     @property
@@ -321,16 +324,49 @@ class Player:
             return True
         return False
 
+    # --- magic tools (engine/magic.py decides who has them) -------------------------------
+    def super_jump(self):
+        """Magic boots: a jump about three times as high."""
+        if self.grounded or self.rope is not None:
+            self.rope = None
+            self.vel[1] = SUPER_JUMP_SPEED
+            hx, _, hz = self.heading
+            self.vel[0] += hx * 4.0
+            self.vel[2] += hz * 4.0
+            self.grounded = False
+            return True
+        return False
+
+    def web_pull(self, boxes):
+        """Magic web-zip: shoot a web at the best roof ahead and get pulled up onto it.
+        Returns the anchor hit, or None."""
+        a = self.best_anchor(boxes)
+        if a is None:
+            return None
+        for b in boxes:
+            if a in b.anchors():
+                cx, _, cz = b.centre
+                landing = (a[0] + max(-1.2, min(1.2, cx - a[0])), b.h,
+                           a[2] + max(-1.2, min(1.2, cz - a[2])))
+                self.zip_to(landing, duration=max(0.5, min(1.4, math.dist(self.pos, landing) / 30.0)))
+                self.zip.append(a)         # a web pulls straight; remembered for drawing
+                return a
+        return None
+
+    def glide(self, on):
+        """Magic cape: falling slowly and drifting forward while it is open."""
+        self.gliding = bool(on) and not self.grounded and self.rope is None and self.zip is None
+
     # --- stepping -----------------------------------------------------------------------
     def update(self, dt, boxes, forward=0.0, turn=0.0):
         """forward/turn in -1..1. Returns an event string or None ("splash", "landed")."""
         self.splash = max(0.0, self.splash - dt)
         if self.zip is not None:
-            start, end, t, dur = self.zip
+            start, end, t, dur = self.zip[:4]
             t = min(1.0, t + dt / dur)
             self.zip[2] = t
             k = t * t * (3 - 2 * t)
-            arc = 10.0 * 4 * t * (1 - t)
+            arc = 0.0 if len(self.zip) > 4 else 10.0 * 4 * t * (1 - t)
             self.pos = [start[i] + (end[i] - start[i]) * k for i in range(3)]
             self.pos[1] += arc
             if t >= 1.0:
@@ -361,6 +397,11 @@ class Player:
                 self.vel[0] += hx * forward * 6.0 * h          # a little air control
                 self.vel[2] += hz * forward * 6.0 * h
             self.vel[1] -= GRAVITY * h
+            if self.gliding:
+                if self.vel[1] < -GLIDE_FALL:
+                    self.vel[1] = -GLIDE_FALL
+                self.vel[0] += hx * 5.0 * h               # the cape carries you forward
+                self.vel[2] += hz * 5.0 * h
             old_y = self.pos[1]
             for i in range(3):
                 self.pos[i] += self.vel[i] * h
@@ -407,6 +448,7 @@ class Player:
             self.pos[1] = floor
             if self.vel[1] < 0:
                 self.vel[1] = 0.0
+            self.gliding = False
             # on a rope you are only touching down: the reel lifts you off again
             self.grounded = self.rope is None
         else:

@@ -15,6 +15,7 @@ import pygame
 
 from engine import campus3d as world
 from engine import economy
+from engine import magic
 from engine.academy import SUBJECTS
 from engine.academy_data import items as academy_items
 from engine.levels import get as get_level
@@ -73,6 +74,14 @@ WORDS = {
     "tip4": ("Click a building or the map to choose it, then Zip there.",
              "কোনো ভবন বা মানচিত্রে ক্লিক করো, তারপর উড়ে যাও।"),
     "got_it": ("Let's go!", "চলো যাই!"),
+    "tip5": ("Class 1-7: answer Academy questions to earn magic tools - ZIP onto roofs, BOOTS to jump high, "
+             "CAPE to float (keys Q, B, hold G).",
+             "শ্রেণি ১-৭: একাডেমির প্রশ্নের উত্তর দিয়ে জাদুর সরঞ্জাম জেতো - জিপে ছাদে ওঠো, বুটে উঁচু লাফ, "
+             "কেপে ভাসো (Q, B, G ধরে রাখো)।"),
+    "locked_tool": ("{t} is locked: answer {n} Class {c} Academy questions right ({h}/{n}). Go to the school!",
+                    "{t} বন্ধ: একাডেমিতে শ্রেণি {c}-এর {n}টি প্রশ্নের সঠিক উত্তর দাও ({h}/{n})। স্কুলে যাও!"),
+    "new_tool": ("New magic tool: {t} - {d}!", "নতুন জাদুর সরঞ্জাম: {t} - {d}!"),
+    "no_roof": ("Face a building to zip onto its roof!", "ছাদে উঠতে একটা ভবনের দিকে মুখ করো!"),
     "ready": ("{r} of {n} subjects ready", "{n}টির মধ্যে {r}টি বিষয় তৈরি"),
 }
 
@@ -120,10 +129,12 @@ class HoldPad:
         self.label = label
         self.colour = colour
         self.held = False
+        self.visible = True
+        self.locked = None          # "2/5" while a magic tool is still being earned
 
     def draw(self, s):
         surf = pygame.Surface(self.rect.size, pygame.SRCALPHA)
-        col = (*_shade(self.colour, 1.5 if self.held else 1.0), 190)
+        col = (*_shade(self.colour, 1.5 if self.held else (0.45 if self.locked else 1.0)), 190)
         pygame.draw.rect(surf, col, surf.get_rect(), border_radius=14)
         pygame.draw.rect(surf, (255, 255, 255, 120), surf.get_rect(), 2, border_radius=14)
         s.blit(surf, self.rect.topleft)
@@ -135,6 +146,15 @@ class HoldPad:
             back = (c[0] - dx * k * 0.7, c[1] - dy * k * 0.7)
             pygame.draw.polygon(s, (255, 255, 255), [tip, (back[0] + side[0], back[1] + side[1]),
                                                      (back[0] - side[0], back[1] - side[1])])
+            return
+        if self.locked:
+            c = self.rect.center
+            lk = pygame.Rect(0, 0, 18, 14)
+            lk.midtop = (c[0], c[1] - 18)
+            pygame.draw.arc(s, (255, 255, 255), (lk.x + 3, lk.y - 9, 12, 18), 0, math.pi, 3)
+            pygame.draw.rect(s, (255, 255, 255), lk, border_radius=3)
+            text(s, self.label, (c[0], c[1] + 8), 14, (220, 225, 235), bold=True, anchor="center", raw=True)
+            text(s, self.locked, (c[0], c[1] + 26), 13, (255, 220, 120), bold=True, anchor="center", raw=True)
             return
         text(s, self.label, self.rect.center, 15, (255, 255, 255), bold=True, anchor="center", raw=True)
 
@@ -224,10 +244,18 @@ class CampusScene:
             "jump": HoldPad((WIDTH - 26 - 3 * 96 - 16, HEIGHT - 26 - 80, 96, 80), "", (40, 120, 70)),
             "swing": HoldPad((WIDTH - 26 - 2 * 96 - 8, HEIGHT - 26 - 80, 96, 80), "", (200, 120, 30)),
             "enter": HoldPad((WIDTH - 26 - 96, HEIGHT - 26 - 80, 96, 80), "", (150, 60, 120)),
+            # magic tools for Class 1-7 players, earned in the Academy (engine/magic.py)
+            "zip": HoldPad((WIDTH - 26 - 3 * 96 - 16, HEIGHT - 26 - 168, 96, 80), "", (230, 110, 40)),
+            "boots": HoldPad((WIDTH - 26 - 2 * 96 - 8, HEIGHT - 26 - 168, 96, 80), "", (50, 120, 220)),
+            "cape": HoldPad((WIDTH - 26 - 96, HEIGHT - 26 - 168, 96, 80), "", (140, 70, 210)),
         }
+        self.cape_hold = False
+        self.web_flash = None         # (anchor, until): the web line of a web-zip
+        self._magic_key = None
         self.sky = self._sky_surface()
         self.hills = self._hills_surface()
         self._labels()
+        self.refresh_magic()
 
     # --- pre-rendered backdrop ----------------------------------------------------------
     def _sky_surface(self):
@@ -274,6 +302,8 @@ class CampusScene:
         self.zip_btn.label = w("zip")
         self.got_it.label = w("got_it")
         self.pads["jump"].label = w("jump")
+        for key, _classes, name, _does in magic.TOOLS:
+            self.pads[key].label = pair(name)
         self.pads["swing"].label = w("swing")
         self.pads["enter"].label = w("go_in")
 
@@ -421,9 +451,11 @@ class CampusScene:
             return
         if e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
             for name, p in self.pads.items():
-                if p.rect.collidepoint(e.pos):
+                if p.visible and p.rect.collidepoint(e.pos):
                     p.held = True
-                    if name == "jump":
+                    if name in ("zip", "boots", "cape"):
+                        self.use_tool(name)
+                    elif name == "jump":
                         self.jump_or_swing(True)
                     elif name == "swing":
                         self.swing(True)
@@ -449,6 +481,7 @@ class CampusScene:
                 if p.held and name in ("jump", "swing"):
                     self.swing(False)
                 p.held = False
+            self.cape_hold = False
             self.drag = None
         elif e.type == pygame.MOUSEMOTION and self.drag is not None:
             self.player.yaw += (e.pos[0] - self.drag) * 0.006
@@ -460,6 +493,10 @@ class CampusScene:
                 self.jump_or_swing(True)
             elif e.key in (pygame.K_e, pygame.K_RETURN, pygame.K_KP_ENTER):
                 self.try_enter()
+            elif e.key == pygame.K_q:
+                self.use_tool("zip")
+            elif e.key == pygame.K_b:
+                self.use_tool("boots")
             elif e.key == pygame.K_ESCAPE:
                 self.target = None
         elif e.type == pygame.KEYUP and e.key == pygame.K_SPACE:
@@ -488,6 +525,63 @@ class CampusScene:
             if self.player.rope is not None:
                 self.player.release()
 
+    # --- magic tools ------------------------------------------------------------------------
+    def refresh_magic(self):
+        """Show the tool belt to Class 1-7 players and lock tools not yet earned; announce a
+        tool the moment it is earned."""
+        save = self.app.save
+        a = save.academy
+        key = (a.get("class"), len(a["answered"]), i18n.lang())
+        if key == self._magic_key:
+            return
+        self._magic_key = key
+        show = magic.eligible(save)
+        seen = save.data.setdefault("magic_seen", [])
+        for tool, _classes, name, does in magic.TOOLS:
+            pad = self.pads[tool]
+            pad.visible = show
+            have, need = magic.progress(save, tool)
+            pad.locked = None if have >= need else f"{have}/{need}"
+            if show and pad.locked is None and tool not in seen:
+                seen.append(tool)
+                save.write()
+                sound.play("kaching")
+                self.say(w("new_tool", t=pair(name), d=pair(does)), 5.0)
+
+    def tool_ready(self, tool):
+        pad = self.pads[tool]
+        if not pad.visible:
+            return False
+        if pad.locked:
+            have, need = magic.progress(self.app.save, tool)
+            self.say(w("locked_tool", t=pad.label, c=magic.class_range(tool), h=have, n=need), 5.0)
+            school = "primary" if magic.BY_KEY[tool][1][-1] <= 4 else "middle"
+            self.target = self.by_key[school]
+            return False
+        return True
+
+    def use_tool(self, tool):
+        p = self.player
+        if p.zip is not None or not self.tool_ready(tool):
+            return
+        if tool == "zip":
+            anchor = p.web_pull(self.boxes)
+            if anchor is None:
+                self.say(w("no_roof"))
+                return
+            sound.play("whoosh")
+            self.web_flash = (anchor, self.t + 1.6)
+        elif tool == "boots":
+            if p.super_jump():
+                sound.play("whoosh")
+        else:
+            self.cape_hold = True
+            if p.grounded:
+                if self.pads["boots"].locked is None:
+                    p.super_jump()
+                else:
+                    p.jump()
+
     def try_enter(self):
         b = world.nearest_entrance(self.boxes, self.player.pos)
         if b is not None:
@@ -503,6 +597,7 @@ class CampusScene:
             self.ncert_overlay.update(dt)
         msg, ttl = self.toast
         self.toast = (msg, max(0.0, ttl - dt))
+        self.refresh_magic()
         if self.overlay() is not None:
             return
         try:
@@ -524,6 +619,8 @@ class CampusScene:
                 and self.player.zip is None and self.player.vel[1] < 2:
             if self.player.attach(self.boxes):         # holding SPACE through the jump
                 sound.play("whoosh")
+        cape = self.pads["cape"]
+        self.player.glide(cape.visible and cape.locked is None and (self.cape_hold or k(pygame.K_g)))
         event = self.player.update(dt, self.boxes, fwd, turn)
         if event == "splash":
             sound.play("snap")
@@ -810,6 +907,9 @@ class CampusScene:
         hip, neck, head = P(0, 0.95), P(0, 1.45), P(0, 1.68)
         lw = max(2, int(0.16 * sc))
         leg = (30, 50, 110)
+        if p.gliding:                                  # the magic cape spreads out behind
+            pygame.draw.polygon(s, (140, 70, 210), [P(-0.25, 1.45, -0.1), P(0.25, 1.45, -0.1),
+                                                    P(0.9, 0.5, -0.8), P(-0.9, 0.5, -0.8)])
         pygame.draw.line(s, leg, hip, P(-0.15, 0.0, swing), lw)
         pygame.draw.line(s, leg, hip, P(0.15, 0.0, -swing), lw)
         pygame.draw.line(s, PLAYER_SUIT, hip, neck, max(3, int(0.32 * sc)))
@@ -819,6 +919,17 @@ class CampusScene:
             if a:
                 pygame.draw.line(s, (255, 255, 255), hand, a[:2], 2)
                 pygame.draw.circle(s, (255, 220, 60), a[:2], 5)
+            pygame.draw.line(s, PLAYER_SUIT, neck, hand, lw)
+            pygame.draw.line(s, PLAYER_SUIT, neck, P(-0.35, 1.0, 0.2), lw)
+        elif p.zip is not None and len(p.zip) > 4:     # the web-zip line, with a little splat
+            hand = P(0.1, 2.0)
+            a = cam.project(p.zip[4])
+            if a:
+                pygame.draw.line(s, (255, 255, 255), hand, a[:2], 2)
+                for k in range(6):
+                    ang = k * math.pi / 3
+                    pygame.draw.line(s, (255, 255, 255), a[:2],
+                                     (a[0] + 9 * math.cos(ang), a[1] + 9 * math.sin(ang)), 1)
             pygame.draw.line(s, PLAYER_SUIT, neck, hand, lw)
             pygame.draw.line(s, PLAYER_SUIT, neck, P(-0.35, 1.0, 0.2), lw)
         elif p.zip is not None:
@@ -972,7 +1083,7 @@ class CampusScene:
         # the door you are standing at
         b = world.nearest_entrance(self.boxes, self.player.pos)
         for name, pad in self.pads.items():
-            if name == "enter" and b is None:
+            if (name == "enter" and b is None) or not pad.visible:
                 continue
             pad.draw(s)
         if b is not None and self.overlay() is None:
@@ -991,12 +1102,12 @@ class CampusScene:
             panel(s, r, (20, 36, 64), (90, 210, 240), 14, alpha=int(min(1.0, ttl) * 230))
             text(s, msg, r.center, 18, (255, 255, 255), bold=True, anchor="center", raw=True)
         if self.show_tips and self.overlay() is None:
-            r = pygame.Rect(26, 70, 440, 300)
+            r = pygame.Rect(26, 70, 440, 380)
             panel(s, r, (20, 40, 70), (255, 196, 64), 16, alpha=235)
             text(s, w("tip_title"), (r.x + 20, r.y + 16), 24, (255, 214, 120), bold=True, raw=True)
             y = r.y + 60
             for key, col in (("tip1", (90, 210, 240)), ("tip2", (255, 220, 60)), ("tip3", (255, 150, 200)),
-                             ("tip4", (140, 230, 140))):
+                             ("tip4", (140, 230, 140)), ("tip5", (255, 140, 60))):
                 pygame.draw.circle(s, col, (r.x + 26, y + 11), 6)
                 for line in wrap(w(key), r.w - 64, 16):
                     text(s, line, (r.x + 42, y), 16, (240, 245, 255), raw=True)

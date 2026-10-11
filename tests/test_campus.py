@@ -215,3 +215,55 @@ def test_signs_and_academy_show_what_is_ready(app):
         if not items(14, s):
             assert ac.ready[s] == SOON and "coming soon" in ac.subject_btns[s].label
     ac.draw(app.screen)
+
+
+def test_magic_tools_are_earned_in_class_1_to_7(app):
+    from engine import magic
+    sc = app.scene
+    app.save.academy["class"] = 9                        # older players: plain rope swing only
+    sc.refresh_magic()
+    assert not any(sc.pads[t].visible for t in ("zip", "boots", "cape"))
+    app.save.academy["class"] = 3
+    sc.refresh_magic()
+    assert all(sc.pads[t].visible for t in ("zip", "boots", "cape"))
+    assert sc.pads["zip"].locked == "0/5"
+    sc.use_tool("zip")                                   # locked: says how to earn it, points to school
+    assert "locked" in sc.toast[0] and sc.target is sc.by_key["primary"]
+    for n in range(5):                                   # 5 right answers to Class 1-2 questions
+        app.save.answer_question(11001 + n, True, 0)
+    app.save.answer_question(31001, False, 0)            # a wrong answer does not count
+    sc.refresh_magic()
+    assert sc.pads["zip"].locked is None and sc.pads["boots"].locked == "0/5"
+    assert "zip" in app.save.data["magic_seen"] and "ZIP" in sc.toast[0]
+    assert magic.unlocked(app.save, "zip") and not magic.unlocked(app.save, "cape")
+    # ZIP pulls the hero onto a roof
+    sc.player = world.Player((0, 0, 20), 0.0)
+    sc.player.jump()
+    for _ in range(10):
+        sc.player.update(1 / 60, sc.boxes)
+    sc.use_tool("zip")
+    for _ in range(150):
+        sc.update(1 / 60)
+    assert sc.player.pos[1] > 5 and sc.player.grounded
+    # BOOTS and CAPE once their classes are learned
+    for n in range(5):
+        app.save.answer_question(31010 + n, True, 0)
+        app.save.answer_question(61010 + n, True, 0)
+    sc.refresh_magic()
+    sc.player = world.Player((0, 0, 0), 0.0)
+    sc.use_tool("boots")
+    top = 0
+    for _ in range(120):
+        sc.player.update(1 / 60, sc.boxes)
+        top = max(top, sc.player.pos[1])
+    assert top > 7                                        # about three times a normal jump
+    sc.player = world.Player((0, 15, 0), 0.0)
+    sc.player.grounded = False
+    sc.cape_hold = True
+    for _ in range(60):
+        sc.update(1 / 60)
+    assert sc.player.vel[1] >= -3.01 and sc.player.pos[1] > 10
+    for lang in ("en", "bn"):
+        i18n.set_lang(lang)
+        sc.update(1 / 60)
+        sc.draw(app.screen)
