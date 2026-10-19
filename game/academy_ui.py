@@ -8,7 +8,7 @@ import random
 
 import pygame
 
-from engine import economy
+from engine import economy, spread
 from engine.academy_data import READING_BONUS
 
 from . import i18n, sound
@@ -204,7 +204,9 @@ def pick_question(save, rng=random):
         pool = [r for s in subjects() for r in bank_pool(c, s)]
         if pool:
             fresh = [r for r in pool if str(r["id"]) not in answered]
-            return rng.choice(fresh or pool)
+            r = spread.pick(fresh or pool, rng)
+            spread.remember(r)
+            return r
     return None
 
 

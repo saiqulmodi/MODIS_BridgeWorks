@@ -5,7 +5,7 @@ import random
 import pygame
 
 from engine import economy
-from engine import question_bank
+from engine import question_bank, spread
 from engine.academy import CLASSES, SUBJECTS, class_label, target_per_subject
 from engine.academy_data import levels, pool as bank_pool, subjects
 from engine.academy_pass import has_access
@@ -150,7 +150,7 @@ class AcademyScene:
         pool = [r for s in subjects() for r in bank_pool(self.cls, s) if str(r["id"]) not in answered]
         if len(pool) < 5:
             pool += [r for r in skill_items() if str(r["id"]) not in answered]
-        self.daily = rng.sample(pool, min(5, len(pool)))
+        self.daily = spread.order(pool, rng)[:5]
         self.daily_k, self.daily_right, self.daily_paid = 0, 0, 0.0
         self.message = ""
         self._show(self.daily[0] if self.daily else None)
@@ -178,15 +178,16 @@ class AcademyScene:
         current = self.card.r["id"] if self.card else None
         fresh = [r for r in pool if str(r["id"]) not in answered and r["id"] != current]
         if fresh:
-            self._show(fresh[0])                 # in order: the bank goes from easy to harder
+            self._show(spread.pick(fresh))       # random, never a look-alike of the last few shown
             return
         self.message = w("done")
-        self._show(random.choice([r for r in pool if r["id"] != current] or pool))
+        self._show(spread.pick([r for r in pool if r["id"] != current] or pool))
 
     def _show(self, record):
         if record is None:
             self.card = None
             return
+        spread.remember(record)
         self.card = QuizCard(self.save, record, (360, 120, WIDTH - 384, HEIGHT - 200), self._answered)
 
     def _answered(self, correct, paid):

@@ -2,7 +2,7 @@ import json
 import random
 import os
 
-from engine import login_limit
+from engine import login_limit, spread
 
 SAVE_FILE = "save.json"
 
@@ -44,8 +44,11 @@ def get_random_question(phase_number, all_questions_dict):
     
     if not available:
         return None  # All questions in this phase completed!
-        
-    return random.choice(available)
+
+    # Random, but never a look-alike of the last few questions shown (engine/spread.py).
+    q = spread.pick(available, random)
+    spread.remember(q)
+    return q
 
 def submit_answer(question_id, user_choice, correct_choice, all_questions_dict=None):
     """
