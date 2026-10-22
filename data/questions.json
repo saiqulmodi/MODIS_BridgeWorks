@@ -1,0 +1,29 @@
+{
+  "Class_7": {
+    "Physics": [
+      {
+        "id": 1,
+        "question": "What is the SI unit of force?",
+        "options": ["Joule", "Newton", "Pascal", "Watt"],
+        "answer": "Newton",
+        "explanation": "Force is measured in Newtons (N), named after Sir Isaac Newton."
+      },
+      {
+        "id": 2,
+        "question": "Which mirror is used as a rear-view mirror in vehicles?",
+        "options": ["Concave mirror", "Convex mirror", "Plane mirror", "Inverted mirror"],
+        "answer": "Convex mirror",
+        "explanation": "Convex mirrors give a wider field of view, making them ideal for traffic monitoring."
+      }
+    ],
+    "Math": [
+      {
+        "id": 1,
+        "question": "What is the value of Pi up to two decimal places?",
+        "options": ["3.14", "2.27", "1.61", "2.71"],
+        "answer": "3.14",
+        "explanation": "Pi represents the ratio of a circle's circumference to its diameter."
+      }
+    ]
+  }
+}
