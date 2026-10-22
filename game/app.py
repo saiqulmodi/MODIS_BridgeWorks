@@ -1,6 +1,5 @@
-"""The application: window, main loop and switching between the menu and levels."""
+﻿"""The application: window, main loop and switching between the menu and levels."""
 import asyncio
-
 import pygame
 
 from engine.levels import LEVELS, get
@@ -11,6 +10,8 @@ from .ui import HEIGHT, WIDTH
 
 TITLE = "MODIS BridgeWorks"
 FPS = 60
+
+QUIT_BTN_RECT = pygame.Rect(WIDTH - 75, 10, 65, 26)
 
 
 def scene_for(app, level):
@@ -39,12 +40,12 @@ class App:
             sound.init()
         self.running = True
         self.scene = None
-        self.home = "menu"           # "campus" after a building in Campus World opened a screen
-        self.campus_state = None     # (door position, facing) to return to in Campus World
+        self.home = "menu"
+        self.campus_state = None
+        self.font = pygame.font.SysFont(None, 20)
         self.to_campus()
 
     def to_menu(self):
-        """Back from a level/Academy/Donations: to the campus door you came from, else the menu."""
         if self.home == "campus":
             self.to_campus()
             return
@@ -79,25 +80,40 @@ class App:
         self.save.data["lang"] = i18n.toggle()
         self.save.write()
 
+    def _draw_quit_button(self):
+        mouse_pos = pygame.mouse.get_pos()
+        hover = QUIT_BTN_RECT.collidepoint(mouse_pos)
+        color = (190, 40, 40) if hover else (120, 30, 30)
+
+        pygame.draw.rect(self.screen, color, QUIT_BTN_RECT, border_radius=4)
+        pygame.draw.rect(self.screen, (220, 220, 220), QUIT_BTN_RECT, width=1, border_radius=4)
+
+        text = self.font.render("Quit", True, (255, 255, 255))
+        self.screen.blit(text, text.get_rect(center=QUIT_BTN_RECT.center))
+
     def frame(self, events, dt):
         for e in events:
             if e.type == pygame.QUIT:
                 self.running = False
+            elif e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
+                if QUIT_BTN_RECT.collidepoint(e.pos):
+                    self.quit()
+                    return
+                self.scene.handle(e)
             elif e.type == pygame.KEYDOWN and e.key == pygame.K_F11:
                 screen.toggle_fullscreen()
             else:
                 self.scene.handle(e)
         self.scene.update(dt)
         self.scene.draw(self.screen)
+        self._draw_quit_button()
 
     async def run(self):
-        """Main loop. It is async so the same code runs in the browser (pygbag), where each
-        frame must hand control back to the page with `await asyncio.sleep(0)`."""
         frames = 0
         while self.running:
             dt = min(self.clock.tick(FPS) / 1000.0, 1 / 20)
             if frames % 30 == 0:
-                screen.fit_browser()          # browser: keep the canvas filling the window
+                screen.fit_browser()
             frames += 1
             self.frame(pygame.event.get(), dt)
             pygame.display.flip()
