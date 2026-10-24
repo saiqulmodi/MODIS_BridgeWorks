@@ -7,14 +7,18 @@ engine/academy_data.py turns them into the public record format (and exports JSO
 """
 from dataclasses import dataclass
 
-SUBJECTS = ("physics", "chemistry", "math", "biology", "finance", "commercials")
+SUBJECTS = ("physics", "chemistry", "math", "biology", "finance", "commercials", "civil")
 CLASSES = tuple(range(1, 15))
 NIT, IIT = 13, 14
 LEVEL_NAMES = {NIT: ("NIT", "এনআইটি"), IIT: ("IIT", "আইআইটি")}   # shown instead of a class number
 
 
 def target_per_subject(class_level):
-    return 200 if class_level >= NIT else 100
+    if class_level >= NIT:
+        return 300
+    if class_level >= 10:
+        return 150
+    return 100
 
 
 def class_label(class_level, lang="en"):
