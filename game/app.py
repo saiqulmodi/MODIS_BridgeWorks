@@ -1,5 +1,6 @@
 """The application: window, main loop and switching between the menu and levels."""
 import asyncio
+import sys
 import pygame
 
 from engine.levels import LEVELS, get
@@ -11,6 +12,8 @@ from .ui import HEIGHT, WIDTH
 TITLE = "MODIS BridgeWorks"
 FPS = 60
 
+# Desktop only: in the browser the tab is closed instead, and stopping the loop would freeze the page
+SHOW_QUIT = sys.platform != "emscripten"
 QUIT_BTN_RECT = pygame.Rect(WIDTH - 75, 10, 65, 26)
 
 
@@ -96,7 +99,7 @@ class App:
             if e.type == pygame.QUIT:
                 self.running = False
             elif e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
-                if QUIT_BTN_RECT.collidepoint(e.pos):
+                if SHOW_QUIT and QUIT_BTN_RECT.collidepoint(e.pos):
                     self.quit()
                     return
                 self.scene.handle(e)
@@ -106,7 +109,8 @@ class App:
                 self.scene.handle(e)
         self.scene.update(dt)
         self.scene.draw(self.screen)
-        self._draw_quit_button()
+        if SHOW_QUIT:
+            self._draw_quit_button()
 
     async def run(self):
         frames = 0
