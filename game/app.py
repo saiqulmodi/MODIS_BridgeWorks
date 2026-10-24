@@ -1,4 +1,4 @@
-﻿"""The application: window, main loop and switching between the menu and levels."""
+"""The application: window, main loop and switching between the menu and levels."""
 import asyncio
 import pygame
 
