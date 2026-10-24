@@ -31,4 +31,4 @@ def generate_bank():
     print("Successfully scaled up questions.txt with expanded entries for Phases 1 to 3!")
 
 if __name__ == "__main__":
-    generate_bank()nwe
+    generate_bank()
