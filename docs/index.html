@@ -286,6 +286,47 @@ function show_infobox() {
 
     <script src="https://pygame-web.github.io/cdn/0.9.3//browserfs.min.js"></script>
 
+    <!-- Firebase Analytics — anonymous usage tracking (no personal data) -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+      import { getAnalytics, logEvent, setAnalyticsCollectionEnabled } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics.js";
+
+      const firebaseConfig = {
+        apiKey:            "AIzaSyBob4abfJ2igP3-xpu1iXckc8tEelxspAE",
+        authDomain:        "bridgeworks-4c3d0.firebaseapp.com",
+        projectId:         "bridgeworks-4c3d0",
+        storageBucket:     "bridgeworks-4c3d0.firebasestorage.app",
+        messagingSenderId: "1060858117867",
+        appId:             "1:1060858117867:web:833e864b328d7b6d0f48ae",
+        measurementId:     "G-87BLE4YCKY"
+      };
+
+      const app       = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+
+      // Track session start + device type
+      const sessionStart = Date.now();
+      logEvent(analytics, "game_session_start", {
+        platform: /Mobi|Android/i.test(navigator.userAgent) ? "mobile" : "desktop"
+      });
+
+      // Track how long the session lasted when player leaves
+      window.addEventListener("beforeunload", () => {
+        const seconds = Math.round((Date.now() - sessionStart) / 1000);
+        navigator.sendBeacon && navigator.sendBeacon(
+          "https://www.google-analytics.com/collect", // beacon fallback; actual via SDK
+          ""
+        );
+        logEvent(analytics, "game_session_end", { duration_seconds: seconds });
+      });
+
+      // Track first interaction (canvas click = game started)
+      document.addEventListener("click", function onFirstClick() {
+        logEvent(analytics, "game_started");
+        document.removeEventListener("click", onFirstClick);
+      }, { once: true });
+    </script>
+
 </head>
 
 <body>
