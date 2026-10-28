@@ -431,7 +431,7 @@ ITEMS = (
         "EPE = ½kx² = ½ × 400 × 0.05² = 0.5 J।"),
     mcq("For a beam to be in rotational equilibrium:", ["Sum of clockwise moments equals sum of anticlockwise moments about any pivot", "All forces on it must be equal", "Its weight must be zero", "It must be made of steel"], 0,
         "Engineers take moments about support points to find bearing loads in a bridge deck.",
-        "বিমের ঘূর্ণনগত ভারসাম্যের জন্য:", ["যেকোনো অক্ষ সম্পর্কে ঘড়ির কাঁটার দিকের টর্কের যোগফল বিপরীত দিকের সমান", "এর উপর সব বল সমান হতে হবে", "এর ওজন শূন্য হতে হবে", "এটা ইস্পাতের তৈরি হতে হবে"], 0,
+        "বিমের ঘূর্ণনগত ভারসাম্যের জন্য:", ["যেকোনো অক্ষ সম্পর্কে ঘড়ির কাঁটার দিকের টর্কের যোগফল বিপরীত দিকের সমান", "এর উপর সব বল সমান হতে হবে", "এর ওজন শূন্য হতে হবে", "এটা ইস্পাতের তৈরি হতে হবে"],
         "প্রকৌশলীরা সেতুর পাটাতনে বিয়ারিং ভার খুঁজতে সাপোর্ট বিন্দু নিয়ে টর্ক নেন।"),
     mcq("The centre of gravity of an object is:", ["The point where the whole weight appears to act", "The geometric centre of any shape", "The heaviest point", "The point where forces balance in all directions"], 0,
         "A suspension bridge deck has its centre of gravity low - important for stability against wind loads.",

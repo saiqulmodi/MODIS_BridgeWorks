@@ -1,128 +1,128 @@
-"""The application: window, main loop and switching between the menu and levels."""
+﻿"""
+MODIS BridgeWorks - Native Pygame 5-Stage Evolution & In-Game Quiz
+"""
 import asyncio
-import sys
+import json
+import os
 import pygame
+from engine.landmarks import BandraWorliSeaLink
+from game.economy import CivicEconomy
 
-from engine.levels import LEVELS, get
-
-from . import i18n, screen, sound
-from .save import Save
-from .ui import HEIGHT, WIDTH
-
-TITLE = "MODIS BridgeWorks"
-FPS = 60
-
-# Desktop only: in the browser the tab is closed instead, and stopping the loop would freeze the page
-SHOW_QUIT = sys.platform != "emscripten"
-QUIT_BTN_RECT = pygame.Rect(WIDTH - 75, 10, 65, 26)
-
-
-def scene_for(app, level):
-    from .scenes.bridge import BridgeScene
-    from .scenes.cantilever import CantileverScene
-    from .scenes.logistics import LogisticsScene
-    from .scenes.rail import RailScene
-    from .scenes.signals import SignalScene
-    from .scenes.traffic import TrafficScene
-    return {"bridge": BridgeScene, "rail": RailScene, "cantilever": CantileverScene,
-            "signals": SignalScene, "traffic": TrafficScene,
-            "logistics": LogisticsScene}[level.scene](app, level)
-
+STAGES = [
+    {"id": 1, "name": "Stage 1: Root & Bamboo", "class": "Class 1-7"},
+    {"id": 2, "name": "Stage 2: Howrah Truss", "class": "Class 8-10"},
+    {"id": 3, "name": "Stage 3: Chenab Arch", "class": "Class 11-12"},
+    {"id": 4, "name": "Stage 4: Bandra-Worli", "class": "JEE / IIT"},
+    {"id": 5, "name": "Stage 5: Megastructure", "class": "Advanced"}
+]
 
 class App:
-    def __init__(self, save=None, headless=False, show_briefings=True):
+    def __init__(self):
         pygame.init()
-        pygame.display.set_caption(TITLE)
-        self.screen = screen.create_window(headless)
+        self.w = 1040
+        self.h = 680
+        self.screen = pygame.display.set_mode((self.w, self.h))
+        pygame.display.set_caption("MODIS BridgeWorks: 5-Stage Evolution & Engineering Statics")
         self.clock = pygame.time.Clock()
-        self.save = save or Save()
-        i18n.set_lang(self.save.data.get("lang", "en"))
-        self.headless = headless
-        self.show_briefings = show_briefings
-        if not headless:
-            sound.init()
+        self.font = pygame.font.SysFont("Segoe UI", 15, bold=True)
+        self.font_sm = pygame.font.SysFont("Segoe UI", 12)
+        
+        self.economy = CivicEconomy(project_name="Bandra-Worli Sea Link", initial_grant=50000000)
+        self.sea_link = BandraWorliSeaLink(self.w, self.h)
+        self.current_stage = 4
+        self.tick = 0
         self.running = True
-        self.scene = None
-        self.home = "menu"
-        self.campus_state = None
-        self.font = pygame.font.SysFont(None, 20)
-        self.to_campus()
+        
+        # Load questions for in-game quiz prompt
+        self.questions = []
+        q_path = os.path.join("data", "questions.json")
+        if os.path.exists(q_path):
+            with open(q_path, "r", encoding="utf-8") as f:
+                self.questions = json.load(f)
+        self.current_q_idx = 0
+        self.deck_nodes = [(x, int(self.h * 0.78) - 55) for x in range(160, self.w - 160, 45)]
 
-    def to_menu(self):
-        if self.home == "campus":
-            self.to_campus()
-            return
-        from .scenes.menu import MenuScene
-        self.scene = MenuScene(self)
+    def draw_hud(self):
+        # Top HUD Banner
+        pygame.draw.rect(self.screen, (30, 41, 59), (0, 0, self.w, 42))
+        pygame.draw.line(self.screen, (51, 65, 85), (0, 42), (self.w, 42), 2)
+        st = self.economy.get_status()
+        hud_str = f"Treasury: {st['Treasury']}  |  Subsidies: {st['Subsidies']}  |  Approval: {st['Approval']}  |  Vehicles: {st['Vehicles Passed']}"
+        self.screen.blit(self.font.render(hud_str, True, (248, 250, 252)), (20, 10))
 
-    def to_classic_menu(self):
-        self.home = "menu"
-        from .scenes.menu import MenuScene
-        self.scene = MenuScene(self)
+        # 5-Stage Evolution Tabs
+        tab_w = (self.w - 40) // 5
+        for i, s in enumerate(STAGES):
+            x = 20 + i * tab_w
+            is_active = (s["id"] == self.current_stage)
+            bg_col = (2, 132, 199) if is_active else (30, 41, 59)
+            border_col = (56, 189, 248) if is_active else (71, 85, 105)
+            
+            pygame.draw.rect(self.screen, bg_col, (x, 48, tab_w - 6, 40), border_radius=6)
+            pygame.draw.rect(self.screen, border_col, (x, 48, tab_w - 6, 40), 2, border_radius=6)
+            
+            t1 = self.font.render(s["name"], True, (255, 255, 255))
+            t2 = self.font_sm.render(s["class"], True, (203, 213, 225))
+            self.screen.blit(t1, (x + 8, 52))
+            self.screen.blit(t2, (x + 8, 70))
 
-    def to_campus(self):
-        from .scenes.campus import CampusScene
-        self.home = "menu"
-        self.scene = CampusScene(self)
-
-    def to_academy(self):
-        from .scenes.academy import AcademyScene
-        self.scene = AcademyScene(self)
-
-    def to_donations(self):
-        from .scenes.donations import DonationScene
-        self.scene = DonationScene(self)
-
-    def start_level(self, num):
-        self.scene = scene_for(self, get(num))
-
-    def quit(self):
-        self.running = False
-
-    def toggle_language(self):
-        self.save.data["lang"] = i18n.toggle()
-        self.save.write()
-
-    def _draw_quit_button(self):
-        mouse_pos = pygame.mouse.get_pos()
-        hover = QUIT_BTN_RECT.collidepoint(mouse_pos)
-        color = (190, 40, 40) if hover else (120, 30, 30)
-
-        pygame.draw.rect(self.screen, color, QUIT_BTN_RECT, border_radius=4)
-        pygame.draw.rect(self.screen, (220, 220, 220), QUIT_BTN_RECT, width=1, border_radius=4)
-
-        text = self.font.render("Quit", True, (255, 255, 255))
-        self.screen.blit(text, text.get_rect(center=QUIT_BTN_RECT.center))
-
-    def frame(self, events, dt):
-        for e in events:
-            if e.type == pygame.QUIT:
-                self.running = False
-            elif e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
-                if SHOW_QUIT and QUIT_BTN_RECT.collidepoint(e.pos):
-                    self.quit()
-                    return
-                self.scene.handle(e)
-            elif e.type == pygame.KEYDOWN and e.key == pygame.K_F11:
-                screen.toggle_fullscreen()
-            else:
-                self.scene.handle(e)
-        self.scene.update(dt)
-        self.scene.draw(self.screen)
-        if SHOW_QUIT:
-            self._draw_quit_button()
+        # In-Game Q/A Challenge Card (Bottom)
+        if self.questions:
+            q = self.questions[self.current_q_idx % len(self.questions)]
+            card_rect = pygame.Rect(20, self.h - 110, self.w - 40, 95)
+            pygame.draw.rect(self.screen, (30, 41, 59), card_rect, border_radius=8)
+            pygame.draw.rect(self.screen, (2, 132, 199), card_rect, 2, border_radius=8)
+            
+            q_header = self.font.render(f"Q/A Challenge ({q['tier']} | {q['category']}) - Press [1, 2, 3, 4] to answer:", True, (56, 189, 248))
+            q_text = self.font.render(q['question'][:120] + "...", True, (255, 255, 255))
+            self.screen.blit(q_header, (32, self.h - 104))
+            self.screen.blit(q_text, (32, self.h - 84))
+            
+            # Show first 2 options
+            opts_str = f"[1] {q['options'][0]}    [2] {q['options'][1]}"
+            self.screen.blit(self.font_sm.render(opts_str, True, (226, 232, 240)), (32, self.h - 58))
+            opts_str2 = f"[3] {q['options'][2]}    [4] {q['options'][3]}    |  [SPACE] Run Toll Convoy"
+            self.screen.blit(self.font_sm.render(opts_str2, True, (226, 232, 240)), (32, self.h - 38))
 
     async def run(self):
-        frames = 0
         while self.running:
-            dt = min(self.clock.tick(FPS) / 1000.0, 1 / 20)
-            if frames % 30 == 0:
-                screen.fit_browser()
-            frames += 1
-            self.frame(pygame.event.get(), dt)
+            self.tick += 1
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.running = False
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    mx, my = event.pos
+                    # Tab click detection
+                    if 48 <= my <= 88:
+                        tab_w = (self.w - 40) // 5
+                        idx = (mx - 20) // tab_w + 1
+                        if 1 <= idx <= 5:
+                            self.current_stage = idx
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_SPACE:
+                        self.economy.collect_toll_revenue(25)
+                    # Keys 1-4 for in-game Q/A answers
+                    elif event.key in [pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4]:
+                        ans_idx = event.key - pygame.K_1
+                        q = self.questions[self.current_q_idx % len(self.questions)]
+                        is_correct = (ans_idx == q["correct"])
+                        self.economy.apply_academic_subsidy(12, is_correct)
+                        self.current_q_idx += 1
+
+            self.screen.fill((15, 23, 42))
+            self.sea_link.render_sea(self.screen, self.tick)
+            if self.current_stage >= 4:
+                self.sea_link.render_diamond_pylon(self.screen)
+                self.sea_link.render_stay_cables(self.screen, self.deck_nodes)
+            
+            # Draw Deck
+            pygame.draw.line(self.screen, (245, 158, 11), self.deck_nodes[0], self.deck_nodes[-1], 4)
+            for pt in self.deck_nodes:
+                pygame.draw.circle(self.screen, (226, 232, 240), pt, 4)
+
+            self.draw_hud()
             pygame.display.flip()
+            self.clock.tick(60)
             await asyncio.sleep(0)
+
         pygame.quit()
-
-
-__all__ = ["App", "LEVELS"]

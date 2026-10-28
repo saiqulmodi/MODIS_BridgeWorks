@@ -22,6 +22,7 @@ NAMES = {
     "physics": ("Physics", "পদার্থবিজ্ঞান"), "chemistry": ("Chemistry", "রসায়ন"),
     "math": ("Math", "গণিত"), "biology": ("Biology", "জীববিজ্ঞান"),
     "finance": ("Finance", "অর্থসংস্থান"), "commercials": ("Commercials", "বাণিজ্য"),
+    "civil": ("Civil Engg", "সিভিল ইঞ্জি"),
     "skills": ("Game skills (Help quiz)", "খেলার দক্ষতা (সাহায্য-কুইজ)"),
     "daily": ("Daily 5 (mixed)", "দৈনিক 5 (মিশ্র)"),
 }

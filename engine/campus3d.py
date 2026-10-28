@@ -21,10 +21,10 @@ SUPER_JUMP_SPEED = 21.0     # magic boots
 GLIDE_FALL = 3.0            # the magic cape caps the falling speed (m/s)
 RADIUS = 0.6                # the player's body, for collisions
 ROPE_MIN, ROPE_MAX = 6.0, 48.0
-RIVER_Z = (96.0, 114.0)
-BRIDGE_HALF = 7.0           # the avenue bridge over the river is |x| < 7
-BOUNDS = (-115.0, 115.0, -40.0, 235.0)      # x0, x1, z0, z1
-START = (0.0, 0.0, -18.0)
+RIVER_Z = (96.0, 116.0)
+BRIDGE_HALF = 10.0          # the avenue bridge over the river is |x| < 10
+BOUNDS = (-140.0, 140.0, -40.0, 245.0)      # x0, x1, z0, z1
+START = (0.0, 0.0, -20.0)
 
 
 class Box:
@@ -74,29 +74,29 @@ class Box:
 
 SCHOOLS = [
     # key, side (-1 west / +1 east), z, width, depth, height, colour, label, sub, classes
-    ("primary", -1, 42, 20, 16, 12, (250, 196, 70), ("Primary School", "প্রাথমিক বিদ্যালয়"),
+    ("primary", -1, 46, 28, 22, 16, (250, 196, 70), ("Primary School", "প্রাথমিক বিদ্যালয়"),
      ("Classes 1-4", "শ্রেণি ১-৪"), (1, 2, 3, 4)),
-    ("middle", 1, 42, 20, 16, 18, (246, 132, 72), ("Middle School", "মাধ্যমিক বিদ্যালয়"),
+    ("middle", 1, 46, 28, 22, 22, (246, 132, 72), ("Middle School", "মাধ্যমিক বিদ্যালয়"),
      ("Classes 5-8", "শ্রেণি ৫-৮"), (5, 6, 7, 8)),
-    ("high", -1, 74, 22, 16, 26, (80, 196, 120), ("High School", "উচ্চ বিদ্যালয়"),
+    ("high", -1, 76, 32, 24, 30, (80, 196, 120), ("High School", "উচ্চ বিদ্যালয়"),
      ("Classes 9-10", "শ্রেণি ৯-১০"), (9, 10)),
-    ("college", 1, 74, 22, 16, 32, (64, 186, 196), ("Higher Secondary College", "উচ্চমাধ্যমিক কলেজ"),
+    ("college", 1, 76, 32, 24, 36, (64, 186, 196), ("Higher Secondary College", "উচ্চমাধ্যমিক কলেজ"),
      ("Classes 11-12", "শ্রেণি ১১-১২"), (11, 12)),
-    ("nit", -1, 142, 24, 18, 40, (150, 110, 220), ("NIT - Engineering College", "এনআইটি - প্রকৌশল কলেজ"),
+    ("nit", -1, 150, 34, 26, 46, (150, 110, 220), ("NIT - Engineering College", "এনআইটি - প্রকৌশল কলেজ"),
      ("JEE Main level", "জেইই মেইন স্তর"), (13,)),
-    ("iit", 1, 142, 24, 18, 50, (214, 82, 96), ("IIT - Institute of Technology", "আইআইটি - প্রযুক্তি প্রতিষ্ঠান"),
+    ("iit", 1, 150, 34, 26, 58, (214, 82, 96), ("IIT - Institute of Technology", "আইআইটি - প্রযুক্তি প্রতিষ্ঠান"),
      ("JEE Advanced level", "জেইই অ্যাডভান্সড স্তর"), (14,)),
 ]
 
 PLACES = [
     # key, side, z, w, d, h, colour, label, sub, kind
-    ("library", -1, 12, 16, 12, 10, (86, 140, 236), ("Help Library", "সাহায্য-গ্রন্থাগার"),
+    ("library", -1, 14, 22, 18, 14, (86, 140, 236), ("Help Library", "সাহায্য-গ্রন্থাগার"),
      ("How to play + Game-skills quiz", "কীভাবে খেলবে + খেলার দক্ষতা কুইজ"), "library"),
-    ("registry", 1, 12, 14, 12, 9, (180, 150, 110), ("Registration Office", "নিবন্ধন অফিস"),
+    ("registry", 1, 14, 20, 18, 12, (180, 150, 110), ("Registration Office", "নিবন্ধন অফিস"),
      ("Register your name", "তোমার নাম নিবন্ধন করো"), "register"),
-    ("archive", -1, 172, 20, 14, 22, (120, 160, 90), ("NCERT Archive", "এনসিইআরটি সংগ্রহশালা"),
+    ("archive", -1, 180, 24, 20, 26, (120, 160, 90), ("NCERT Archive", "এনসিইআরটি সংগ্রহশালা"),
      ("NCERT question bank", "এনসিইআরটি প্রশ্নভান্ডার"), "ncert"),
-    ("camp", 1, 172, 18, 14, 8, (232, 170, 60), ("Donation Camp", "দান-শিবির"),
+    ("camp", 1, 180, 22, 18, 12, (232, 170, 60), ("Donation Camp", "দান-শিবির"),
      ("Give grants to good causes", "ভালো কাজে অনুদান দাও"), "donate"),
 ]
 
@@ -105,54 +105,77 @@ def build_world():
     """Every solid thing in the campus, plus decorative trees and lamps."""
     boxes = []
     for key, side, z, w, d, h, col, label, sub, classes in SCHOOLS:
-        x0 = side * 12.0
+        x0 = side * 28.0
         boxes.append(Box(key, x0, z - d / 2, x0 + side * w, z + d / 2, h, col, label, sub,
                          kind="school", payload=classes))
     for key, side, z, w, d, h, col, label, sub, kind in PLACES:
-        x0 = side * 12.0
+        x0 = side * 28.0
         boxes.append(Box(key, x0, z - d / 2, x0 + side * w, z + d / 2, h, col, label, sub, kind=kind))
     # the Daily 5 clock tower closes the end of the avenue
-    boxes.append(Box("tower", -5, 204, 5, 214, 58, (236, 226, 200), ("Daily 5 Clock Tower", "দৈনিক ৫ ঘড়িঘর"),
+    boxes.append(Box("tower", -6, 212, 6, 224, 62, (236, 226, 200), ("Daily 5 Clock Tower", "দৈনিক ৫ ঘড়িঘর"),
                      ("5 mixed questions a day", "প্রতিদিন ৫টি মিশ্র প্রশ্ন"), kind="daily", roof=(200, 70, 60)))
     # ten bridge-site pylons on the south bank of the river: one per level
     for n in range(1, 11):
         side = -1 if n <= 5 else 1
         k = (n - 1) % 5
-        x = side * (24 + k * 17)
-        h = 10 + n * 2.2
-        boxes.append(Box(f"site{n}", x - 1.6, 86.4, x + 1.6, 89.6, h, (255, 196, 64),
+        x = side * (32 + k * 18)
+        h = 12 + n * 2.4
+        boxes.append(Box(f"site{n}", x - 2.0, 86.0, x + 2.0, 90.0, h, (255, 196, 64),
                          (f"Bridge site {n}", f"সেতু-ক্ষেত্র {n}"), kind="level", payload=n,
                          roof=(230, 110, 40), windows=False))
     # stepping pylons standing in the river, so you can swing across
-    for x in (-60, -30, 30, 60):
-        boxes.append(Box(f"pier{x}", x - 1.2, 103.8, x + 1.2, 106.2, 24, (150, 160, 176), windows=False))
-    # the campus gate
-    boxes.append(Box("gate_w", -9.5, -6, -7.5, -4, 11, (210, 90, 70), windows=False))
-    boxes.append(Box("gate_e", 7.5, -6, 9.5, -4, 11, (210, 90, 70), windows=False))
-    boxes.append(Box("gate_top", -9.5, -6, 9.5, -4, 13.5, (230, 110, 80), windows=False, y0=11))
-    # bridge railings over the river
+    for x in (-70, -40, -15, 15, 40, 70):
+        boxes.append(Box(f"pier{x}", x - 1.4, 103.0, x + 1.4, 107.0, 28, (150, 160, 176), windows=False))
+    # the campus gate - wider for the wider avenue
+    boxes.append(Box("gate_w", -13, -8, -11, -4, 13, (210, 90, 70), windows=False))
+    boxes.append(Box("gate_e", 11, -8, 13, -4, 13, (210, 90, 70), windows=False))
+    boxes.append(Box("gate_top", -13, -8, 13, -4, 16, (230, 110, 80), windows=False, y0=13))
+    # bridge railings over the river (wider avenue)
     for side in (-1, 1):
-        boxes.append(Box(f"rail{side}", side * 6.6, RIVER_Z[0] - 2, side * 7.2, RIVER_Z[1] + 2, 1.2,
+        boxes.append(Box(f"rail{side}", side * 10.4, RIVER_Z[0] - 2, side * 11.0, RIVER_Z[1] + 2, 1.4,
                          (220, 230, 240), windows=False))
+    # Mumbai Sea Link style cable-stay towers at the river crossing
+    rz_mid = (RIVER_Z[0] + RIVER_Z[1]) / 2
+    boxes.append(Box("mtower_w", -17, rz_mid - 3, -12, rz_mid + 3, 58,
+                     (220, 228, 238), windows=False))
+    boxes.append(Box("mtower_e", 12, rz_mid - 3, 17, rz_mid + 3, 58,
+                     (220, 228, 238), windows=False))
     return boxes
 
 
 def trees_and_lamps():
     trees, lamps = [], []
-    for z in range(-30, 230, 16):
+    for z in range(-32, 242, 14):
         if RIVER_Z[0] - 6 < z < RIVER_Z[1] + 6:
             continue
-        lamps.append((-8.5, z))
-        lamps.append((8.5, z + 8))
-    for i in range(70):            # a fixed pseudo-random scatter (same every run)
-        x = ((i * 73) % 200) - 100
-        z = ((i * 131) % 260) - 35
-        if abs(x) < 40 and z > -10:
-            continue                # keep the avenue and building rows clear
-        if RIVER_Z[0] - 4 < z < RIVER_Z[1] + 4 or 80 < z < 93:
+        lamps.append((-12, z))
+        lamps.append((12, z + 7))
+    for i in range(120):           # wider, denser scatter (same every run)
+        x = ((i * 73) % 260) - 130
+        z = ((i * 131) % 285) - 38
+        if abs(x) < 48 and z > -14:
+            continue                # keep the avenue and building areas clear
+        if RIVER_Z[0] - 5 < z < RIVER_Z[1] + 5 or 80 < z < 94:
             continue
-        trees.append((x + 0.5, z + 0.5, 5.0 + (i % 4) * 1.5))
+        trees.append((x + 0.5, z + 0.5, 5.5 + (i % 5) * 1.5))
     return trees, lamps
+
+
+def flowers():
+    """Flower bushes and coloured grass patches scattered around the campus.
+    Returns list of (x, z, radius, kind) where kind 0=yellow 1=pink 2=white 3=lavender."""
+    result = []
+    for i in range(100):
+        x = ((i * 107) % 260) - 130
+        z = ((i * 163) % 285) - 38
+        if abs(x) < 52 and z > -18:
+            continue
+        if RIVER_Z[0] - 7 < z < RIVER_Z[1] + 7 or 78 < z < 95:
+            continue
+        kind = (i * 43) % 4
+        r = 1.4 + (i % 3) * 0.7
+        result.append((x + 1.0, z + 1.0, r, kind))
+    return result
 
 
 def in_river(x, z):

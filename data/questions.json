@@ -1,29 +1,452 @@
-{
-  "Class_7": {
-    "Physics": [
-      {
-        "id": 1,
-        "question": "What is the SI unit of force?",
-        "options": ["Joule", "Newton", "Pascal", "Watt"],
-        "answer": "Newton",
-        "explanation": "Force is measured in Newtons (N), named after Sir Isaac Newton."
-      },
-      {
-        "id": 2,
-        "question": "Which mirror is used as a rear-view mirror in vehicles?",
-        "options": ["Concave mirror", "Convex mirror", "Plane mirror", "Inverted mirror"],
-        "answer": "Convex mirror",
-        "explanation": "Convex mirrors give a wider field of view, making them ideal for traffic monitoring."
-      }
+[
+  {
+    "id": "ENG_11_SOLIDS_001",
+    "tier": "Class_11",
+    "category": "Mechanical Properties of Solids",
+    "question": "In the Bandra-Worli Sea Link stay cables, which property must be maximized to prevent structural sagging under dead and live loads?",
+    "options": [
+      "A) Bulk Modulus",
+      "B) Young's Modulus",
+      "C) Shear Modulus",
+      "D) Poisson's Ratio"
     ],
-    "Math": [
-      {
-        "id": 1,
-        "question": "What is the value of Pi up to two decimal places?",
-        "options": ["3.14", "2.27", "1.61", "2.71"],
-        "answer": "3.14",
-        "explanation": "Pi represents the ratio of a circle's circumference to its diameter."
-      }
-    ]
+    "correct": 1,
+    "explanation": "Young's modulus (Y = longitudinal stress / longitudinal strain) directly governs tensile resistance against axial elongation.",
+    "subsidy": 150000
+  },
+  {
+    "id": "ENG_JEE_EQUILIB_002",
+    "tier": "JEE_Advanced",
+    "category": "Statics & Rotational Equilibrium",
+    "question": "For a bridge pylon in static equilibrium subjected to concurrent asymmetric vehicle loads, which condition is mandatory?",
+    "options": [
+      "A) \u03a3Fx = 0 only",
+      "B) \u03a3Fy = 0 only",
+      "C) Both \u03a3F = 0 and \u03a3\u03c4 = 0 about all axes",
+      "D) Moment of Inertia is zero"
+    ],
+    "correct": 2,
+    "explanation": "Static equilibrium in 3D/2D space mandates zero net translational force (\u03a3F = 0) and zero net rotational torque (\u03a3\u03c4 = 0).",
+    "subsidy": 300000
+  },
+  {
+    "id": "ENG_11_THERMAL_003",
+    "tier": "Class_11",
+    "category": "Thermal Expansion",
+    "question": "Why are finger-type expansion joints installed every 500m along modern steel bridge spans?",
+    "options": [
+      "A) To dampen acoustic traffic noise",
+      "B) To allow linear expansion (\u0394L = \u03b1\u00b7L\u00b7\u0394T) without buckling",
+      "C) To increase concrete curing speed",
+      "D) To ground lightning strikes"
+    ],
+    "correct": 1,
+    "explanation": "Thermal expansion causes continuous length changes. Constrained members experience destructive thermal stress F = Y\u00b7A\u00b7\u03b1\u00b7\u0394T.",
+    "subsidy": 175000
+  },
+  {
+    "id": "ENG_09_NEWTON_004",
+    "tier": "Class_09",
+    "category": "Forces and Laws of Motion",
+    "question": "When a heavy multi-axle freight convoy brakes sharply on a deck, what force does the bridge foundation absorb?",
+    "options": [
+      "A) Normal vertical reaction",
+      "B) Horizontal shear friction",
+      "C) Centripetal force",
+      "D) Archimedes buoyant lift"
+    ],
+    "correct": 1,
+    "explanation": "Decelerating freight transmits horizontal shear force to the deck through tyre-surface friction.",
+    "subsidy": 75000
+  },
+  {
+    "id": "ENG_JEE_BUCKLE_005",
+    "tier": "JEE_Advanced",
+    "category": "Structural Mechanics",
+    "question": "According to Euler's formula, the critical compressive buckling load P_cr of a slender bridge strut is inversely proportional to:",
+    "options": [
+      "A) Young's Modulus E",
+      "B) Moment of Inertia I",
+      "C) Square of the effective length (L_eff\u00b2)",
+      "D) Material Density"
+    ],
+    "correct": 2,
+    "explanation": "P_cr = (\u03c0\u00b2 \u00b7 E \u00b7 I) / (K \u00b7 L)\u00b2. Doubling the length reduces buckling capacity to one-fourth.",
+    "subsidy": 350000
+  },
+  {
+    "id": "SCH_6",
+    "tier": "Class_10_12",
+    "category": "Physics & Engineering Foundations",
+    "question": "What is 5 + 5?",
+    "options": [
+      "A) 5",
+      "B) 9",
+      "C) 10",
+      "D) 0"
+    ],
+    "correct": 2,
+    "explanation": "Fundamental mechanics and properties of matter concept from NCERT curriculum.",
+    "subsidy": 100000
+  },
+  {
+    "id": "SCH_7",
+    "tier": "Class_10_12",
+    "category": "Physics & Engineering Foundations",
+    "question": "What is 12 + 5?",
+    "options": [
+      "A) 17",
+      "B) 27",
+      "C) 8",
+      "D) 16"
+    ],
+    "correct": 0,
+    "explanation": "Fundamental mechanics and properties of matter concept from NCERT curriculum.",
+    "subsidy": 100000
+  },
+  {
+    "id": "SCH_8",
+    "tier": "Class_10_12",
+    "category": "Physics & Engineering Foundations",
+    "question": "What is 1 + 9?",
+    "options": [
+      "A) 1",
+      "B) 15",
+      "C) 11",
+      "D) 10"
+    ],
+    "correct": 3,
+    "explanation": "Fundamental mechanics and properties of matter concept from NCERT curriculum.",
+    "subsidy": 100000
+  },
+  {
+    "id": "SCH_9",
+    "tier": "Class_10_12",
+    "category": "Physics & Engineering Foundations",
+    "question": "What is 6 + 9?",
+    "options": [
+      "A) 25",
+      "B) 14",
+      "C) 18",
+      "D) 15"
+    ],
+    "correct": 3,
+    "explanation": "Fundamental mechanics and properties of matter concept from NCERT curriculum.",
+    "subsidy": 100000
+  },
+  {
+    "id": "SCH_10",
+    "tier": "Class_10_12",
+    "category": "Physics & Engineering Foundations",
+    "question": "What is 10 + 2?",
+    "options": [
+      "A) 6",
+      "B) 13",
+      "C) 120",
+      "D) 12"
+    ],
+    "correct": 3,
+    "explanation": "Fundamental mechanics and properties of matter concept from NCERT curriculum.",
+    "subsidy": 100000
+  },
+  {
+    "id": "SCH_11",
+    "tier": "Class_10_12",
+    "category": "Physics & Engineering Foundations",
+    "question": "What is 2 + 5?",
+    "options": [
+      "A) 6",
+      "B) 7",
+      "C) 2",
+      "D) 10"
+    ],
+    "correct": 1,
+    "explanation": "Fundamental mechanics and properties of matter concept from NCERT curriculum.",
+    "subsidy": 100000
+  },
+  {
+    "id": "SCH_12",
+    "tier": "Class_10_12",
+    "category": "Physics & Engineering Foundations",
+    "question": "What is 2 + 2?",
+    "options": [
+      "A) 3",
+      "B) 8",
+      "C) 5",
+      "D) 4"
+    ],
+    "correct": 3,
+    "explanation": "Fundamental mechanics and properties of matter concept from NCERT curriculum.",
+    "subsidy": 100000
+  },
+  {
+    "id": "SCH_13",
+    "tier": "Class_10_12",
+    "category": "Physics & Engineering Foundations",
+    "question": "What is 1 + 8?",
+    "options": [
+      "A) 9",
+      "B) 11",
+      "C) 19",
+      "D) 4"
+    ],
+    "correct": 0,
+    "explanation": "Fundamental mechanics and properties of matter concept from NCERT curriculum.",
+    "subsidy": 100000
+  },
+  {
+    "id": "SCH_14",
+    "tier": "Class_10_12",
+    "category": "Physics & Engineering Foundations",
+    "question": "What is 3 + 4?",
+    "options": [
+      "A) 12",
+      "B) 6",
+      "C) 2",
+      "D) 7"
+    ],
+    "correct": 3,
+    "explanation": "Fundamental mechanics and properties of matter concept from NCERT curriculum.",
+    "subsidy": 100000
+  },
+  {
+    "id": "SCH_15",
+    "tier": "Class_10_12",
+    "category": "Physics & Engineering Foundations",
+    "question": "What is 10 + 7?",
+    "options": [
+      "A) 18",
+      "B) 17",
+      "C) 16",
+      "D) 7"
+    ],
+    "correct": 1,
+    "explanation": "Fundamental mechanics and properties of matter concept from NCERT curriculum.",
+    "subsidy": 100000
+  },
+  {
+    "id": "SCH_16",
+    "tier": "Class_10_12",
+    "category": "Physics & Engineering Foundations",
+    "question": "What is 9 + 5?",
+    "options": [
+      "A) 14",
+      "B) 24",
+      "C) 15",
+      "D) 4"
+    ],
+    "correct": 0,
+    "explanation": "Fundamental mechanics and properties of matter concept from NCERT curriculum.",
+    "subsidy": 100000
+  },
+  {
+    "id": "SCH_17",
+    "tier": "Class_10_12",
+    "category": "Physics & Engineering Foundations",
+    "question": "What is 10 + 3?",
+    "options": [
+      "A) 130",
+      "B) 14",
+      "C) 13",
+      "D) 16"
+    ],
+    "correct": 2,
+    "explanation": "Fundamental mechanics and properties of matter concept from NCERT curriculum.",
+    "subsidy": 100000
+  },
+  {
+    "id": "SCH_18",
+    "tier": "Class_10_12",
+    "category": "Physics & Engineering Foundations",
+    "question": "What is 10 + 1?",
+    "options": [
+      "A) 11",
+      "B) 14",
+      "C) 12",
+      "D) 22"
+    ],
+    "correct": 0,
+    "explanation": "Fundamental mechanics and properties of matter concept from NCERT curriculum.",
+    "subsidy": 100000
+  },
+  {
+    "id": "SCH_19",
+    "tier": "Class_10_12",
+    "category": "Physics & Engineering Foundations",
+    "question": "What is 5 + 4?",
+    "options": [
+      "A) 10",
+      "B) 9",
+      "C) 4",
+      "D) 14"
+    ],
+    "correct": 1,
+    "explanation": "Fundamental mechanics and properties of matter concept from NCERT curriculum.",
+    "subsidy": 100000
+  },
+  {
+    "id": "SCH_20",
+    "tier": "Class_10_12",
+    "category": "Physics & Engineering Foundations",
+    "question": "What is 6 + 1?",
+    "options": [
+      "A) 14",
+      "B) 17",
+      "C) 7",
+      "D) 6"
+    ],
+    "correct": 2,
+    "explanation": "Fundamental mechanics and properties of matter concept from NCERT curriculum.",
+    "subsidy": 100000
+  },
+  {
+    "id": "SCH_21",
+    "tier": "Class_10_12",
+    "category": "Physics & Engineering Foundations",
+    "question": "What is 12 + 1?",
+    "options": [
+      "A) 14",
+      "B) 13",
+      "C) 130",
+      "D) 3"
+    ],
+    "correct": 1,
+    "explanation": "Fundamental mechanics and properties of matter concept from NCERT curriculum.",
+    "subsidy": 100000
+  },
+  {
+    "id": "SCH_22",
+    "tier": "Class_10_12",
+    "category": "Physics & Engineering Foundations",
+    "question": "What is 3 + 3?",
+    "options": [
+      "A) 6",
+      "B) 60",
+      "C) 5",
+      "D) 4"
+    ],
+    "correct": 0,
+    "explanation": "Fundamental mechanics and properties of matter concept from NCERT curriculum.",
+    "subsidy": 100000
+  },
+  {
+    "id": "SCH_23",
+    "tier": "Class_10_12",
+    "category": "Physics & Engineering Foundations",
+    "question": "What is 9 + 1?",
+    "options": [
+      "A) 100",
+      "B) 5",
+      "C) 15",
+      "D) 10"
+    ],
+    "correct": 3,
+    "explanation": "Fundamental mechanics and properties of matter concept from NCERT curriculum.",
+    "subsidy": 100000
+  },
+  {
+    "id": "SCH_24",
+    "tier": "Class_10_12",
+    "category": "Physics & Engineering Foundations",
+    "question": "What is 4 + 1?",
+    "options": [
+      "A) 8",
+      "B) 2",
+      "C) 4",
+      "D) 5"
+    ],
+    "correct": 3,
+    "explanation": "Fundamental mechanics and properties of matter concept from NCERT curriculum.",
+    "subsidy": 100000
+  },
+  {
+    "id": "SCH_25",
+    "tier": "Class_10_12",
+    "category": "Physics & Engineering Foundations",
+    "question": "What is 2 + 6?",
+    "options": [
+      "A) 8",
+      "B) 6",
+      "C) 11",
+      "D) 18"
+    ],
+    "correct": 0,
+    "explanation": "Fundamental mechanics and properties of matter concept from NCERT curriculum.",
+    "subsidy": 100000
+  },
+  {
+    "id": "SCH_26",
+    "tier": "Class_10_12",
+    "category": "Physics & Engineering Foundations",
+    "question": "What is 9 + 8?",
+    "options": [
+      "A) 20",
+      "B) 22",
+      "C) 17",
+      "D) 18"
+    ],
+    "correct": 2,
+    "explanation": "Fundamental mechanics and properties of matter concept from NCERT curriculum.",
+    "subsidy": 100000
+  },
+  {
+    "id": "SCH_27",
+    "tier": "Class_10_12",
+    "category": "Physics & Engineering Foundations",
+    "question": "What is 7 + 7?",
+    "options": [
+      "A) 14",
+      "B) 140",
+      "C) 41",
+      "D) 13"
+    ],
+    "correct": 0,
+    "explanation": "Fundamental mechanics and properties of matter concept from NCERT curriculum.",
+    "subsidy": 100000
+  },
+  {
+    "id": "SCH_28",
+    "tier": "Class_10_12",
+    "category": "Physics & Engineering Foundations",
+    "question": "What is 7 + 6?",
+    "options": [
+      "A) 12",
+      "B) 13",
+      "C) 31",
+      "D) 130"
+    ],
+    "correct": 1,
+    "explanation": "Fundamental mechanics and properties of matter concept from NCERT curriculum.",
+    "subsidy": 100000
+  },
+  {
+    "id": "SCH_29",
+    "tier": "Class_10_12",
+    "category": "Physics & Engineering Foundations",
+    "question": "What is 2 + 9?",
+    "options": [
+      "A) 11",
+      "B) 12",
+      "C) 22",
+      "D) 110"
+    ],
+    "correct": 0,
+    "explanation": "Fundamental mechanics and properties of matter concept from NCERT curriculum.",
+    "subsidy": 100000
+  },
+  {
+    "id": "SCH_30",
+    "tier": "Class_10_12",
+    "category": "Physics & Engineering Foundations",
+    "question": "What is 4 + 6?",
+    "options": [
+      "A) 8",
+      "B) 11",
+      "C) 20",
+      "D) 10"
+    ],
+    "correct": 3,
+    "explanation": "Fundamental mechanics and properties of matter concept from NCERT curriculum.",
+    "subsidy": 100000
   }
-}
+]

@@ -30,10 +30,13 @@ FOG = (206, 222, 236)
 GRASS_NEAR = (92, 170, 84)
 GRASS_FAR = (150, 196, 120)
 AVENUE = (176, 170, 158)
+AVENUE_LINE = (200, 196, 180)
 RIVER = (52, 132, 206)
 DECK = (120, 112, 104)
 PLAYER_SUIT = (40, 110, 220)
 HAT = (255, 200, 40)
+FLOWER_COLS = [(255, 220, 50), (255, 100, 160), (255, 255, 255), (180, 130, 230)]
+CABLE_COL = (195, 205, 218)
 LIGHT = (0.45, 0.80, -0.40)
 MAP = pygame.Rect(WIDTH - 196, 58, 182, 214)
 # the browser runs Python more slowly, so it draws a little less fine detail far away
@@ -200,6 +203,7 @@ class CampusScene:
         self.boxes = world.build_world()
         self.by_key = {b.key: b for b in self.boxes}
         self.trees, self.lamps = world.trees_and_lamps()
+        self.flower_patches = world.flowers()
         state = getattr(app, "campus_state", None)
         if state:
             self.player = world.Player(state[0], state[1])
@@ -706,31 +710,51 @@ class CampusScene:
     def draw_ground(self, s):
         x0, x1, z0, z1 = world.BOUNDS
         rz0, rz1 = world.RIVER_Z
-        # avenue (in pieces so the far part fades nicely)
+        # flower and grass patches first (drawn into the grass before the road)
+        for fx, fz, fr, fk in self.flower_patches:
+            pts = [(fx + fr * math.cos(a / 8 * math.tau), fz + fr * math.sin(a / 8 * math.tau))
+                   for a in range(8)]
+            self.ground_poly(s, pts, FLOWER_COLS[fk % 4])
+        # avenue (in pieces so the far part fades nicely) - wider road
         for za in range(int(z0), int(z1), 30):
             zb = min(z1, za + 30)
-            self.ground_poly(s, [(-6, za), (6, za), (6, zb), (-6, zb)], AVENUE)
-        # side paths to every door
+            self.ground_poly(s, [(-10, za), (10, za), (10, zb), (-10, zb)], AVENUE)
+        # central dashed line on the avenue
+        for za in range(int(z0), int(z1), 16):
+            zb = za + 8
+            self.ground_poly(s, [(-0.4, za), (0.4, za), (0.4, zb), (-0.4, zb)], AVENUE_LINE)
+        # side paths to every door (wider)
         for b in self.boxes:
             if b.kind in ("school", "library", "register", "ncert", "donate"):
                 dx, _, dz = b.door()
                 xa, xb = sorted((dx, 0.0))
-                self.ground_poly(s, [(xa, dz - 2), (xb, dz - 2), (xb, dz + 2), (xa, dz + 2)], AVENUE)
-        # a round plaza at the gate
-        plaza = [(14 * math.cos(a / 12 * math.tau), 8 + 14 * math.sin(a / 12 * math.tau)) for a in range(12)]
+                self.ground_poly(s, [(xa, dz - 3), (xb, dz - 3), (xb, dz + 3), (xa, dz + 3)], AVENUE)
+        # a wider plaza at the gate
+        plaza = [(18 * math.cos(a / 12 * math.tau), 10 + 18 * math.sin(a / 12 * math.tau)) for a in range(12)]
         self.ground_poly(s, plaza, (196, 186, 170))
         # the river with moving ripples, then the avenue bridge over it
         self.ground_poly(s, [(x0, rz0), (x1, rz0), (x1, rz1), (x0, rz1)], RIVER)
-        for k in range(8):
-            z = rz0 + 2 + ((k * 2.1 + self.t * 1.2) % (rz1 - rz0 - 4))
+        for k in range(12):
+            z = rz0 + 2 + ((k * 1.8 + self.t * 1.4) % (rz1 - rz0 - 4))
             a = self.cam.project((x0 + 20, 0.02, z))
             b = self.cam.project((x1 - 20, 0.02, z))
             if a and b:
                 pygame.draw.line(s, (120, 186, 236), a[:2], b[:2], 1)
-        self.ground_poly(s, [(-7, rz0 - 2), (7, rz0 - 2), (7, rz1 + 2), (-7, rz1 + 2)], DECK)
+        # wider bridge deck
+        self.ground_poly(s, [(-10, rz0 - 2), (10, rz0 - 2), (10, rz1 + 2), (-10, rz1 + 2)], DECK)
+        # Mumbai Sea Link cable stays drawn from tower tops to the deck
+        rz_mid = (rz0 + rz1) / 2
+        for tower_cx in (-14.5, 14.5):
+            tower_top = self.cam.project((tower_cx, 58.0, rz_mid))
+            if tower_top and tower_top[2] > 0.5:
+                for dz_off in (-9, -5, -1, 3, 7, 11):
+                    deck_pt = self.cam.project((tower_cx * 0.15, 1.0, rz_mid + dz_off))
+                    if deck_pt and deck_pt[2] > 0.5:
+                        depth = (abs(tower_cx) + 8) / 2
+                        pygame.draw.line(s, self.fog(CABLE_COL, depth), tower_top[:2], deck_pt[:2], 1)
         # building-site sand along the south bank
-        self.ground_poly(s, [(x0, 82), (-12, 82), (-12, 93), (x0, 93)], (214, 190, 140))
-        self.ground_poly(s, [(12, 82), (x1, 82), (x1, 93), (12, 93)], (214, 190, 140))
+        self.ground_poly(s, [(x0, 82), (-10, 82), (-10, 93), (x0, 93)], (214, 190, 140))
+        self.ground_poly(s, [(10, 82), (x1, 82), (x1, 93), (10, 93)], (214, 190, 140))
         # the target ring on the ground
         if self.target is not None:
             dx, _, dz = self.target.door()
@@ -900,7 +924,9 @@ class CampusScene:
 
         exp = getattr(self, "exp", 0)
         tier = EngineerTier.get_tier(exp)
-        sc = (cam.focal / foot[2]) * tier.get("scale", 1.0)
+        sc = (cam.focal / foot[2]) * tier.get("scale", 1.0) * 1.5   # engineer is a big human
+
+        bs = 1.5  # body scale: all limb offsets in metres
 
         def P(dx, dy, dz=0.0):
             hx, _, hz = p.heading
@@ -909,52 +935,56 @@ class CampusScene:
             return q[:2] if q else foot[:2]
 
         swing = math.sin(p.walk_phase * 2.2) * (0.4 if p.grounded else 0.15)
-        hip, neck, head = P(0, 0.95), P(0, 1.45), P(0, 1.70)
-        lw = max(3, int(0.18 * sc))
+        hip   = P(0, 0.95 * bs)
+        neck  = P(0, 1.45 * bs)
+        head  = P(0, 1.70 * bs)
+        lw = max(4, int(0.18 * sc))
 
         if p.gliding:
             pygame.draw.polygon(s, (140, 70, 210), [
-                P(-0.25, 1.45, -0.1), P(0.25, 1.45, -0.1),
-                P(0.9, 0.5, -0.8), P(-0.9, 0.5, -0.8)
+                P(-0.25 * bs, 1.45 * bs, -0.1), P(0.25 * bs, 1.45 * bs, -0.1),
+                P(0.9 * bs, 0.5 * bs, -0.8), P(-0.9 * bs, 0.5 * bs, -0.8)
             ])
 
         if tier.get("accessory") == "blueprint_tube":
-            tube_top = P(-0.25, 1.75, -0.12)
-            tube_bot = P(0.22, 1.05, -0.12)
+            tube_top = P(-0.25 * bs, 1.75 * bs, -0.12)
+            tube_bot = P(0.22 * bs, 1.05 * bs, -0.12)
             pygame.draw.line(s, (35, 40, 45), tube_top, tube_bot, max(4, int(0.14 * sc)))
             pygame.draw.circle(s, (220, 185, 45), tube_top, max(2, int(0.06 * sc)))
 
         pants_col = tier["pants_color"]
         boot_col = tier["boots_color"]
-        l_foot = P(-0.16, 0.0, swing)
-        r_foot = P(0.16, 0.0, -swing)
+        l_foot = P(-0.16 * bs, 0.0, swing)
+        r_foot = P(0.16 * bs, 0.0, -swing)
         pygame.draw.line(s, pants_col, hip, l_foot, lw)
         pygame.draw.line(s, pants_col, hip, r_foot, lw)
-        pygame.draw.circle(s, boot_col, l_foot, max(3, int(0.11 * sc)))
-        pygame.draw.circle(s, boot_col, r_foot, max(3, int(0.11 * sc)))
+        pygame.draw.circle(s, boot_col, l_foot, max(4, int(0.13 * sc)))
+        pygame.draw.circle(s, boot_col, r_foot, max(4, int(0.13 * sc)))
 
-        torso_w = max(5, int(0.36 * sc))
+        torso_w = max(6, int(0.40 * sc))
         pygame.draw.line(s, tier["shirt_color"], hip, neck, torso_w)
-        vest_w = max(4, int(0.34 * sc))
-        mid_spine = P(0, 1.20)
+        vest_w = max(5, int(0.38 * sc))
+        mid_spine = P(0, 1.20 * bs)
         pygame.draw.line(s, tier["vest_color"], mid_spine, neck, vest_w)
-        pygame.draw.line(s, (250, 250, 250), P(-0.16, 1.25), P(0.16, 1.25), max(2, int(0.06 * sc)))
+        pygame.draw.line(s, (250, 250, 250), P(-0.16 * bs, 1.25 * bs), P(0.16 * bs, 1.25 * bs),
+                         max(2, int(0.07 * sc)))
 
         if tier.get("accessory") in ("toolbelt", "clipboard_goggles", "blueprint_tube"):
-            pygame.draw.line(s, (45, 30, 15), P(-0.19, 0.96), P(0.19, 0.96), max(3, int(0.08 * sc)))
-            pygame.draw.rect(s, (210, 190, 60), (hip[0] - 3, hip[1] - 3, 6, 6))
+            pygame.draw.line(s, (45, 30, 15), P(-0.19 * bs, 0.96 * bs), P(0.19 * bs, 0.96 * bs),
+                             max(3, int(0.09 * sc)))
+            pygame.draw.rect(s, (210, 190, 60), (hip[0] - 4, hip[1] - 4, 8, 8))
 
         shirt_col = tier["shirt_color"]
         if p.rope is not None:
-            hand = P(0.1, 2.0)
+            hand = P(0.1 * bs, 2.0 * bs)
             a = cam.project(p.rope[0])
             if a:
                 pygame.draw.line(s, (255, 255, 255), hand, a[:2], 2)
                 pygame.draw.circle(s, (255, 220, 60), a[:2], 5)
             pygame.draw.line(s, shirt_col, neck, hand, lw)
-            pygame.draw.line(s, shirt_col, neck, P(-0.35, 1.0, 0.2), lw)
+            pygame.draw.line(s, shirt_col, neck, P(-0.35 * bs, 1.0 * bs, 0.2), lw)
         elif p.zip is not None and len(p.zip) > 4:
-            hand = P(0.1, 2.0)
+            hand = P(0.1 * bs, 2.0 * bs)
             a = cam.project(p.zip[4])
             if a:
                 pygame.draw.line(s, (255, 255, 255), hand, a[:2], 2)
@@ -963,15 +993,15 @@ class CampusScene:
                     pygame.draw.line(s, (255, 255, 255), a[:2],
                                      (a[0] + 9 * math.cos(ang), a[1] + 9 * math.sin(ang)), 1)
             pygame.draw.line(s, shirt_col, neck, hand, lw)
-            pygame.draw.line(s, shirt_col, neck, P(-0.35, 1.0, 0.2), lw)
+            pygame.draw.line(s, shirt_col, neck, P(-0.35 * bs, 1.0 * bs, 0.2), lw)
         elif p.zip is not None:
-            pygame.draw.line(s, shirt_col, neck, P(-0.4, 1.9), lw)
-            pygame.draw.line(s, shirt_col, neck, P(0.4, 1.9), lw)
+            pygame.draw.line(s, shirt_col, neck, P(-0.4 * bs, 1.9 * bs), lw)
+            pygame.draw.line(s, shirt_col, neck, P(0.4 * bs, 1.9 * bs), lw)
         else:
-            pygame.draw.line(s, shirt_col, neck, P(-0.32, 1.0, -swing), lw)
-            pygame.draw.line(s, shirt_col, neck, P(0.32, 1.0, swing), lw)
+            pygame.draw.line(s, shirt_col, neck, P(-0.32 * bs, 1.0 * bs, -swing), lw)
+            pygame.draw.line(s, shirt_col, neck, P(0.32 * bs, 1.0 * bs, swing), lw)
 
-        hr = max(3, int(0.20 * sc))
+        hr = max(5, int(0.22 * sc))
         pygame.draw.circle(s, (230, 185, 145), head, hr)
         helmet_col = tier["helmet_color"]
         pygame.draw.circle(s, helmet_col, (head[0], head[1] - hr * 0.35), int(hr * 1.08),
@@ -980,10 +1010,10 @@ class CampusScene:
                          (head[0] + hr * 1.35, head[1] - hr * 0.3), max(2, hr // 3))
 
         if p.splash > 0:
-            for k in range(6):
-                a = k / 6 * math.tau + self.t * 3
-                q = P(math.cos(a) * 0.9, 0.3 + 0.8 * p.splash / 2.5, math.sin(a) * 0.9)
-                pygame.draw.circle(s, (180, 220, 255), q, max(2, int(0.1 * sc)))
+            for k in range(8):
+                a = k / 8 * math.tau + self.t * 3
+                q = P(math.cos(a) * 0.9 * bs, 0.3 + 0.8 * p.splash / 2.5, math.sin(a) * 0.9 * bs)
+                pygame.draw.circle(s, (180, 220, 255), q, max(2, int(0.12 * sc)))
     def draw_anchor(self, s):
         if self.anchor is None or self.overlay() is not None:
             return
