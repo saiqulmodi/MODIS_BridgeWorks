@@ -1,84 +1,84 @@
-﻿// Graded Curriculum Bank: Class 1-7 through JEE/IIT Mechanics
+// Auto-generated from build_quiz.py
 const QuizBank = [
-    {
-        id: "PHYS_01_RIGID_01",
-        stage: 1,
-        tier: "Class 1–7",
-        category: "Geometric Rigidity & Levers",
-        question: "Why does a triangular structural frame resist deformation under a point load better than a square frame?",
-        options: [
-            "A) Triangles have higher density",
-            "B) Triangle angles are geometrically locked by fixed side lengths",
-            "C) Triangles have zero gravity acting on them",
-            "D) Square frames have lower friction at pin joints"
-        ],
-        correct: 1,
-        explanation: "Side-Side-Side (SSS) congruence locks a triangle's interior angles without allowing hinge shearing.",
-        subsidy: 50000
-    },
-    {
-        id: "PHYS_02_TRUSS_02",
-        stage: 2,
-        tier: "Class 8–10",
-        category: "Coplanar Trusses & Equilibrium",
-        "question": "For a statically determinate pin-jointed bridge truss in coplanar equilibrium, which pair of equations must be satisfied at every joint?",
-        options: [
-            "A) ΣFx = 0 and ΣFy = 0",
-            "B) ΣF = m·a and Στ = I·α",
-            "C) W = F·d and P = W/t",
-            "D) F_net = constant"
-        ],
-        correct: 0,
-        explanation: "Static translational equilibrium requires zero net force vectors along both orthogonal axes.",
-        subsidy: 150000
-    },
-    {
-        id: "PHYS_03_SOLID_03",
-        stage: 3,
-        tier: "Class 11–12",
-        category: "Mechanical Properties of Solids",
-        question: "A steel stay cable experiences an axial tensile stress σ within its elastic limit. What defines its Young's Modulus Y?",
-        options: [
-            "A) Shear stress / Lateral strain",
-            "B) Tensile stress / Longitudinal strain (σ / ε)",
-            "C) Hydraulic pressure / Volume strain",
-            "D) Fracture load / Cross-sectional area"
-        ],
-        correct: 1,
-        explanation: "Hooke's Law states that within proportional elastic limits, longitudinal stress is directly proportional to longitudinal strain.",
-        subsidy: 250000
-    },
-    {
-        id: "PHYS_04_BUCKLE_04",
-        stage: 4,
-        tier: "JEE Advanced",
-        category: "Compressive Stability & Torsion",
-        question: "According to Euler's buckling theory, pinning both ends of an axial compressive column causes its critical buckling load P_cr to depend on length as:",
-        options: [
-            "A) Inversely proportional to L² (P_cr ∝ 1/L²)",
-            "B) Directly proportional to L²",
-            "C) Linearly proportional to L",
-            "D) Independent of column length"
-        ],
-        correct: 0,
-        explanation: "Euler critical buckling formula: P_cr = (π²·E·I) / (K·L)². For pinned ends (K=1), P_cr scales inversely with L².",
-        subsidy: 400000
-    },
-    {
-        id: "PHYS_05_FEM_05",
-        stage: 5,
-        tier: "IIT / NIT Mechanics",
-        category: "Finite Element Method & Dynamics",
-        question: "In computational finite element analysis (FEM) of large bridge spans, how is the global stiffness equation formulated?",
-        options: [
-            "A) [K]{u} = {F}",
-            "B) [M]{a} = 0",
-            "C) [C]{v} = {F}",
-            "D) {u} = [K]⁻¹"
-        ],
-        correct: 0,
-        explanation: "The fundamental matrix equilibrium relation connects the global stiffness matrix [K] and nodal displacements {u} with applied forces {F}.",
-        subsidy: 750000
-    }
+  {
+    "id": "PHYS_C17_01",
+    "stage": 1,
+    "tier": "Class 1\u20137",
+    "category": "Geometric Rigidity",
+    "question": "Why does a triangular structural frame hold its shape under load without collapsing into a parallelogram?",
+    "options": [
+      "A) Triangles have higher density",
+      "B) Triangle angles are geometrically locked by fixed side lengths (SSS Rule)",
+      "C) Gravity does not act on three-sided shapes",
+      "D) Pin joints have higher friction in triangles"
+    ],
+    "correct": 1,
+    "explanation": "Side-Side-Side congruence locks the internal angles, preventing diagonal shearing without needing extra diagonal bracing.",
+    "subsidy": 50000
+  },
+  {
+    "id": "PHYS_C810_02",
+    "stage": 2,
+    "tier": "Class 8\u201310",
+    "category": "Coplanar Trusses & Equilibrium",
+    "question": "For a pin-jointed bridge truss in static equilibrium under coplanar loads, which condition must hold at every joint?",
+    "options": [
+      "A) \u03a3Fx = 0 and \u03a3Fy = 0",
+      "B) \u03a3F = m\u00b7a and \u03a3\u03c4 = I\u00b7\u03b1",
+      "C) Kinetic energy must equal potential energy",
+      "D) Total acceleration must be non-zero"
+    ],
+    "correct": 0,
+    "explanation": "Static equilibrium requires net force along both horizontal and vertical axes to equal zero.",
+    "subsidy": 150000
+  },
+  {
+    "id": "PHYS_C1112_03",
+    "stage": 3,
+    "tier": "Class 11\u201312",
+    "category": "Mechanical Properties of Solids",
+    "question": "A high-tensile steel stay cable has length L, area A, and Young's modulus Y. Under axial load F, what is its elastic elongation \u0394L?",
+    "options": [
+      "A) \u0394L = (F \u00b7 L) / (A \u00b7 Y)",
+      "B) \u0394L = (F \u00b7 A) / (L \u00b7 Y)",
+      "C) \u0394L = (Y \u00b7 L) / (F \u00b7 A)",
+      "D) \u0394L = (F \u00b7 Y) / (A \u00b7 L)"
+    ],
+    "correct": 0,
+    "explanation": "Hooke's Law: Stress \u03c3 = F/A and Strain \u03b5 = \u0394L/L. Since Y = \u03c3/\u03b5, \u0394L = (F\u00b7L)/(A\u00b7Y).",
+    "subsidy": 250000
+  },
+  {
+    "id": "PHYS_JEE_04",
+    "stage": 4,
+    "tier": "JEE Advanced",
+    "category": "Euler Buckling & Slenderness",
+    "question": "According to Euler's formula, the critical compressive load P_cr for a slender bridge strut pinned at both ends scales as:",
+    "options": [
+      "A) P_cr \u221d 1 / L\u00b2",
+      "B) P_cr \u221d L\u00b2",
+      "C) P_cr \u221d 1 / L",
+      "D) P_cr \u221d L"
+    ],
+    "correct": 0,
+    "explanation": "Euler's Critical Buckling: P_cr = (\u03c0\u00b2 \u00b7 E \u00b7 I) / (K \u00b7 L)\u00b2. With pinned ends (K=1), capacity is inversely proportional to L\u00b2.",
+    "subsidy": 400000
+  },
+  {
+    "id": "PHYS_IIT_05",
+    "stage": 5,
+    "tier": "IIT Mechanics",
+    "category": "Finite Element Method (FEM)",
+    "question": "In computational matrix analysis of large hyperstatic cable-stayed structures, what is the global equilibrium system?",
+    "options": [
+      "A) [K]{u} = {F}",
+      "B) [M]{x} = {v}",
+      "C) [C]{a} = {F}",
+      "D) {F} = [K]\u00b2 {u}"
+    ],
+    "correct": 0,
+    "explanation": "The global stiffness matrix [K] maps nodal displacement vectors {u} directly to external applied load vectors {F}.",
+    "subsidy": 500000
+  }
 ];
-if (typeof module !== "undefined") module.exports = QuizBank;
+if (typeof module !== 'undefined') module.exports = QuizBank;
