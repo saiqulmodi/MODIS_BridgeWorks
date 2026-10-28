@@ -7,71 +7,44 @@
     <link rel="stylesheet" href="css/style.css">
     <style>
         .container { max-width: 1040px; margin: 0 auto; }
-        canvas { width: 100%; border-radius: 8px; border: 1px solid var(--border-color); background: #0f172a; cursor: crosshair; }
-        .filter-btn { background: #334155; color: white; border: 1px solid #475569; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; }
-        .filter-btn:hover { background: #0284c7; }
-        .subject-lab-btn { background: #059669; color: white; border: none; padding: 8px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
-        .subject-lab-btn:hover { background: #047857; }
+        canvas { width: 100%; border-radius: 8px; border: 1px solid var(--border-color); background: #0f172a; margin-bottom: 18px; }
+        .batch-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 22px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); margin-top: 10px; }
+        .batch-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 15px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Top Navigation Bar -->
+        <!-- Top HUD -->
         <div class="header">
             <div>
                 <h2>MODIS BridgeWorks</h2>
-                <p style="color:var(--text-muted); font-size:14px;">National Infrastructure Engineering & NCERT Mastery</p>
+                <p style="color:var(--text-muted); font-size:14px;">Structural Mechanics & NCERT Physics Mastery</p>
             </div>
-            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-                <div>Treasury: <span id="hud-treasury" class="badge">₹50,000,000</span></div>
+            <div style="display:flex; gap:12px; align-items:center;">
+                <div>Score: <span id="hud-score" class="badge">0</span></div>
                 <div>Grants: <span id="hud-subsidies" class="badge">₹0</span></div>
-                <!-- Dedicated Subject Q/A Tab Button -->
-                <button class="subject-lab-btn" onclick="openSubjectLab()">🔬 Q/A Subject Lab</button>
-                <a href="qa-bank.html" class="voice-btn" style="text-decoration:none; padding:8px 12px;">📖 Full Q/A Bank</a>
+                <div>Treasury: <span id="hud-treasury" class="badge">₹50,000,000</span></div>
+                <a href="qa-bank.html" class="voice-btn" style="text-decoration:none; padding:8px 12px;">Full Bank</a>
             </div>
         </div>
 
-        <!-- 5-Stage Evolution Navigation Bar -->
+        <!-- Academic Topic Tabs -->
         <div id="stage-tabs" class="stages-wrapper"></div>
 
-        <!-- Main Simulation Viewport -->
+        <!-- Physics Simulation Canvas -->
         <canvas id="seaLinkCanvas"></canvas>
-    </div>
 
-    <!-- In-Game Checkpoint Quiz Modal -->
-    <div id="quiz-modal" class="modal-overlay">
-        <div class="modal-card">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <span id="modal-q-category" class="badge">Physics Checkpoint</span>
-                <button class="voice-btn" onclick="Speech.speak(document.getElementById('modal-q-text').innerText)">🔊 Read</button>
+        <!-- Focused Single-Question Batch Runner -->
+        <div class="batch-card">
+            <div class="batch-header">
+                <h3 id="active-topic-title" style="color:#38bdf8; margin:0;">Topic Batch</h3>
+                <span id="batch-progress" class="badge" style="background:#334155;">Question 1</span>
             </div>
-            <h3 id="modal-q-text" style="margin:12px 0 16px 0; font-size:18px;"></h3>
-            <div id="modal-options"></div>
-            <div id="modal-feedback" class="feedback"></div>
+            <div id="active-question-card"></div>
         </div>
     </div>
 
-    <!-- Dedicated Q/A Subject Lab Modal (Categorized by Class 1-7, 8-10, 11-12, JEE) -->
-    <div id="subject-lab-modal" class="modal-overlay">
-        <div class="modal-card" style="max-width: 720px; max-height: 85vh; display: flex; flex-direction: column;">
-            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:12px;">
-                <h3 style="margin:0; color:#38bdf8;">🔬 Engineering Subject Lab (Class 1 to JEE / IIT)</h3>
-                <button onclick="closeSubjectLab()" class="reset-btn" style="padding:4px 10px;">✕ Close</button>
-            </div>
-            <!-- Class Filtering Bar -->
-            <div style="display:flex; gap:8px; margin: 12px 0; overflow-x: auto; padding-bottom: 4px;">
-                <button class="filter-btn" onclick="filterSubjectLab('ALL')">All Classes</button>
-                <button class="filter-btn" onclick="filterSubjectLab('1–7')">Class 1–7 (Foundations)</button>
-                <button class="filter-btn" onclick="filterSubjectLab('8–10')">Class 8–10 (Forces)</button>
-                <button class="filter-btn" onclick="filterSubjectLab('11–12')">Class 11–12 (Elasticity)</button>
-                <button class="filter-btn" onclick="filterSubjectLab('JEE')">JEE / IIT (Buckling & FEM)</button>
-            </div>
-            <!-- Question Content Scroll Container -->
-            <div id="subject-lab-questions" style="overflow-y: auto; flex: 1; padding-right: 6px;"></div>
-        </div>
-    </div>
-
-    <!-- Unified Script Chain -->
+    <!-- Core Module Pipeline -->
     <script src="js/Database.js"></script>
     <script src="js/quizbank.js"></script>
     <script src="js/Speech.js"></script>
