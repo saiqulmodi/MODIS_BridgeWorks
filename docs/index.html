@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MODIS BridgeWorks: 5-Stage Engineering Sandbox</title>
+    <title>MODIS BridgeWorks: Structural Mechanics & NCERT Physics</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
         .container { max-width: 1040px; margin: 0 auto; }
-        canvas { width: 100%; border-radius: 8px; border: 1px solid var(--border-color); background: #0f172a; }
+        canvas { width: 100%; border-radius: 8px; border: 1px solid var(--border-color); background: #0f172a; cursor: crosshair; }
     </style>
 </head>
 <body>
@@ -15,10 +15,10 @@
         <!-- Header HUD -->
         <div class="header">
             <div>
-                <h2>MODIS BridgeWorks</h2>
+                <h2>MODIS BridgeWorks: Structural Mechanics</h2>
                 <p style="color:var(--text-muted); font-size:14px;">National Infrastructure Engineering & NCERT Mastery</p>
             </div>
-            <div style="display:flex; gap:12px; align-items:center;">
+            <div style="display:flex; gap:10px; align-items:center;">
                 <div>Treasury: <span id="hud-treasury" class="badge">₹50,000,000</span></div>
                 <div>Grants: <span id="hud-subsidies" class="badge">₹0</span></div>
                 <a href="qa-bank.html" class="voice-btn" style="text-decoration:none; padding:8px 14px;">📖 Standalone Q/A Bank</a>
@@ -35,15 +35,22 @@
     <!-- In-Game Checkpoint Quiz Modal -->
     <div id="quiz-modal" class="modal-overlay">
         <div class="modal-card">
-            <span id="modal-q-category" class="badge" style="margin-bottom:8px; display:inline-block;">Physics Checkpoint</span>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span id="modal-q-category" class="badge">Physics Checkpoint</span>
+                <button class="voice-btn" onclick="Speech.speak(document.getElementById('modal-q-text').innerText)">🔊 Read</button>
+            </div>
             <h3 id="modal-q-text" style="margin:12px 0 16px 0; font-size:18px;"></h3>
             <div id="modal-options"></div>
             <div id="modal-feedback" class="feedback"></div>
         </div>
     </div>
 
-    <!-- Scripts aligned with EcosSynthetica -->
+    <!-- Fully Wired Module Pipeline Aligned with EcosSynthetica -->
     <script src="js/Database.js"></script>
+    <script src="js/quizbank.js"></script>
+    <script src="js/Speech.js"></script>
+    <script src="js/Sound.js"></script>
+    <script src="js/Controls.js"></script>
     <script src="js/Quiz.js"></script>
     <script src="js/UI.js"></script>
     <script src="js/GameLoop.js"></script>

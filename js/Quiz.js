@@ -1,4 +1,4 @@
-﻿// In-Game Checkpoint Quiz Runner (+4 / -1 Scoring & Unlock System)
+﻿// In-Game Quiz Runner connected to js/quizbank.js & Web Speech read-aloud
 class QuizEngine {
     constructor() {
         this.currentQuestions = [];
@@ -7,19 +7,14 @@ class QuizEngine {
         this.onCompleteCallback = null;
     }
 
-    startCheckpoint(tierName, onComplete) {
+    startCheckpoint(stageId, onComplete) {
         this.onCompleteCallback = onComplete;
-        fetch("data/questions.json")
-            .then(r => r.json())
-            .then(allQ => {
-                // Shuffle and pick 5 questions
-                const filtered = allQ.sort(() => 0.5 - Math.random()).slice(0, 5);
-                this.currentQuestions = filtered;
-                this.currentIndex = 0;
-                this.active = true;
-                this.renderModal();
-            })
-            .catch(e => console.error("Could not load quiz questions:", e));
+        const bank = (typeof QuizBank !== "undefined") ? QuizBank : [];
+        this.currentQuestions = bank.filter(q => q.stage === stageId);
+        if (this.currentQuestions.length === 0) this.currentQuestions = bank.slice(0, 3);
+        this.currentIndex = 0;
+        this.active = true;
+        this.renderModal();
     }
 
     renderModal() {
@@ -59,12 +54,14 @@ class QuizEngine {
 
         if (selected === correct) {
             fb.style.background = "#14532d";
-            fb.innerHTML = `✓ Correct (+4)! Engineering Grant Unlocked: +₹${subsidy.toLocaleString('en-IN')}<br><small>${explanation}</small>`;
-            window.civicEconomy.addGrant(subsidy);
+            fb.innerHTML = `✓ Correct (+4)! Academic Grant Unlocked: +₹${subsidy.toLocaleString('en-IN')}<br><small>${explanation}</small>`;
+            if (window.Sound) window.Sound.subsidyGranted();
+            if (window.civicEconomy) window.civicEconomy.addGrant(subsidy);
         } else {
             fb.style.background = "#7f1d1d";
             fb.innerHTML = `✗ Incorrect (-1). Audit penalty incurred.<br><small>${explanation}</small>`;
-            window.civicEconomy.applyPenalty(25000);
+            if (window.Sound) window.Sound.auditPenalty();
+            if (window.civicEconomy) window.civicEconomy.applyPenalty(25000);
         }
 
         setTimeout(() => {
