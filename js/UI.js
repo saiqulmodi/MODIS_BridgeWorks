@@ -1,17 +1,17 @@
-﻿// UI Manager: 5-Stage Evolution Tabs and Material Palette
+﻿// Academic Physics & Structural Mechanics Progression
 const Stages = [
-    { id: 1, name: "Stage 1: Bamboo & Living Root", span: "15m", grant: "₹25 Lakhs", classReq: "Class 1–7" },
-    { id: 2, name: "Stage 2: Howrah Cantilever", span: "450m", grant: "₹2.5 Cr", classReq: "Class 8–10" },
-    { id: 3, name: "Stage 3: Chenab Arch Bridge", span: "467m", grant: "₹15 Cr", classReq: "Class 11–12" },
-    { id: 4, name: "Stage 4: Bandra-Worli Sea Link", span: "5,600m", grant: "₹50 Cr", classReq: "JEE / IIT Tier" },
-    { id: 5, name: "Stage 5: Oceanic Hyper-Megastructure", span: "25,000m", grant: "₹250 Cr", classReq: "Advanced Engineering" }
+    { id: 1, name: "Stage 1: Tensile Fibers", desc: "Line of Action & Rigidity", grant: "₹25 Lakhs", classReq: "Class 1–7 (Basics)" },
+    { id: 2, name: "Stage 2: Coplanar Trusses", desc: "Concurrent Equilibrium", grant: "₹2.5 Cr", classReq: "Class 8–10 (Forces)" },
+    { id: 3, name: "Stage 3: Parabolic Thrust", desc: "Elastic Moduli & Thermal Stress", grant: "₹15 Cr", classReq: "Class 11–12 (Solids)" },
+    { id: 4, name: "Stage 4: Stay Dynamics", desc: "Axial Torsion & Buckling", grant: "₹50 Cr", classReq: "JEE Main / Advanced" },
+    { id: 5, name: "Stage 5: Matrix Dissipation", desc: "Continuous Systems & FEM", grant: "₹250 Cr", classReq: "IIT / NIT Mechanics" }
 ];
 
 class CivicEconomyState {
     constructor() {
         this.treasury = 50000000;
         this.subsidies = 0;
-        this.currentStage = 4; // Starts on Bandra-Worli Sea Link
+        this.currentStage = 4;
     }
     addGrant(val) {
         this.treasury += val;
@@ -29,7 +29,7 @@ class CivicEconomyState {
             else tab.classList.remove("active");
         });
         window.quizEngine.startCheckpoint(Stages[idx - 1].name, () => {
-            alert(`Checkpoint Cleared! Now building ${Stages[idx - 1].name}`);
+            alert(`Checkpoint Cleared! Now testing ${Stages[idx - 1].name}`);
         });
     }
     updateHUD() {
@@ -46,7 +46,7 @@ function initTabs() {
     Stages.forEach(s => {
         const btn = document.createElement("button");
         btn.className = `stage-tab ${s.id === 4 ? "active" : ""}`;
-        btn.innerHTML = `<strong>${s.name}</strong><br><small style="color:#94a3b8;">${s.classReq} | ${s.grant}</small>`;
+        btn.innerHTML = `<strong>${s.name}</strong><br><small style="color:#94a3b8;">${s.classReq}</small>`;
         btn.onclick = () => window.civicEconomy.setStage(s.id);
         tabContainer.appendChild(btn);
     });
