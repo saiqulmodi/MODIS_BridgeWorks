@@ -7,9 +7,9 @@
     <link rel="stylesheet" href="css/style.css">
     <style>
         .container { max-width: 1040px; margin: 0 auto; }
-        canvas { width: 100%; border-radius: 8px; border: 1px solid var(--border-color); background: #0f172a; margin-bottom: 18px; }
-        .batch-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 22px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); margin-top: 10px; }
-        .batch-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 15px; }
+        canvas { width: 100%; border-radius: 8px; border: 1px solid var(--border-color); background: #0f172a; margin-bottom: 16px; }
+        .batch-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); margin-top: 12px; }
+        .batch-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 14px; }
     </style>
 </head>
 <body>
@@ -18,7 +18,7 @@
         <div class="header">
             <div>
                 <h2>MODIS BridgeWorks</h2>
-                <p style="color:var(--text-muted); font-size:14px;">Structural Mechanics & NCERT Physics Mastery</p>
+                <p style="color:var(--text-muted); font-size:14px;">National Infrastructure Engineering & NCERT Mastery</p>
             </div>
             <div style="display:flex; gap:12px; align-items:center;">
                 <div>Score: <span id="hud-score" class="badge">0</span></div>
@@ -28,10 +28,13 @@
             </div>
         </div>
 
-        <!-- Academic Topic Tabs -->
+        <!-- Academic Topic Navigation Tabs -->
         <div id="stage-tabs" class="stages-wrapper"></div>
 
-        <!-- Physics Simulation Canvas -->
+        <!-- Dynamic Structural Blueprint Lab (Materials & Clues) -->
+        <div id="blueprint-lab"></div>
+
+        <!-- Simulation Canvas -->
         <canvas id="seaLinkCanvas"></canvas>
 
         <!-- Focused Single-Question Batch Runner -->
