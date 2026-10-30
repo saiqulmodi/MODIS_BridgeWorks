@@ -1,15 +1,14 @@
-﻿const CACHE_NAME = 'modis-bridgeworks-v1';
-const ASSETS = [
-  './',
-  './qa-bank.html',
-  './qa-manager.js',
-  './data/questions.json'
-];
-
-self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)));
+// Offline once loaded: the game files are cached on install; each class's questions are cached the first time it opens.
+const CACHE = "bridgeworks-campus-v3";
+const CORE = ["./", "index.html", "js/truss.js", "js/i18n.js", "js/intro.js", "js/game.js", "data/levels.json", "data/projects.json", "favicon.png"];
+self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE)).then(() => self.skipWaiting())); });
+self.addEventListener("activate", e => {
+  e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim()));
 });
-
-self.addEventListener('fetch', (e) => {
-  e.respondWith(caches.match(e.request).then((res) => res || fetch(e.request)));
+self.addEventListener("fetch", e => {
+  if (e.request.method !== "GET" || new URL(e.request.url).origin !== location.origin) return;
+  // network first so updates arrive; fall back to the cache when offline
+  e.respondWith(fetch(e.request).then(r => {
+    const copy = r.clone(); caches.open(CACHE).then(c => c.put(e.request, copy)); return r;
+  }).catch(() => caches.match(e.request)));
 });

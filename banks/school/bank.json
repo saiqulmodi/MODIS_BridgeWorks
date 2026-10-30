@@ -1,7 +1,7 @@
 {
  "id": "school",
  "title": "School MCQ Bank",
- "title_bn": "স্কুল প্রশ্নব্যাংক",
+ "title_bn": "School MCQ Bank",
  "source": "mcq_bank.db",
  "levels": {},
  "subjects": {
@@ -303,7 +303,7 @@
   "8/general_safety": 152,
   "8/geography": 234,
   "8/math": 500,
-  "8/physics": 300,
+  "8/physics": 299,
   "9/biology": 223,
   "9/chemistry": 330,
   "9/commercials": 191,
@@ -312,5 +312,5 @@
   "9/math": 483,
   "9/physics": 350
  },
- "total": 22413
+ "total": 22412
 }
