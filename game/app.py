@@ -1,4 +1,4 @@
-"""
+﻿"""
 MODIS BridgeWorks - Structural Mechanics & NCERT Physics Sandbox
 A Campus World with one building per level (Class 1-12, BE, NIT, IIT, Expert
 Engineer). Each building has only its own question bank and a bridge project
@@ -46,6 +46,7 @@ SIZE_WIDTH = {"S": 2, "M": 3, "L": 4, "XL": 6}
 
 class App:
     def __init__(self):
+        self.bank_revealed = {}
         pygame.init()
         self.w, self.h = 1080, 600
         self.screen = pygame.display.set_mode((self.w, self.h))
@@ -165,12 +166,12 @@ class App:
             self.score += CORRECT_PTS
             self.treasury += CORRECT_CASH
             self.design.parts += parts
-            self.feedback_msg = f"Correct! +₹{CORRECT_CASH:,.0f} | +{CORRECT_PTS} Pts | +{parts} parts"
+            self.feedback_msg = f"Correct! +â‚¹{CORRECT_CASH:,.0f} | +{CORRECT_PTS} Pts | +{parts} parts"
             self.feedback_color = (34, 197, 94)
         else:
             self.score = max(0, self.score - WRONG_PTS)
             self.treasury = max(0.0, self.treasury - WRONG_CASH)
-            self.feedback_msg = f"Wrong! -₹{WRONG_CASH:,.0f} | -{WRONG_PTS} Pt | Answer: {q['answer']}"
+            self.feedback_msg = f"Wrong! -â‚¹{WRONG_CASH:,.0f} | -{WRONG_PTS} Pt | Answer: {q['answer']}"
             self.feedback_color = (239, 68, 68)
         self.next_question()
 
@@ -286,9 +287,9 @@ class App:
         text = str(text).replace("\n", " ")
         if font.size(text)[0] <= max_w:
             return text
-        while text and font.size(text + "…")[0] > max_w:
+        while text and font.size(text + "â€¦")[0] > max_w:
             text = text[:-1]
-        return text + "…"
+        return text + "â€¦"
 
     def wrap(self, text, font, max_w, max_lines):
         words, lines, cur = str(text).replace("\n", " ").split(), [], ""
@@ -363,8 +364,8 @@ class App:
     def draw_hud(self):
         pygame.draw.rect(self.screen, (30, 41, 59), (0, 0, self.w, 40))
         pygame.draw.line(self.screen, (51, 65, 85), (0, 40), (self.w, 40), 2)
-        hud_str = (f"Score: {self.score} | Treasury: ₹{self.treasury:,.2f} | "
-                   f"Govt Subsidies: ₹{self.subsidies:,.2f} | Vehicles: {self.vehicles_passed}")
+        hud_str = (f"Score: {self.score} | Treasury: â‚¹{self.treasury:,.2f} | "
+                   f"Govt Subsidies: â‚¹{self.subsidies:,.2f} | Vehicles: {self.vehicles_passed}")
         self.screen.blit(self.font.render(hud_str, True, (248, 250, 252)), (20, 11))
 
         if self.mode == "world":
@@ -379,7 +380,7 @@ class App:
         st = STAGES[self.current_stage - 1]
         tx = back.right + 12
         self.screen.blit(self.font_lg.render(self.level_name, True, (255, 255, 255)), (tx, TAB_Y + 1))
-        sub = f"Project {st['id']}: {st['name']}" + ("  ·  BUILT" if self.design.complete else "")
+        sub = f"Project {st['id']}: {st['name']}" + ("  Â·  BUILT" if self.design.complete else "")
         self.screen.blit(self.font_sm.render(sub, True, (110, 231, 183) if self.design.complete
                                              else (203, 213, 225)), (tx, TAB_Y + 22))
         for r, subj, label in self.subject_chips():
@@ -396,7 +397,7 @@ class App:
             label = self.font.render("X  Close Bank", True, (255, 255, 255))
             self.screen.blit(label, label.get_rect(center=rect.center))
         else:
-            icon = self.font_icon.render("📋", True, (255, 255, 255))
+            icon = self.font_icon.render("ðŸ“‹", True, (255, 255, 255))
             label = self.font.render("Q&A Bank", True, (255, 255, 255))
             x = rect.centerx - (icon.get_width() + 4 + label.get_width()) // 2
             self.screen.blit(icon, icon.get_rect(midleft=(x, rect.centery)))
@@ -517,9 +518,9 @@ class App:
             self.screen.blit(self.font.render(msg, True, (251, 191, 36)), (32, top + 10))
             return
 
-        header = (f"{self.level_name} · {subject_name(q['subject'])}  |  Project {st['id']}: {st['name']}"
-                  f"  |  Right +₹10,000 (+4) +{PARTS_PER_CORRECT[self.current_stage]} parts"
-                  f"  Wrong -₹1,000 (-1)")
+        header = (f"{self.level_name} Â· {subject_name(q['subject'])}  |  Project {st['id']}: {st['name']}"
+                  f"  |  Right +â‚¹10,000 (+4) +{PARTS_PER_CORRECT[self.current_stage]} parts"
+                  f"  Wrong -â‚¹1,000 (-1)")
         self.screen.blit(self.font_sm.render(self.fit(header, self.font_sm, self.w - 470), True, (56, 189, 248)),
                          (32, top + 8))
         if self.feedback_msg:
@@ -537,7 +538,7 @@ class App:
             self.screen.blit(self.font_sm.render(label, True, (241, 245, 249)), (rect.x + 8, rect.y + 4))
 
         hint = ("Press [1-4] or click an option  |  [SPACE] Skip  |  [Q] Q&A Bank  |  "
-                "Build: click two joints  ·  right-click a member to remove  ·  [T] Test")
+                "Build: click two joints  Â·  right-click a member to remove  Â·  [T] Test")
         self.screen.blit(self.font_sm.render(self.fit(hint, self.font_sm, self.w - 64), True, (148, 163, 184)),
                          (32, top + 122))
 
@@ -552,7 +553,7 @@ class App:
         subj = "All subjects" if self.subject is None else subject_name(self.subject)
         title = f"Q&A Bank: {self.level_name} - {subj}  ({len(self.bank_questions):,} questions)"
         self.screen.blit(self.font_lg.render(title, True, (56, 189, 248)), (x0, y))
-        help_txt = ("[Left/Right] page  ·  [PgUp/PgDn] 50 pages  ·  [Home/End]  ·  click a subject above to filter  ·  "
+        help_txt = ("[Left/Right] page  Â·  [PgUp/PgDn] 50 pages  Â·  [Home/End]  Â·  click a subject above to filter  Â·  "
                     "[Q] or [Esc] close")
         self.screen.blit(self.font_sm.render(help_txt, True, (148, 163, 184)), (x0, y + 24))
         y += 46
@@ -562,18 +563,35 @@ class App:
         for n, item in enumerate(self.bank_questions[start:start + PER_PAGE], start + 1):
             head = f"{n}. [{subject_name(item['subject'])}] {item['question']}"
             self.screen.blit(self.font.render(self.fit(head, self.font, text_w), True, (248, 250, 252)), (x0, y))
+            user_pick = getattr(self, "bank_revealed", {}).get(n)
+
             for i, opt in enumerate(item["options"][:4]):
                 ox, oy = x0 + 16 + (i % 2) * half, y + 19 + (i // 2) * 16
                 right = i == item["correct_idx"]
+                is_picked = user_pick == i
                 label = self.fit(f"{'ABCD'[i]}: {opt}", self.font_sm, half - 28)
-                surf = self.font_sm.render(label, True, (15, 23, 42) if right else (203, 213, 225))
-                if right:
-                    pygame.draw.rect(self.screen, (52, 211, 153),
-                                     (ox - 4, oy, surf.get_width() + 8, surf.get_height()), border_radius=3)
+                
+                txt_color = (203, 213, 225)
+                if user_pick is not None:
+                    if right:
+                        txt_color = (15, 23, 42)
+                        tmp_surf = self.font_sm.render(label, True, txt_color)
+                        pygame.draw.rect(self.screen, (52, 211, 153),
+                                         (ox - 4, oy - 2, tmp_surf.get_width() + 8, tmp_surf.get_height() + 4), border_radius=3)
+                    elif is_picked:
+                        txt_color = (255, 255, 255)
+                        tmp_surf = self.font_sm.render(label, True, txt_color)
+                        pygame.draw.rect(self.screen, (239, 68, 68),
+                                         (ox - 4, oy - 2, tmp_surf.get_width() + 8, tmp_surf.get_height() + 4), border_radius=3)
+
+                surf = self.font_sm.render(label, True, txt_color)
                 self.screen.blit(surf, (ox, oy))
-            exp = item["explanation"] or "-"
-            exp = self.fit(f"Answer: {item['answer']}  ·  Explanation: {exp}", self.font_sm, text_w - 16)
-            self.screen.blit(self.font_sm.render(exp, True, (110, 231, 183)), (x0 + 16, y + 53))
+
+            if user_pick is not None:
+                exp = item.get("explanation") or "-"
+                exp_str = self.fit(f"Answer: {item['answer']}  ·  Explanation: {exp}", self.font_sm, text_w - 16)
+                self.screen.blit(self.font_sm.render(exp_str, True, (110, 231, 183)), (x0 + 16, y + 53))
+
             y += 76
 
         prev_r, next_r = self.page_btn_rects()
@@ -614,19 +632,40 @@ class App:
                 if r.collidepoint(mx, my):
                     self.set_subject(subj)
             return
+
         if self.show_bank_view:
+            rect = pygame.Rect(16, TAB_Y + TAB_H + 6, self.w - 32, self.h - (TAB_Y + TAB_H + 6) - 8)
+            x0 = rect.x + 20
+            y_click = rect.y + 10 + 46
+            text_w = rect.w - 40
+            start = self.bank_page * PER_PAGE
+            half = text_w // 2
+
+            for n, item in enumerate(self.bank_questions[start:start + PER_PAGE], start + 1):
+                for i in range(min(4, len(item['options']))):
+                    ox = x0 + 16 + (i % 2) * half
+                    oy = y_click + 19 + (i // 2) * 16
+                    opt_rect = pygame.Rect(ox - 8, oy - 4, half - 16, 20)
+                    if opt_rect.collidepoint(mx, my):
+                        if not hasattr(self, 'bank_revealed'):
+                            self.bank_revealed = {}
+                        self.bank_revealed[n] = i
+                        return
+                y_click += 76
+
             prev_r, next_r = self.page_btn_rects()
             if prev_r.collidepoint(mx, my):
                 self.set_page(self.bank_page - 1)
             elif next_r.collidepoint(mx, my):
                 self.set_page(self.bank_page + 1)
             return
+
         if button == 1:
             for i, rect in enumerate(self.option_rects()):
                 if rect.collidepoint(mx, my):
                     self.submit_answer(i)
                     return
-        if self.test and self.test["status"] == "running":
+        if self.test and self.test['status'] == 'running':
             return
         if button == 1:
             for r, (action, value), *_ in self.tool_buttons():
@@ -636,12 +675,6 @@ class App:
         if CANVAS_TOP <= my < self.h - 150:
             if button == 3:
                 self.remove_member_at(mx, my)
-            elif button == 1:
-                k = self.joint_at(mx, my)
-                if k is not None:
-                    self.click_joint(k)
-                else:
-                    self.selected = None
 
     def on_key(self, key):
         if key == pygame.K_q:
@@ -723,3 +756,10 @@ class App:
 
 if __name__ == "__main__":
     asyncio.run(App().run())
+
+
+
+
+
+
+

@@ -3,8 +3,9 @@
     python tools/export_web.py
 
 web/data/levels.json         one row per building: level code, name, project, question count, subjects
-web/data/q/<level>.json      that level's questions only: {"s": [subjects], "q": [[subject, q, options, answer, explanation, bengali?]]}
-                             (bengali = [question, options, explanation] where the Academy has it)
+web/data/q/<level>.json      that level's questions only: {"s": [subjects], "q": [[subject, q, options, answer, explanation, bengali, chapter]]}
+                             (bengali = [question, options, explanation] where the Academy has it, else null;
+                              chapter = index into levels.json chapters[subject], -1 = none; a null row = question owned by a lower class)
 web/data/projects.json       the 5 bridge projects, materials, sizes, guided-build steps (checked with the Python solver)
 web/data/handbook.json       the 200-question Engineering Handbook (English + Bengali)
 """
@@ -21,7 +22,12 @@ from game.projects import (DECK_SIZE, PARTS_PER_CORRECT, PROJECTS, PYLON_AREA,  
 from game.question_bank import load_for_game           # noqa: E402
 from game.world import LEVELS, SUBJECT_NAMES, tier_of  # noqa: E402
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import ncert_map                                        # noqa: E402
+
 OUT = os.path.join(ROOT, "web", "data")
+SCHOOL_DB = os.path.join(os.path.dirname(ROOT), "School_MCQ_Bank", "output", "mcq_bank.db")
+WEB_SUBJECT_NAMES = {**SUBJECT_NAMES, "accountancy": "Accountancy", "business": "Business Studies"}
 SC, ST, ST_C, CF = M.STEEL_CABLE, M.STEEL, M.CONCRETE, M.CARBON_CABLE
 
 # Guided build: the steps of a design that passes, easiest idea first.
@@ -111,28 +117,58 @@ def bengali_text():
     return out
 
 
+def school_topics():
+    """(class, question) -> topic, read-only from the School MCQ Bank database."""
+    import sqlite3
+    db = sqlite3.connect(f"file:{SCHOOL_DB}?mode=ro", uri=True)
+    try:
+        return {(c, q.strip().lower()): t for c, q, t in db.execute("select class_level, question, topic from questions")}
+    finally:
+        db.close()
+
+
 def export_questions():
     qs = load_for_game()
     bn = bengali_text()
+    topics = school_topics()
     os.makedirs(os.path.join(OUT, "q"), exist_ok=True)
+    # a question lives in one class only: the lowest class it appears in (BE and Expert come last, after JEE)
+    owner = {}
+    for level in sorted({q["class_level"] for q in qs}):
+        for q in qs:
+            if q["class_level"] == level:
+                owner.setdefault(q["question"].strip().lower(), level)
     levels = []
     for level, name in LEVELS:
-        mine = [q for q in qs if q["class_level"] == level]
-        subjects = sorted({q["subject"] for q in mine}, key=lambda s: SUBJECT_NAMES.get(s, s))
-        idx = {s: k for k, s in enumerate(subjects)}
-        rows = []
+        mine = [q for q in qs if q["class_level"] == level and q["correct_idx"] < 4]
+        filed = []
         for q in mine:
-            if q["correct_idx"] >= 4:
+            key = q["question"].strip().lower()
+            if owner[key] != level:
+                filed.append(None)      # the row stays as a gap so saved progress (row numbers) still points at the right question
                 continue
-            row = [idx[q["subject"]], q["question"], q["options"][:4], q["correct_idx"], q["explanation"]]
+            filed.append((q, ncert_map.classify(level, q["subject"], topics.get((level, key), ""), q["question"], q["explanation"])))
+        used = {f[1][0] for f in filed if f}
+        ncert = [s for s in ncert_map.NCERT_SUBJECTS.get(level, []) if s in used]
+        subjects = ncert + sorted(used - set(ncert), key=lambda s: SUBJECT_NAMES.get(s.removesuffix("_x"), s))
+        idx = {s: k for k, s in enumerate(subjects)}
+        chapters = {s: [c for c in ncert_map.chapter_order(level, s) if any(f and f[1][0] == s and f[1][1] == c for f in filed)] for s in ncert}
+        rows = []
+        for f in filed:
+            if f is None:
+                rows.append(None)
+                continue
+            q, (subject, chapter, _) = f
+            row = [idx[subject], q["question"], q["options"][:4], q["correct_idx"], q["explanation"]]
             b = bn.get((level, q["question"].strip()))
-            if b and len(b[1]) >= 4:
-                row.append([b[0], b[1][:4], b[2]])
+            row.append([b[0], b[1][:4], b[2]] if b and len(b[1]) >= 4 else None)
+            row.append(chapters[subject].index(chapter) if chapter else -1)
             rows.append(row)
         with open(os.path.join(OUT, "q", f"{level}.json"), "w", encoding="utf-8") as f:
             json.dump({"s": subjects, "q": rows}, f, ensure_ascii=False, separators=(",", ":"))
-        counts = {s: sum(1 for r in rows if r[0] == idx[s]) for s in subjects}
-        levels.append({"l": level, "name": name, "project": tier_of(level), "n": len(rows), "subjects": counts})
+        counts = {s: sum(1 for r in rows if r and r[0] == idx[s]) for s in subjects}
+        levels.append({"l": level, "name": name, "project": tier_of(level), "n": sum(counts.values()), "rows": len(rows),
+                       "subjects": counts, "ncert": ncert, "chapters": chapters, "exam": ncert_map.JEE_LABEL.get(level, "")})
     return levels
 
 
@@ -152,7 +188,7 @@ def main():
 
     dump("projects.json", export_projects())
     levels = export_questions()
-    dump("levels.json", {"levels": levels, "subject_names": SUBJECT_NAMES})
+    dump("levels.json", {"levels": levels, "subject_names": WEB_SUBJECT_NAMES})
     dump("handbook.json", export_handbook())
     print("questions:", sum(l["n"] for l in levels), "in", len(levels), "levels")
 
