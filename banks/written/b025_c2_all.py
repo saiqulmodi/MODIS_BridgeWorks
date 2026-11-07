@@ -1,0 +1,42 @@
+"""Class 2, batch 25: EVS and Maths, by NCERT chapter; very short questions for young children."""
+LEVEL, SUBJECT = 2, None
+V, M = "evs", "math"
+PE, AN, PL, FO, SH, WA, TR, TH = ("Family and Friends: People", "Family and Friends: Animals", "Family and Friends: Plants", "Food", "Shelter",
+                                  "Water", "Travel", "Things We Make and Do")
+
+ITEMS = [
+    (V, AN, "Which animal says 'moo'?", ["Cow", "Dog", "Cat", "Duck"], "Cows give us milk."),
+    (V, AN, "Which animal has a trunk?", ["Elephant", "Lion", "Horse", "Rabbit"], "It uses its trunk like a hand."),
+    (V, AN, "A baby dog is called a:", ["Puppy", "Kitten", "Calf", "Chick"], "A baby cat is a kitten."),
+    (V, AN, "Which animal can fly?", ["Parrot", "Cat", "Goat", "Pig"], "Birds have wings."),
+    (V, AN, "Fish live in:", ["Water", "Trees", "Sand", "Nests"], "They swim with fins."),
+    (V, PL, "Which colour are most leaves?", ["Green", "Blue", "Black", "Pink"], "Because of chlorophyll."),
+    (V, PL, "Mango is a:", ["Fruit", "Vegetable", "Flower", "Root"], "Called the king of fruits."),
+    (V, PL, "Plants need sunlight and ___ to grow.", ["Water", "Sweets", "Plastic", "Paint"], "Water them every day."),
+    (V, FO, "Which of these is a vegetable?", ["Potato", "Apple", "Banana", "Grapes"], "It grows under the ground."),
+    (V, FO, "We get milk from:", ["Cows", "Trees", "Hens", "Fish"], "Also from buffaloes and goats."),
+    (V, FO, "Which is a healthy snack?", ["A fruit", "Lots of sweets", "Cold drinks", "Chips every day"], "Fruits keep us strong."),
+    (V, SH, "We live in a:", ["House", "Nest", "Hive", "Burrow"], "It keeps us safe."),
+    (V, WA, "We should drink water that is:", ["Clean", "Dirty", "Salty", "Muddy"], "Clean water keeps us healthy."),
+    (V, WA, "We use water for:", ["Drinking and bathing", "Reading", "Flying", "Writing"], "Do not waste water."),
+    (V, TR, "Which of these moves on water?", ["Boat", "Car", "Bicycle", "Train"], "Ships and boats float."),
+    (V, TR, "Which has two wheels?", ["Bicycle", "Car", "Bus", "Truck"], "We pedal it."),
+    (V, TH, "We write with a:", ["Pencil", "Spoon", "Comb", "Plate"], "Or a pen."),
+    (V, PE, "Who teaches us at school?", ["A teacher", "A driver", "A farmer", "A cook"], "Teachers help us learn."),
+    (V, PE, "Who grows food for us?", ["A farmer", "A doctor", "A pilot", "A tailor"], "Farmers work in fields."),
+    (M, "What is Long, What is Round?", "Which of these can roll?", ["A ball", "A book", "A box", "A brick"], "Round things roll."),
+    (M, "Counting in Groups", "How many is 5 + 5?", ["10", "55", "5", "15"], "Five and five more."),
+    (M, "Counting in Groups", "Count in twos: 2, 4, 6, ... What comes next?", ["8", "7", "10", "9"], "Add 2."),
+    (M, "How Much Can You Carry?", "Which is lighter?", ["A pencil", "A school bag", "A chair", "A table"], "It is small."),
+    (M, "Counting in Tens", "Count in tens: 10, 20, 30, ... What comes next?", ["40", "31", "50", "35"], "Add 10."),
+    (M, "Add Our Points / Give and Take", "12 + 6 equals:", ["18", "16", "6", "26"], "12 and 6 more."),
+    (M, "Add Our Points / Give and Take", "15 - 5 equals:", ["10", "20", "5", "15"], "Take away 5."),
+    (M, "Long and Short", "Which is shorter?", ["A crayon", "A door", "A bed", "A tree"], "It fits in your hand."),
+    (M, "Birds Come, Birds Go (Tables)", "2 x 5 equals:", ["10", "7", "25", "3"], "Two fives."),
+    (M, "Lines and Lines", "A line that goes straight up and down is:", ["Standing (vertical)", "Sleeping (horizontal)", "Curved", "Slanting"],
+     "Like a flag pole."),
+    (M, "Tens and Ones", "In 47, how many tens are there?", ["4", "7", "47", "11"], "4 tens and 7 ones."),
+    (M, "My Funday (Time)", "Which day comes after Monday?", ["Tuesday", "Sunday", "Friday", "Wednesday"], "Days go in order."),
+    (M, "Rupees and Paise", "A Rs 5 coin and a Rs 2 coin make:", ["Rs 7", "Rs 3", "Rs 10", "Rs 52"], "5 + 2."),
+    (M, "Sharing", "6 sweets shared equally by 3 children gives each:", ["2", "3", "6", "9"], "6 / 3."),
+]
