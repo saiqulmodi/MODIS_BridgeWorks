@@ -21,6 +21,7 @@ from engine import materials as M                       # noqa: E402
 from game.projects import (DECK_SIZE, PARTS_PER_CORRECT, PROJECTS, PYLON_AREA,  # noqa: E402
                            SIZE_COST, Design)
 from game import question_bank                         # noqa: E402
+from banks import written as written_bank              # noqa: E402
 from game.world import LEVELS, SUBJECT_NAMES, tier_of  # noqa: E402
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -142,6 +143,7 @@ def export_questions():
         for q in qs:
             if q["class_level"] == level:
                 owner.setdefault(q["question"].strip().lower(), level)
+    written, gate, added = written_bank.load(), None, {}
     levels = []
     for level, name in LEVELS:
         mine = [q for q in qs if q["class_level"] == level and q["correct_idx"] < 4]
@@ -152,6 +154,23 @@ def export_questions():
                 filed.append(None)      # the row stays as a gap so saved progress (row numbers) still points at the right question
                 continue
             filed.append((q, ncert_map.classify(level, q["subject"], topics.get((level, key), ""), q["question"], q["explanation"])))
+        # questions written fresh (banks/written), after every older row so saved progress stays put; the gate
+        # leaves out anything already in the game or near-same to a question kept in this class and subject
+        if gate is None:
+            gate = written_bank.Gate(owner, {})
+        kept_here = {}
+        for f in filed:
+            if f:
+                kept_here.setdefault((level, f[1][0]), []).append(f[0]["question"])
+        for key, texts in kept_here.items():
+            for t in texts:
+                gate._add(key, t)
+        for w in written:
+            if w["class_level"] == level:
+                assert w["chapter"] in ncert_map.chapter_order(level, w["subject"]), (w["batch"], w["chapter"])
+                if gate.ok(level, w["subject"], w["question"]):
+                    filed.append((w, (w["subject"], w["chapter"], True)))
+                    added[level] = added.get(level, 0) + 1
         used = {f[1][0] for f in filed if f}
         ncert = [s for s in ncert_map.NCERT_SUBJECTS.get(level, []) if s in used]
         subjects = ncert + sorted(used - set(ncert), key=lambda s: SUBJECT_NAMES.get(s.removesuffix("_x"), s))
@@ -173,6 +192,7 @@ def export_questions():
         counts = {s: sum(1 for r in rows if r and r[0] == idx[s]) for s in subjects}
         levels.append({"l": level, "name": name, "project": tier_of(level), "n": sum(counts.values()), "rows": len(rows),
                        "subjects": counts, "ncert": ncert, "chapters": chapters, "exam": ncert_map.JEE_LABEL.get(level, "")})
+    print("written questions added:", added, "of", len(written))
     return levels
 
 
