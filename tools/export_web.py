@@ -5,7 +5,8 @@
 web/data/levels.json         one row per building: level code, name, project, question count, subjects
 web/data/q/<level>.json      that level's questions only: {"s": [subjects], "q": [[subject, q, options, answer, explanation, bengali, chapter]]}
                              (bengali = [question, options, explanation] where the Academy has it, else null;
-                              chapter = index into levels.json chapters[subject], -1 = none; a null row = question owned by a lower class)
+                              chapter = index into levels.json chapters[subject], -1 = none; a null row = question owned by a lower class
+                              or a look-alike left out by question_bank.quality())
 web/data/projects.json       the 5 bridge projects, materials, sizes, guided-build steps (checked with the Python solver)
 web/data/handbook.json       the 200-question Engineering Handbook (English + Bengali)
 """
@@ -19,7 +20,7 @@ sys.path.insert(0, ROOT)
 from engine import materials as M                       # noqa: E402
 from game.projects import (DECK_SIZE, PARTS_PER_CORRECT, PROJECTS, PYLON_AREA,  # noqa: E402
                            SIZE_COST, Design)
-from game.question_bank import load_for_game           # noqa: E402
+from game import question_bank                         # noqa: E402
 from game.world import LEVELS, SUBJECT_NAMES, tier_of  # noqa: E402
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -128,7 +129,10 @@ def school_topics():
 
 
 def export_questions():
-    qs = load_for_game()
+    # the full bank in its original order keeps every row number (saved progress) in place;
+    # look-alikes that quality() leaves out become null rows, like questions owned by a lower class
+    qs = question_bank.merge(question_bank.load_school_bank(), question_bank.load_academy_bank())
+    good = {id(q) for q in question_bank.quality(qs)}
     bn = bengali_text()
     topics = school_topics()
     os.makedirs(os.path.join(OUT, "q"), exist_ok=True)
@@ -144,7 +148,7 @@ def export_questions():
         filed = []
         for q in mine:
             key = q["question"].strip().lower()
-            if owner[key] != level:
+            if owner[key] != level or id(q) not in good:
                 filed.append(None)      # the row stays as a gap so saved progress (row numbers) still points at the right question
                 continue
             filed.append((q, ncert_map.classify(level, q["subject"], topics.get((level, key), ""), q["question"], q["explanation"])))

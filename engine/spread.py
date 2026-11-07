@@ -10,7 +10,7 @@ import random
 import re
 from collections import deque
 
-WINDOW = 6                      # a new question must not look like any of the last 6 shown
+WINDOW = 10                     # a new question must not look like any of the last 10 shown
 _RECENT = deque(maxlen=WINDOW)
 _WORD = re.compile(r"[^\W\d_]+")
 

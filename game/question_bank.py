@@ -3,7 +3,7 @@ Question bank loader for the 5-project sandbox.
 
 Reads banks/*/*.json - school/ and the generated core/ (compact keys q/o/a/e, class from the key or the
 file name prefix) plus every Academy question (Class 1-12, NIT 13, IIT 14),
-skipping repeats of the same question in the same class, and writes
+skipping repeats of the same question in the same class and look-alikes (quality() below), and writes
 data/questions.json and questions.txt as {"1".."5": [questions]} - the phase
 layout quiz_console.py reads (Phase 1 = Class 1-3, 2 = 4-7, 3 = 8-10,
 4 = 11-12, 5 = 13+).
@@ -131,9 +131,47 @@ def phase_of(cls):
     return "1" if cls <= 3 else "2" if cls <= 7 else "3" if cls <= 10 else "4" if cls <= 12 else "5"
 
 
+# ---- quality filter: a limited bank of distinct questions, not number-swapped repeats ----
+# Many generated questions are one template with new numbers ("What is 4 x 7?", "What is 6 x 9?").
+# Each class keeps at most FAMILY_CAP questions of one kind per subject, a question whose words are
+# NEAR_SAME alike with FAMILY_CAP kept ones counts as the same kind, and a kind already kept in an
+# earlier class is not repeated in a later one, so every class is its own segment.
+FAMILY_CAP = 2
+NEAR_SAME = 0.8
+PLAY_ORDER = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 15, 13, 14, 16)    # Class 1-12, BE, NIT, IIT, Expert
+_WORDS = re.compile(r"[^\W\d_]+")
+
+
+def kind_of(text):
+    """The question with its numbers removed: questions that differ only in numbers share it."""
+    return " ".join(_WORDS.findall(text.lower()))
+
+
+def quality(questions):
+    """Distinct questions only, each kind in the first class (in play order) that has it."""
+    rank = {c: i for i, c in enumerate(PLAY_ORDER)}
+    by_class = sorted(questions, key=lambda q: rank.get(q["class_level"], len(rank) + q["class_level"]))
+    count, owner, kept_words, out = {}, {}, {}, []
+    for q in by_class:
+        cls, subj, kind = q["class_level"], q["subject"], kind_of(q["question"])
+        if owner.setdefault((subj, kind), cls) != cls:
+            continue                                   # this kind belongs to an earlier class
+        key = (cls, subj, kind)
+        if count.get(key, 0) >= FAMILY_CAP:
+            continue
+        words = frozenset(_WORDS.findall(q["question"].lower()))
+        kept = kept_words.setdefault((cls, subj), [])
+        if words and sum(1 for w in kept[-400:] if len(words & w) / len(words | w) >= NEAR_SAME) >= FAMILY_CAP:
+            continue
+        count[key] = count.get(key, 0) + 1
+        kept.append(words)
+        out.append(q)
+    return out
+
+
 def build():
     phases = {str(p): [] for p in range(1, 6)}
-    for q in merge(load_school_bank(), load_academy_bank()):
+    for q in quality(merge(load_school_bank(), load_academy_bank())):
         phases[phase_of(q["class_level"])].append(q)
     return phases
 

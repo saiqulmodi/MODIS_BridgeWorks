@@ -1,4 +1,4 @@
-﻿"""
+"""
 MODIS BridgeWorks - Structural Mechanics & NCERT Physics Sandbox
 A Campus World with one building per level (Class 1-12, BE, NIT, IIT, Expert
 Engineer). Each building has only its own question bank and a bridge project
@@ -118,11 +118,13 @@ class App:
         return PROJECTS[self.current_stage - 1]
 
     def filter_stage_questions(self):
-        self.bank_questions = [q for q in self.raw_questions if q["class_level"] == self.level
-                               and (self.subject is None or q["subject"] == self.subject)]
-        self.bank_questions.sort(key=lambda q: subject_name(q["subject"]))
-        # random order with look-alike questions (same template, new numbers) kept apart
-        self.active_questions = spread.order(self.bank_questions)
+        mine = [q for q in self.raw_questions if q["class_level"] == self.level
+                and (self.subject is None or q["subject"] == self.subject)]
+        # random order with look-alike questions (same template, new numbers) kept apart;
+        # the Q&A Bank lists the same random order
+        self.active_questions = spread.order(mine)
+        self.bank_questions = self.active_questions
+        self.bank_revealed = {}          # answers stay hidden until A-D is tapped, for this list only
         self.current_q_idx = 0
         self.bank_page = 0
         self.feedback_msg = ""
@@ -166,12 +168,12 @@ class App:
             self.score += CORRECT_PTS
             self.treasury += CORRECT_CASH
             self.design.parts += parts
-            self.feedback_msg = f"Correct! +â‚¹{CORRECT_CASH:,.0f} | +{CORRECT_PTS} Pts | +{parts} parts"
+            self.feedback_msg = f"Correct! +₹{CORRECT_CASH:,.0f} | +{CORRECT_PTS} Pts | +{parts} parts"
             self.feedback_color = (34, 197, 94)
         else:
             self.score = max(0, self.score - WRONG_PTS)
             self.treasury = max(0.0, self.treasury - WRONG_CASH)
-            self.feedback_msg = f"Wrong! -â‚¹{WRONG_CASH:,.0f} | -{WRONG_PTS} Pt | Answer: {q['answer']}"
+            self.feedback_msg = f"Wrong! -₹{WRONG_CASH:,.0f} | -{WRONG_PTS} Pt | Answer: {q['answer']}"
             self.feedback_color = (239, 68, 68)
         self.next_question()
 
@@ -287,9 +289,9 @@ class App:
         text = str(text).replace("\n", " ")
         if font.size(text)[0] <= max_w:
             return text
-        while text and font.size(text + "â€¦")[0] > max_w:
+        while text and font.size(text + "…")[0] > max_w:
             text = text[:-1]
-        return text + "â€¦"
+        return text + "…"
 
     def wrap(self, text, font, max_w, max_lines):
         words, lines, cur = str(text).replace("\n", " ").split(), [], ""
@@ -364,8 +366,8 @@ class App:
     def draw_hud(self):
         pygame.draw.rect(self.screen, (30, 41, 59), (0, 0, self.w, 40))
         pygame.draw.line(self.screen, (51, 65, 85), (0, 40), (self.w, 40), 2)
-        hud_str = (f"Score: {self.score} | Treasury: â‚¹{self.treasury:,.2f} | "
-                   f"Govt Subsidies: â‚¹{self.subsidies:,.2f} | Vehicles: {self.vehicles_passed}")
+        hud_str = (f"Score: {self.score} | Treasury: ₹{self.treasury:,.2f} | "
+                   f"Govt Subsidies: ₹{self.subsidies:,.2f} | Vehicles: {self.vehicles_passed}")
         self.screen.blit(self.font.render(hud_str, True, (248, 250, 252)), (20, 11))
 
         if self.mode == "world":
@@ -380,7 +382,7 @@ class App:
         st = STAGES[self.current_stage - 1]
         tx = back.right + 12
         self.screen.blit(self.font_lg.render(self.level_name, True, (255, 255, 255)), (tx, TAB_Y + 1))
-        sub = f"Project {st['id']}: {st['name']}" + ("  Â·  BUILT" if self.design.complete else "")
+        sub = f"Project {st['id']}: {st['name']}" + ("  ·  BUILT" if self.design.complete else "")
         self.screen.blit(self.font_sm.render(sub, True, (110, 231, 183) if self.design.complete
                                              else (203, 213, 225)), (tx, TAB_Y + 22))
         for r, subj, label in self.subject_chips():
@@ -397,7 +399,7 @@ class App:
             label = self.font.render("X  Close Bank", True, (255, 255, 255))
             self.screen.blit(label, label.get_rect(center=rect.center))
         else:
-            icon = self.font_icon.render("ðŸ“‹", True, (255, 255, 255))
+            icon = self.font_icon.render("📋", True, (255, 255, 255))
             label = self.font.render("Q&A Bank", True, (255, 255, 255))
             x = rect.centerx - (icon.get_width() + 4 + label.get_width()) // 2
             self.screen.blit(icon, icon.get_rect(midleft=(x, rect.centery)))
@@ -518,9 +520,9 @@ class App:
             self.screen.blit(self.font.render(msg, True, (251, 191, 36)), (32, top + 10))
             return
 
-        header = (f"{self.level_name} Â· {subject_name(q['subject'])}  |  Project {st['id']}: {st['name']}"
-                  f"  |  Right +â‚¹10,000 (+4) +{PARTS_PER_CORRECT[self.current_stage]} parts"
-                  f"  Wrong -â‚¹1,000 (-1)")
+        header = (f"{self.level_name} · {subject_name(q['subject'])}  |  Project {st['id']}: {st['name']}"
+                  f"  |  Right +₹10,000 (+4) +{PARTS_PER_CORRECT[self.current_stage]} parts"
+                  f"  Wrong -₹1,000 (-1)")
         self.screen.blit(self.font_sm.render(self.fit(header, self.font_sm, self.w - 470), True, (56, 189, 248)),
                          (32, top + 8))
         if self.feedback_msg:
@@ -538,7 +540,7 @@ class App:
             self.screen.blit(self.font_sm.render(label, True, (241, 245, 249)), (rect.x + 8, rect.y + 4))
 
         hint = ("Press [1-4] or click an option  |  [SPACE] Skip  |  [Q] Q&A Bank  |  "
-                "Build: click two joints  Â·  right-click a member to remove  Â·  [T] Test")
+                "Build: click two joints  ·  right-click a member to remove  ·  [T] Test")
         self.screen.blit(self.font_sm.render(self.fit(hint, self.font_sm, self.w - 64), True, (148, 163, 184)),
                          (32, top + 122))
 
@@ -553,7 +555,7 @@ class App:
         subj = "All subjects" if self.subject is None else subject_name(self.subject)
         title = f"Q&A Bank: {self.level_name} - {subj}  ({len(self.bank_questions):,} questions)"
         self.screen.blit(self.font_lg.render(title, True, (56, 189, 248)), (x0, y))
-        help_txt = ("[Left/Right] page  Â·  [PgUp/PgDn] 50 pages  Â·  [Home/End]  Â·  click a subject above to filter  Â·  "
+        help_txt = ("[Left/Right] page  ·  [PgUp/PgDn] 50 pages  ·  [Home/End]  ·  click a subject above to filter  ·  "
                     "[Q] or [Esc] close")
         self.screen.blit(self.font_sm.render(help_txt, True, (148, 163, 184)), (x0, y + 24))
         y += 46
@@ -649,7 +651,7 @@ class App:
                     if opt_rect.collidepoint(mx, my):
                         if not hasattr(self, 'bank_revealed'):
                             self.bank_revealed = {}
-                        self.bank_revealed[n] = i
+                        self.bank_revealed.setdefault(n, i)     # first tap counts
                         return
                 y_click += 76
 

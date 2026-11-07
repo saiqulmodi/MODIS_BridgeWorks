@@ -480,12 +480,21 @@
   function spread(items) {
     const rest = items.slice();
     for (let k = rest.length - 1; k > 0; k--) { const j = Math.floor(Math.random() * (k + 1)); [rest[k], rest[j]] = [rest[j], rest[k]]; }
-    const sig = q => q.q.toLowerCase().replace(/[^a-z\s]/g, " ").split(/\s+/).filter(Boolean).slice(0, 5).join(" ");
-    const out = [], recent = [];
+    // look-alike = same first five words, or half of the words shared (numbers ignored), like engine/spread.py
+    const sig = q => { const w = q.q.toLowerCase().replace(/[^a-z\s]/g, " ").split(/\s+/).filter(Boolean);
+                       return { head: w.slice(0, 5).join(" "), set: new Set(w) }; };
+    const alike = (a, b) => {
+      if (a.head && a.head === b.head) return true;
+      let both = 0; a.set.forEach(x => { if (b.set.has(x)) both++; });
+      const any = a.set.size + b.set.size - both;
+      return any > 0 && both / any >= 0.5;
+    };
+    const out = [], recent = [];                 // nothing may look like any of the last 10 shown
     while (rest.length) {
-      let k = rest.slice(0, 300).findIndex(q => !recent.includes(sig(q)));
+      let k = -1;
+      for (let j = 0; j < Math.min(300, rest.length) && k < 0; j++) { const s = sig(rest[j]); if (!recent.some(r => alike(s, r))) k = j; }
       if (k < 0) k = 0;
-      const q = rest.splice(k, 1)[0]; out.push(q); recent.push(sig(q)); if (recent.length > 6) recent.shift();
+      const q = rest.splice(k, 1)[0]; out.push(q); recent.push(sig(q)); if (recent.length > 10) recent.shift();
     }
     return out;
   }
