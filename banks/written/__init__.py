@@ -59,9 +59,11 @@ def load():
     out = []
     for name in sorted(f[:-3] for f in os.listdir(HERE) if f.startswith("b") and f.endswith(".py")):
         mod = importlib.import_module(f"banks.written.{name}")
-        for chapter, q, opts, expl in mod.ITEMS:
+        for item in mod.ITEMS:
+            # (chapter, q, opts, expl) uses the file's SUBJECT; (subject, chapter, q, opts, expl) names its own
+            subject, (chapter, q, opts, expl) = (mod.SUBJECT, item) if len(item) == 4 else (item[0], item[1:])
             assert len(opts) == 4 and len(set(opts)) == 4, (name, q)
             options, right = _mix(q, opts)
-            out.append({"class_level": mod.LEVEL, "subject": mod.SUBJECT, "chapter": chapter, "question": q,
+            out.append({"class_level": mod.LEVEL, "subject": subject, "chapter": chapter, "question": q,
                         "options": options, "correct_idx": right, "explanation": expl, "batch": name})
     return out
