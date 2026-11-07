@@ -1066,6 +1066,11 @@
   // ---------------- buttons, keys, loop ----------------
   $("btn-back").onclick = () => { save(); show("world"); if (!cur.weekly) world.focus(cur.level); };
   $("btn-bank").onclick = openBank;
+  // the other game (FAILSPAN 3D <-> BridgeWorks 2D) on the player's demand; each keeps its own progress
+  $("btn-other").onclick = () => {
+    const url = /stratos/.test(location.hostname) ? "/play/saiqulmodi-failspan/" : "https://saiqulmodi.github.io/FAILSPAN/";
+    try { window.top.location.href = url; } catch (e) { location.href = url; }
+  };
   $("btn-bankall").onclick = openBank;
   $("btn-guide").onclick = openGuide;
   $("btn-handbook").onclick = openHandbook;
