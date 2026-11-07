@@ -57,7 +57,7 @@ def _mix(question, options):
 def load():
     """-> list of dicts: class_level, subject, chapter, question, options, correct_idx, explanation (batch order)."""
     out = []
-    for name in sorted(f[:-3] for f in os.listdir(HERE) if f.startswith("b") and f.endswith(".py")):
+    for name in sorted(f[:-3] for f in os.listdir(HERE) if f.startswith("b") and f[1:4].isdigit() and f.endswith(".py")):
         mod = importlib.import_module(f"banks.written.{name}")
         for item in mod.ITEMS:
             # (chapter, q, opts, expl) uses the file's SUBJECT; (subject, chapter, q, opts, expl) names its own
