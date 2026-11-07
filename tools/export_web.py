@@ -167,7 +167,9 @@ def export_questions():
                 gate._add(key, t)
         for w in written:
             if w["class_level"] == level:
-                assert w["chapter"] in ncert_map.chapter_order(level, w["subject"]), (w["batch"], w["chapter"])
+                # BE and Expert have no NCERT book: their written questions carry no chapter
+                assert (w["chapter"] is None and not ncert_map.chapter_order(level, w["subject"])) or \
+                    w["chapter"] in ncert_map.chapter_order(level, w["subject"]), (w["batch"], w["chapter"])
                 if gate.ok(level, w["subject"], w["question"]):
                     filed.append((w, (w["subject"], w["chapter"], True)))
                     added[level] = added.get(level, 0) + 1
