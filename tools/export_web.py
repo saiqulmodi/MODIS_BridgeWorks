@@ -22,14 +22,20 @@ from game.projects import (DECK_SIZE, PARTS_PER_CORRECT, PROJECTS, PYLON_AREA,  
                            SIZE_COST, Design)
 from game import question_bank                         # noqa: E402
 from banks import written as written_bank              # noqa: E402
-from game.world import LEVELS, SUBJECT_NAMES, tier_of  # noqa: E402
+from game.world import LEVELS, SUBJECT_NAMES  # noqa: E402
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import ncert_map                                        # noqa: E402
 
 OUT = os.path.join(ROOT, "web", "data")
 SCHOOL_DB = os.path.join(os.path.dirname(ROOT), "School_MCQ_Bank", "output", "mcq_bank.db")
-WEB_SUBJECT_NAMES = {**SUBJECT_NAMES, "accountancy": "Accountancy", "business": "Business Studies"}
+WEB_SUBJECT_NAMES = {**SUBJECT_NAMES, "accountancy": "Accountancy", "business": "Business Studies", "edge": "⚡ Edge"}
+# 08-Nov-2026 (owner): the web game starts at Class 8 and has no Biology. Classes 1-7 are still worked out below, only
+# not shipped, so every later row keeps its number (saved progress); a Biology row becomes a null row (a gap).
+SHOWN = lambda level: level >= 8
+NO_SUBJECT = {"biology", "biology_x"}
+# Classes 8-12 each have their own bridge project (1-5); NIT, IIT, BE and Expert build the hardest one
+WEB_PROJECT = {8: 1, 9: 2, 10: 3, 11: 4, 12: 5}
 SC, ST, ST_C, CF = M.STEEL_CABLE, M.STEEL, M.CONCRETE, M.CARBON_CABLE
 
 # Guided build: the steps of a design that passes, easiest idea first.
@@ -173,9 +179,10 @@ def export_questions():
                 if gate.ok(level, w["subject"], w["question"]):
                     filed.append((w, (w["subject"], w["chapter"], True)))
                     added[level] = added.get(level, 0) + 1
-        used = {f[1][0] for f in filed if f}
+        used = {f[1][0] for f in filed if f} - NO_SUBJECT
         ncert = [s for s in ncert_map.NCERT_SUBJECTS.get(level, []) if s in used]
-        subjects = ncert + sorted(used - set(ncert), key=lambda s: SUBJECT_NAMES.get(s.removesuffix("_x"), s))
+        # the class's own Edge tab (hard questions from its whole syllabus) comes right after the NCERT subjects
+        subjects = ncert + sorted(used - set(ncert), key=lambda s: (s != "edge", SUBJECT_NAMES.get(s.removesuffix("_x"), s)))
         idx = {s: k for k, s in enumerate(subjects)}
         chapters = {s: [c for c in ncert_map.chapter_order(level, s) if any(f and f[1][0] == s and f[1][1] == c for f in filed)] for s in ncert}
         rows = []
@@ -184,16 +191,24 @@ def export_questions():
                 rows.append(None)
                 continue
             q, (subject, chapter, _) = f
+            if subject in NO_SUBJECT:
+                rows.append(None)
+                continue
             row = [idx[subject], q["question"], q["options"][:4], q["correct_idx"], q["explanation"]]
             b = bn.get((level, q["question"].strip()))
             row.append([b[0], b[1][:4], b[2]] if b and len(b[1]) >= 4 else None)
             row.append(chapters[subject].index(chapter) if chapter else -1)
             rows.append(row)
+        if not SHOWN(level):
+            continue
         with open(os.path.join(OUT, "q", f"{level}.json"), "w", encoding="utf-8") as f:
             json.dump({"s": subjects, "q": rows}, f, ensure_ascii=False, separators=(",", ":"))
         counts = {s: sum(1 for r in rows if r and r[0] == idx[s]) for s in subjects}
-        levels.append({"l": level, "name": name, "project": tier_of(level), "n": sum(counts.values()), "rows": len(rows),
+        levels.append({"l": level, "name": name, "project": WEB_PROJECT.get(level, 5), "n": sum(counts.values()), "rows": len(rows),
                        "subjects": counts, "ncert": ncert, "chapters": chapters, "exam": ncert_map.JEE_LABEL.get(level, "")})
+    for level, _ in LEVELS:                 # files of classes no longer shipped
+        if not SHOWN(level) and os.path.exists(os.path.join(OUT, "q", f"{level}.json")):
+            os.remove(os.path.join(OUT, "q", f"{level}.json"))
     print("written questions added:", added, "of", len(written))
     return levels
 
